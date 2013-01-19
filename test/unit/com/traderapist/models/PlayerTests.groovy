@@ -11,7 +11,23 @@ import org.junit.*
 @TestFor(Player)
 class PlayerTests {
 
-    void testSomething() {
-       fail "Implement me"
+   void testNameNotBlank() {
+        def player = new Player(name:"")
+
+        mockForConstraintsTests(Player, [player])
+
+        assertFalse "The player validation should have failed", player.validate()
+
+        assert "blank" == player.errors["name"]
+    }
+
+    void testPositionNotBlank() {
+        def player = new Player(position:"")
+
+        mockForConstraintsTests(Player, [player])
+
+        assertFalse "The player validation should have failed", player.validate()
+
+        assert "blank" == player.errors["position"]
     }
 }
