@@ -8,4 +8,9 @@ class Player {
     String position
     static constraints = {
     }
+
+    static mapping = {
+        table "players"
+        version false
+    }
 }
