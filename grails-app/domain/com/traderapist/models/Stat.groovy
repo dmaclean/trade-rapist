@@ -11,4 +11,9 @@ class Stat {
 
     static constraints = {
     }
+
+    static mapping = {
+        table "stats"
+        version false
+    }
 }
