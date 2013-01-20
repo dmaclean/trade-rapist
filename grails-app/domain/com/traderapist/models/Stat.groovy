@@ -7,11 +7,14 @@ class Stat {
     Integer week
     Integer statKey
     Integer statValue
+    Integer points
+
+    static transients = ['points']
 
     static constraints = {
         season nullable:false
         week nullable:false
-        week range:1..17
+        week range:-1..17
         statKey nullable:false
         statValue nullable:false
     }

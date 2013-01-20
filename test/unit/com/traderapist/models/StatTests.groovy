@@ -32,7 +32,7 @@ class StatTests {
     }
 
     void testWeekBetween1and17() {
-        def stat = new Stat(week: 0)
+        def stat = new Stat(week: -2)
 
         mockForConstraintsTests(Stat, [stat])
 
