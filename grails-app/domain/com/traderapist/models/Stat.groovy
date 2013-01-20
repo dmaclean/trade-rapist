@@ -7,7 +7,7 @@ class Stat {
     Integer week
     Integer statKey
     Integer statValue
-    Integer points
+    double points
 
     static transients = ['points']
 
