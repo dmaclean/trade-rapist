@@ -1,5 +1,8 @@
 package com.traderapist.models
 
+import com.traderapist.scoringsystem.IFantasyScoringSystem
+import com.traderapist.scoringsystem.ESPNStandardScoringSystem
+
 class Player {
     static hasMany = [stats: Stat]
 
@@ -20,6 +23,29 @@ class Player {
     static mapping = {
         table "players"
         version false
+    }
+
+    /**
+     * Determine how many points have been scored for each season and each week.
+     *
+     * @param system		The fantasy scoring system to use when calculating points.
+     */
+    def calculatePoints(IFantasyScoringSystem system) {
+        /*
+         * Season stats
+         */
+        for(s in seasonStats) {
+            seasonStatPoints[s.key] = system.calculateScore(s.value)
+        }
+
+        /*
+         * Week stats
+         */
+        for(s in weeklyStats) {
+            for(s2 in weeklyStats[s.key]) {
+                weeklyStatPoints[s.key] = [(s2.key): system.calculateScore(s2.value)]
+            }
+        }
     }
 
     def afterLoad() {
@@ -50,5 +76,7 @@ class Player {
                 }
             }
         }
+
+        calculatePoints(new ESPNStandardScoringSystem())
     }
 }

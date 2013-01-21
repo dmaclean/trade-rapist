@@ -5,6 +5,10 @@ package com.traderapist.models
 import grails.test.mixin.*
 import org.junit.*
 
+import com.traderapist.constants.FantasyConstants
+import com.traderapist.scoringsystem.IFantasyScoringSystem
+import com.traderapist.scoringsystem.ESPNStandardScoringSystem
+
 /**
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
@@ -30,6 +34,47 @@ class PlayerTests {
         assertFalse "The player validation should have failed", player.validate()
 
         assert "blank" == player.errors["position"]
+    }
+
+    void testCalculatePoints_SeasonStats_ESPNStandardScoring() {
+        Player player = new Player(name: "Dan", position: "QB")
+        Stat s1 = new Stat(statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
+        Stat s2 = new Stat(statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+        List stats = [s1, s2]
+
+        player.seasonStats = ["2001": stats]
+
+        IFantasyScoringSystem system = new ESPNStandardScoringSystem();
+        player.calculatePoints(system);
+
+        //HashMap<Integer, Double> seasonPoints = player.getSeasonStatPoints();
+
+        //assertTrue(seasonPoints.get(2001) == 16);
+        assert player.seasonStatPoints["2001"] == 16
+    }
+
+    void testCalculatePoints_WeekStats_ESPNStandardScoring() {
+        Player player = new Player(name: "Dan", position: "QB")
+        Stat s1 = new Stat(statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
+        Stat s2 = new Stat(statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+        List stats = [s1, s2]
+
+//        HashMap<Integer, ArrayList<Stat>> weekStats = new HashMap<Integer, ArrayList<Stat>>();
+//        weekStats.put(1, stats);
+
+//        HashMap<Integer, HashMap<Integer, ArrayList<Stat>>> seasonStats = new HashMap<Integer, HashMap<Integer,ArrayList<Stat>>>();
+//        seasonStats.put(2001, weekStats);
+
+//        player.setWeeklyStats(seasonStats);
+        player.weeklyStats = ["2001": ["1": stats]]
+
+        IFantasyScoringSystem system = new ESPNStandardScoringSystem();
+        player.calculatePoints(system);
+
+//        HashMap<Integer, HashMap<Integer, Double>> weekPoints = player.getWeekStatPoints();
+//
+//        assertTrue(weekPoints.get(2001).get(1) == 16);
+        assertTrue player.weeklyStatPoints["2001"]["1"] == 16
     }
 
 //    void testAfterLoad_Season() {
