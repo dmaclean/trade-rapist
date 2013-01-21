@@ -50,15 +50,13 @@
 				</li>
 				</g:if>
 			
-				<g:if test="${statInstance?.statValue}">
 				<li class="fieldcontain">
 					<span id="statValue-label" class="property-label"><g:message code="stat.statValue.label" default="Stat Value" /></span>
 					
 						<span class="property-value" aria-labelledby="statValue-label"><g:fieldValue bean="${statInstance}" field="statValue"/></span>
 					
 				</li>
-				</g:if>
-			
+
 				<g:if test="${statInstance?.player}">
 				<li class="fieldcontain">
 					<span id="player-label" class="property-label"><g:message code="stat.player.label" default="Player" /></span>

@@ -44,9 +44,9 @@
 					
 						<td>${fieldValue(bean: statInstance, field: "week")}</td>
 					
-						<td>${fieldValue(bean: statInstance, field: "statKey")}</td>
+						<td>${statInstance.translateStatKey()}</td>
 					
-						<td><!--${fieldValue(bean: statInstance, field: "statValue")}-->${statInstance.translateStatKey()}</td>
+						<td>${fieldValue(bean: statInstance, field: "statValue")}</td>
 					
 						<td><!--${fieldValue(bean: statInstance, field: "player")}-->${statInstance.player.name}</td>
 					
