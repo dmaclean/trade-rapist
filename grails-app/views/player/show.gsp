@@ -46,7 +46,10 @@
 					<span id="stats-label" class="property-label"><g:message code="player.stats.label" default="Stats" /></span>
 					
 						<g:each in="${playerInstance.stats}" var="s">
-						<span class="property-value" aria-labelledby="stats-label"><g:link controller="stat" action="show" id="${s.id}">${s?.encodeAsHTML()}</g:link></span>
+						    <span class="property-value" aria-labelledby="stats-label"><g:link controller="stat" action="show" id="${s.id}">
+                                <g:if test="${s.week == -1}">${s.season} - ${s.translateStatKey()} - ${s.statValue}</g:if>
+                                <g:if test="${s.week != -1}">Week ${s.week} (${s.season}) - ${s.translateStatKey()} - ${s.statValue}</g:if>
+                            </g:link></span>
 						</g:each>
 					
 				</li>
