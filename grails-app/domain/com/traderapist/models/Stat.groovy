@@ -1,5 +1,7 @@
 package com.traderapist.models
 
+import com.traderapist.constants.FantasyConstants
+
 class Stat {
     static belongsTo = [player: Player]
 
@@ -22,5 +24,9 @@ class Stat {
     static mapping = {
         table "stats"
         version false
+    }
+
+    def translateStatKey() {
+        return FantasyConstants.statTranslation[statKey]
     }
 }

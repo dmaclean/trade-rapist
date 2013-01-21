@@ -45,7 +45,7 @@
 				<li class="fieldcontain">
 					<span id="statKey-label" class="property-label"><g:message code="stat.statKey.label" default="Stat Key" /></span>
 					
-						<span class="property-value" aria-labelledby="statKey-label"><g:fieldValue bean="${statInstance}" field="statKey"/></span>
+						<span class="property-value" aria-labelledby="statKey-label">${statInstance.translateStatKey()}</span>
 					
 				</li>
 				</g:if>

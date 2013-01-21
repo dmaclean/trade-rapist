@@ -46,7 +46,7 @@
 					
 						<td>${fieldValue(bean: statInstance, field: "statKey")}</td>
 					
-						<td>${fieldValue(bean: statInstance, field: "statValue")}</td>
+						<td><!--${fieldValue(bean: statInstance, field: "statValue")}-->${statInstance.translateStatKey()}</td>
 					
 						<td>${fieldValue(bean: statInstance, field: "player")}</td>
 					

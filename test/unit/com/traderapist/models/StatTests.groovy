@@ -5,6 +5,8 @@ package com.traderapist.models
 import grails.test.mixin.*
 import org.junit.*
 
+import com.traderapist.constants.FantasyConstants
+
 /**
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
@@ -65,5 +67,15 @@ class StatTests {
         assertFalse "Stat with null statValue passed validation", stat.validate()
 
         assertEquals "nullable", stat.errors["statValue"]
+    }
+
+    void testStatKeyTranslation_PassCompletions() {
+        def statCompletions = new Stat(statKey: FantasyConstants.STAT_COMPLETIONS, statValue: 30)
+        def statIncompletions = new Stat(statKey: FantasyConstants.STAT_INCOMPLETE_PASSES, statValue: 30)
+        def statPassingYards = new Stat(statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 30)
+
+        assertEquals "Completions", statCompletions.translateStatKey()
+        assertEquals "Incomplete Passes", statIncompletions.translateStatKey()
+        assertEquals "Passing Yards", statPassingYards.translateStatKey()
     }
 }
