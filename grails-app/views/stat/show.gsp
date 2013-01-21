@@ -63,7 +63,7 @@
 				<li class="fieldcontain">
 					<span id="player-label" class="property-label"><g:message code="stat.player.label" default="Player" /></span>
 					
-						<span class="property-value" aria-labelledby="player-label"><g:link controller="player" action="show" id="${statInstance?.player?.id}">${statInstance?.player?.encodeAsHTML()}</g:link></span>
+						<span class="property-value" aria-labelledby="player-label"><g:link controller="player" action="show" id="${statInstance?.player?.id}">${statInstance.player.name}</g:link></span>
 					
 				</li>
 				</g:if>

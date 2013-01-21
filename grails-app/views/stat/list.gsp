@@ -48,7 +48,7 @@
 					
 						<td><!--${fieldValue(bean: statInstance, field: "statValue")}-->${statInstance.translateStatKey()}</td>
 					
-						<td>${fieldValue(bean: statInstance, field: "player")}</td>
+						<td><!--${fieldValue(bean: statInstance, field: "player")}-->${statInstance.player.name}</td>
 					
 					</tr>
 				</g:each>
