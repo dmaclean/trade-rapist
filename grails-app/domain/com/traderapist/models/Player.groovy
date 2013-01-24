@@ -4,16 +4,10 @@ import com.traderapist.scoringsystem.IFantasyScoringSystem
 import com.traderapist.scoringsystem.ESPNStandardScoringSystem
 
 class Player {
-    static hasMany = [stats: Stat]
-
-    static transients = ['seasonStats', 'seasonStatPoints', 'weeklyStats', 'weeklyStatPoints']
+    static hasMany = [stats: Stat, fantasyPoints: FantasyPoints]
 
     String name
     String position
-    Map seasonStats = [:]
-    Map seasonStatPoints = [:]
-    Map weeklyStats = [:]
-    Map weeklyStatPoints = [:]
 
     static constraints = {
         name blank:false
@@ -21,62 +15,33 @@ class Player {
     }
 
     static mapping = {
+        cache true
+        stats cache: 'read-only'
         table "players"
         version false
     }
 
-    /**
-     * Determine how many points have been scored for each season and each week.
-     *
-     * @param system		The fantasy scoring system to use when calculating points.
-     */
-    def calculatePoints(IFantasyScoringSystem system) {
-        /*
-         * Season stats
-         */
-        for(s in seasonStats) {
-            seasonStatPoints[s.key] = system.calculateScore(s.value)
-        }
+    def computeFantasyPoints(IFantasyScoringSystem scoringSystem) {
+        def points = [:]
 
-        /*
-         * Week stats
-         */
-        for(s in weeklyStats) {
-            for(s2 in weeklyStats[s.key]) {
-                weeklyStatPoints[s.key] = [(s2.key): system.calculateScore(s2.value)]
-            }
-        }
-    }
-
-    def afterLoad() {
+        long start = System.currentTimeMillis();
         for(s in stats) {
             def seasonStr = String.valueOf(s.season)
             def weekStr = String.valueOf(s.week)
+            def key = "${seasonStr}__${weekStr}"
 
-            // Stat is season
-            if(s.week == -1) {
-                if(!seasonStats[seasonStr]) {
-                    seasonStats[seasonStr] = []
-                }
-                seasonStats[seasonStr] << s
+            if(!points[key]) {
+                points[key] = 0.0
             }
-            //Stat is week
-            else {
-                // Season entry doesn't exist yet --> create map for it
-                if(!weeklyStats[seasonStr]) {
-                    weeklyStats[seasonStr] = [weekStr: [s]]
-                }
-                // Season exists, but week doesn't --> create map for it
-                else if(!weeklyStats[seasonStr][weekStr]) {
-                    weeklyStats[seasonStr][weekStr] = [s]
-                }
-                // Both already exist, just append the stat
-                else {
-                    weeklyStats[seasonStr][weekStr] << s
-                }
-            }
+            points[key] += scoringSystem.calculateScore([s])
         }
+        long end = System.currentTimeMillis();
+        println("Distributed stats to season and week for ${name} in ${(end-start)/1000.0}")
 
-        calculatePoints(new ESPNStandardScoringSystem())
+        for(p in points) {
+            String[] keyPieces = p.key.split("__")
+            FantasyPoints fp = new FantasyPoints(player: this, season: keyPieces[0], week: keyPieces[1], system: scoringSystem.class.getName(), points:  p.value)
+            fp.save(flush: true)
+        }
     }
 }
