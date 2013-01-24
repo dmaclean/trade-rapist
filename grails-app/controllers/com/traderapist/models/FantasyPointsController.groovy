@@ -19,6 +19,12 @@ class FantasyPointsController {
         [fantasyPointsInstance: new FantasyPoints(params)]
     }
 
+    /**
+     * Iterates through ALL players and calculates their fantasy points for each week and season.  These
+     * points are written to the database as FantasyPoints.
+     *
+     * The scoring system is determined by the "system" request parameter that is passed in.
+     */
     def generatePoints() {
         Class clazz = Class.forName("com.traderapist.scoringsystem.${params["system"]}", true, Thread.currentThread().contextClassLoader)
         def scoringSystem = clazz.newInstance()
