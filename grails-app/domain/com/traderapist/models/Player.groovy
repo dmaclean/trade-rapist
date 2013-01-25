@@ -40,7 +40,18 @@ class Player {
 
         for(p in points) {
             String[] keyPieces = p.key.split("__")
-            FantasyPoints fp = new FantasyPoints(player: this, season: keyPieces[0], week: keyPieces[1], system: scoringSystem.class.getName(), points:  p.value)
+            double pts = p.value
+
+            FantasyPoints fp = FantasyPoints.findByPlayerAndSeasonAndWeekAndSystemAndPoints(
+                    this,
+                    keyPieces[0].toInteger(),
+                    keyPieces[1].toInteger(),
+                    scoringSystem.class.getName(),
+                    pts)
+
+            if (!fp) {
+                fp = new FantasyPoints(player: this, season: keyPieces[0], week: keyPieces[1], system: scoringSystem.class.getName(), points:  p.value)
+            }
             fp.save(flush: true)
         }
     }
