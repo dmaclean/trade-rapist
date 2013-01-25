@@ -64,11 +64,49 @@ class FantasyPointsControllerTests {
 
         controller.generatePoints()
 
-        FantasyPoints fp = FantasyPoints.findBySeason(2001)
+        def fps = FantasyPoints.findAllBySeason(2001)
+
+        assertTrue "Should have found one FantasyPoints object for 2001", fps.size() == 1
+
+        def fp = fps[0]
 
         assertTrue "Season is not 2001", fp.season == 2001
         assertTrue "Week is not -1", fp.week == -1
         assertTrue "Points is not 12", fp.points == 12
+    }
+
+    void testGeneratePoints_Season_Existing() {
+        params["system"] = "ESPNStandardScoringSystem"
+
+        Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100)
+        s1.save(flush: true)
+        Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+        s2.save(flush: true)
+
+        controller.generatePoints()
+
+        def fps = FantasyPoints.findAllBySeason(2001)
+
+        assertTrue "Should have found one FantasyPoints object for 2001", fps.size() == 1
+
+        def fp = fps[0]
+
+        assertTrue "Season is not 2001", fp.season == 2001
+        assertTrue "Week is not -1", fp.week == -1
+        assertTrue "Points is not 12", fp.points == 12
+
+        /*
+        Make sure we didn't write a duplicate
+         */
+        controller.generatePoints()
+
+        fps = FantasyPoints.findAllBySeason(2001)
+
+        assertTrue "Should have found one FantasyPoints object for 2001", fps.size() == 1
+
+        assertTrue "Season is not 2001", fps[0].season == 2001
+        assertTrue "Week is not -1", fps[0].week == -1
+        assertTrue "Points is not 12", fps[0].points == 12
     }
 
     void testSave() {
