@@ -4,7 +4,7 @@ class FantasyPoints {
 
     Integer season
     Integer week
-    Integer points
+    Double points
     String system
 
     static belongsTo = [player: Player]
