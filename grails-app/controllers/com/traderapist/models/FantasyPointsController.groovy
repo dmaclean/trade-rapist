@@ -32,6 +32,7 @@ class FantasyPointsController {
         def players = Player.findAll()
 
         for(player in players) {
+            log.info("Calculating fantasy points for ${player.name}")
             player.computeFantasyPoints(scoringSystem)
         }
     }
