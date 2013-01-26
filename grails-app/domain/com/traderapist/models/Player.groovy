@@ -55,4 +55,19 @@ class Player {
             fp.save(flush: true)
         }
     }
+
+    /**
+     * Runs a query to fetch all players of a certain position for a certain season and sort
+     * them by fantasy points scored (highest to lowest).
+     *
+     * @param position      The player position we're interested in.
+     * @param season        The season to analyze
+     * @return              A list of arrays, with each array containing [<Player object>, <FantasyPoints object>]
+     */
+    static def getDropoffData(String position, int season) {
+        def results = Player.executeQuery("from Player p inner join p.fantasyPoints f " +
+                "where p.position = ? and f.season = ? and f.week = -1 order by f.points desc", [position, season])
+
+        return results
+    }
 }
