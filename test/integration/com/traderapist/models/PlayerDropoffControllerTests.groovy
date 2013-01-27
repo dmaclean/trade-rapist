@@ -1,9 +1,5 @@
 package com.traderapist.models
 
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
-
-import static org.junit.Assert.*
 import org.junit.*
 
 class PlayerDropoffControllerTests {
@@ -19,7 +15,7 @@ class PlayerDropoffControllerTests {
     }
 
     @Test
-    void testSomething() {
+    void testIndex() {
         def q1 = new Player(name: "Quarterback 1", position: "QB")
         q1.save(flush: true)
         def q2 = new Player(name: "Quarterback 2", position: "QB")
