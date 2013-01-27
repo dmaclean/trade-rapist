@@ -58,7 +58,9 @@ class Player {
 
     /**
      * Runs a query to fetch all players of a certain position for a certain season and sort
-     * them by fantasy points scored (highest to lowest).
+     * them by fantasy points scored (highest to lowest).  The players are then broken up into
+     * tiers, with separation of tiers determined by any two consecutive players separated
+     * by 16 or more points.
      *
      * @param position      The player position we're interested in.
      * @param season        The season to analyze
@@ -68,6 +70,54 @@ class Player {
         def results = Player.executeQuery("from Player p inner join p.fantasyPoints f " +
                 "where p.position = ? and f.season = ? and f.week = -1 order by f.points desc", [position, season])
 
-        return results
+        // Separate into tiers.
+        def maxDiff = 16
+        def tiers = []
+
+        def currTier = null
+        def r_prev = null
+        for(r in results) {
+            // First player in a new tier
+            if (!currTier) {
+                currTier = [r]
+            }
+            // Found two players separated by 16 or more points.  Add the
+            // current tier to the list of tiers and put our current player
+            // into a new tier.
+            else if (Math.abs(r_prev[1].points - r[1].points) >= maxDiff) {
+                tiers << currTier
+                currTier = [r]
+            }
+            // Current player belongs in current tier.
+            else {
+                currTier << r
+            }
+
+            r_prev = r
+        }
+
+        // Current tier has players in it.  Add it to the list.
+        if (currTier.size() > 0) {
+            tiers << currTier
+        }
+
+        return tiers
+    }
+
+    static def calculateStandardDeviation(results) {
+        // Calculate mean
+        def mean = 0.0
+        for(r in results) {
+            mean += r[1].points
+        }
+        mean /= results.size()
+
+        // Diff from mean, squared
+        def diff_squared = []
+        for(r in results) {
+            diff_squared << (r[1].points - mean)**2
+        }
+
+        return Math.sqrt(diff_squared.sum()/results.size())
     }
 }
