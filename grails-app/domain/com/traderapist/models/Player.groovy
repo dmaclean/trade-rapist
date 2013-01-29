@@ -74,7 +74,7 @@ class Player {
         def maxDiff = 16
         def tiers = []
 
-        def currTier = null
+        def currTier = []
         def r_prev = null
         for(r in results) {
             // First player in a new tier
