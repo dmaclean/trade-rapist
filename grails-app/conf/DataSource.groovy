@@ -20,12 +20,14 @@ environments {
             driverClassName = "com.mysql.jdbc.Driver"
             username = "fantasy"
             password = "fantasy"
+            logSql=true
         }
     }
     test {
         dataSource {
             dbCreate = "update"
             url = "jdbc:h2:mem:testDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
+            logSql=true
         }
     }
     production {
