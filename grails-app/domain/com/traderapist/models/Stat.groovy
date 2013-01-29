@@ -30,4 +30,13 @@ class Stat {
     def translateStatKey() {
         return FantasyConstants.statTranslation[statKey]
     }
+
+    /**
+     * Determines which years are available for player statistics
+     *
+     * @return      An array of integers representing the seasons available.
+     */
+    static def getStatYears() {
+        return Stat.executeQuery("select distinct s.season from Stat s")
+    }
 }
