@@ -1,7 +1,6 @@
 package com.traderapist.models
 
 import com.traderapist.scoringsystem.IFantasyScoringSystem
-import com.traderapist.scoringsystem.ESPNStandardScoringSystem
 
 class Player {
     static hasMany = [stats: Stat, fantasyPoints: FantasyPoints]
@@ -19,6 +18,20 @@ class Player {
         stats cache: 'read-only'
         table "players"
         version false
+    }
+
+    /**
+     * Retrieve the years that we have stats for this player.
+     *
+     * @return      An array of years.
+     */
+    def getStatYears() {
+        return Stat.executeQuery("select distinct season from Stat s where s.player = ?", [this])
+    }
+
+    def getScoringAverageForSeason(season) {
+        def result = Player.executeQuery("select avg(f.points) from Player p inner join p.fantasyPoints f where p = ? and f.season = ?", [this, season])
+        return (result[0] == null) ? 0 : result[0]
     }
 
     def computeFantasyPoints(IFantasyScoringSystem scoringSystem) {
@@ -104,20 +117,55 @@ class Player {
         return tiers
     }
 
-    static def calculateStandardDeviation(results) {
-        // Calculate mean
-        def mean = 0.0
-        for(r in results) {
-            mean += r[1].points
+    /**
+     * Calculates the standard deviation of points scored each week over
+     * the course of the specified season.
+     *
+     * @param season        The season to evaluate.
+     * @return              The standard deviation, or -1 if season is invalid.
+     */
+    def calculatePointsStandardDeviation(season) {
+        /*
+        Make sure that the user has specified a valid year for this player.
+         */
+        if(!Stat.getStatYears().contains(season)) {
+            return -1
         }
-        mean /= results.size()
+
+        def fantasyPoints = FantasyPoints.findAllByPlayerAndSeason(this, season)
+
+        def points = []
+        for(fp in fantasyPoints) {
+            if (fp.week != -1) {
+                points << fp.points
+            }
+        }
+
+        return calculateStandardDeviation(points)
+    }
+
+    def calculateProjectedPoints(year) {
+        def statYears = Stat.getStatYears()
+
+        /*
+        Make sure the year we want to project is supported with stats from the previous year.
+
+        i.e. year = 2002, we need stats from 2001.
+         */
+        if (!statYears.contains(year-1))
+            throw new Exception("Invalid year.")
+    }
+
+    static def calculateStandardDeviation(values) {
+        // Calculate mean
+        def mean = values.sum()/values.size()
 
         // Diff from mean, squared
         def diff_squared = []
-        for(r in results) {
-            diff_squared << (r[1].points - mean)**2
+        for(v in values) {
+            diff_squared << (v - mean)**2
         }
 
-        return Math.sqrt(diff_squared.sum()/results.size())
+        return Math.sqrt(diff_squared.sum()/values.size())
     }
 }

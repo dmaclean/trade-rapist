@@ -38,7 +38,15 @@ class PlayerController {
             return
         }
 
-        [playerInstance: playerInstance]
+        def statYears = playerInstance.getStatYears()
+        def stdDevYears = [:]
+        def scoringAverages = [:]
+        for(y in statYears) {
+            stdDevYears[y] = playerInstance.calculatePointsStandardDeviation(y)
+            scoringAverages[y] = playerInstance.getScoringAverageForSeason(y)
+        }
+
+        [playerInstance: playerInstance, stdDevYears: stdDevYears, scoringAverages: scoringAverages]
     }
 
     def edit(Long id) {

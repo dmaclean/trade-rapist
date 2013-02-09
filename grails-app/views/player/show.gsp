@@ -56,6 +56,13 @@
 				</g:if>
 			
 			</ol>
+
+            <h3>Season Standard Deviations</h3>
+            <ol>
+                <g:each in="${stdDevYears}" var="val">
+                    <li>${val.key} - ${val.value}</li>
+                </g:each>
+            </ol>
 			<g:form>
 				<fieldset class="buttons">
 					<g:hiddenField name="id" value="${playerInstance?.id}" />
