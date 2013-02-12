@@ -60,7 +60,7 @@
             <h3>Season Standard Deviations</h3>
             <ol>
                 <g:each in="${stdDevYears}" var="val">
-                    <li>${val.key} - ${val.value}</li>
+                    <li>${val.key} - ${Double.valueOf(val.value).trunc(1)} (${Double.valueOf(scoringAverages[val.key] - val.value).trunc(1)} - ${Double.valueOf(scoringAverages[val.key] + val.value).trunc(1)})</li>
                 </g:each>
             </ol>
 			<g:form>
