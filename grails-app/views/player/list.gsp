@@ -46,5 +46,10 @@
 				<g:paginate total="${playerInstanceTotal}" />
 			</div>
 		</div>
+
+        <div>
+            <p>Correlation</p>
+            <p>QB (2001 - 2002) - ${qbCorrelation}</p>
+        </div>
 	</body>
 </html>
