@@ -29,6 +29,12 @@ class Player {
         return Stat.executeQuery("select distinct season from Stat s where s.player = ?", [this])
     }
 
+    /**
+     * Calculates the average of a player's scores for the specified season.
+     *
+     * @param season    The season to calculate average points for.
+     * @return          The average number of points scored, or zero if there is no data.
+     */
     def getScoringAverageForSeason(season) {
         def result = Player.executeQuery("select avg(f.points) from Player p inner join p.fantasyPoints f where p = ? and f.season = ?", [this, season])
         return (result[0] == null) ? 0 : result[0]
@@ -84,8 +90,15 @@ class Player {
                 "where p.position = ? and f.season = ? and f.week = -1 order by f.points desc", [position, season])
 
         // Separate into tiers.
-        def maxDiff = 16
         def tiers = []
+
+        // Calculate maximum difference between players i and i+1 that would keep them in the same tier.
+        // This difference is currently two standard deviations from the average difference between players.
+        def diffs = []
+        for(int i=0; i<results.size()-1; i++) {
+            diffs.add(Math.abs(results[i][1].points - results[i+1][1].points))
+        }
+        def maxDiff = Player.calculateStandardDeviation(diffs) * 2
 
         def currTier = []
         def r_prev = null
@@ -154,6 +167,53 @@ class Player {
          */
         if (!statYears.contains(year-1))
             throw new Exception("Invalid year.")
+    }
+
+    static def getCorrelation(position, stat, IFantasyScoringSystem system, season1, season2) {
+        // Returns all players at a position that have FantasyPoint records for both seasons.
+        def results
+        if (stat == null) {
+            results = Player.executeQuery("from Player p inner join p.fantasyPoints f1 with f1.season = ? and f1.week = -1 " +
+                    "inner join p.fantasyPoints f2 with f2.season = ? and f2.week = -1 where p.position = ?", [season1, season2, position])
+        }
+        else {
+            results = Player.executeQuery("from Player p inner join p.stats s1 with s1.season = ? and s1.week = -1 and s1.statKey = ? " +
+                    "inner join p.stats s2 with s2.season = ? and s2.week = -1 and s2.statKey = ? " +
+                    "where p.position = ?", [season1, stat, season2, stat, position])
+        }
+
+        def x = 0
+        def y = 0
+        def xy = 0
+        def x2 = 0
+        def y2 = 0
+
+        /*
+        Iterate through the results to calculate xy, x**2, and y**2
+         */
+        for(r in results) {
+            def points1, points2
+
+            if (stat == null) {
+                points1 = r[1].points
+                points2 = r[2].points
+            }
+            else {
+                points1 = system.calculateScore([r[1]])
+                points2 = system.calculateScore([r[2]])
+            }
+
+            x += points1
+            y += points2
+            xy += points1 * points2
+            x2 += points1**2
+            y2 += points2**2
+        }
+
+        def correlation = (results.size()*xy - x*y)/
+                Math.sqrt(Double.valueOf(results.size()*x2 - x**2)*Double.valueOf(results.size()*y2 - y**2))
+
+        return correlation
     }
 
     static def calculateStandardDeviation(values) {
