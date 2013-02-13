@@ -51,6 +51,12 @@ class Player {
         return (result[0] == null) ? 0 : result[0]
     }
 
+    /**
+     * Calculates the fantasy points for the player based on their statistics and
+     * the provided scoring system.
+     *
+     * @param scoringSystem     The scoring system that will translate stats into points.
+     */
     def computeFantasyPoints(IFantasyScoringSystem scoringSystem) {
         def points = [:]
 
@@ -168,6 +174,14 @@ class Player {
         return calculateStandardDeviation(points)
     }
 
+    /**
+     * Estimates how many points a player will score in the specified season.  This
+     * currently requires that the previous two season be available because we
+     * calculate the point correlation for the player's position on the fly.
+     *
+     * @param year      The season we want to estimate points for.
+     * @return          The estimated number of fantasy points the player will score.
+     */
     def calculateProjectedPoints(year) {
         def statYears = Stat.getStatYears()
 
