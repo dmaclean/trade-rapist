@@ -84,12 +84,70 @@ class PlayerTests {
     }
 
     def testGetProjectedPoints_QB() {
-        def q1 = new Player(name: "Quarterback", position: "QB").save(flush: true)
-        def s1 = new Stat(player: q1, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 10).save(flush: true)
+        def qb1 = new Player(name: "Quarterback 1", position: "QB").save(flush: true)
+        def qb2 = new Player(name: "Quarterback 2", position: "QB").save(flush: true)
+        def qb3 = new Player(name: "Quarterback 3", position: "QB").save(flush: true)
+        def qb4 = new Player(name: "Quarterback 4", position: "QB").save(flush: true)
+        def qb5 = new Player(name: "Quarterback 5", position: "QB").save(flush: true)
+        def qb6 = new Player(name: "Quarterback 6", position: "QB").save(flush: true)
+
+        // create some stats so the call to getStatYears() doesn't fail.
+        def qb1_s2001 = new Stat(player: qb1, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb1_s2002 = new Stat(player: qb1, season: 2002, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb2_s2001 = new Stat(player: qb2, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb2_s2002 = new Stat(player: qb2, season: 2002, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb3_s2001 = new Stat(player: qb3, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb3_s2002 = new Stat(player: qb3, season: 2002, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb4_s2001 = new Stat(player: qb4, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb4_s2002 = new Stat(player: qb4, season: 2002, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb5_s2001 = new Stat(player: qb5, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb5_s2002 = new Stat(player: qb5, season: 2002, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb6_s2001 = new Stat(player: qb6, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+        def qb6_s2002 = new Stat(player: qb6, season: 2002, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 1).save(flush: true)
+
+        def fp1_2001 = new FantasyPoints(player: qb1, season: 2001, week: -1, system: "ESPNStandardScoringSystem", points: 43.0).save(flush: true)
+        def fp1_2002 = new FantasyPoints(player: qb1, season: 2002, week: -1, system: "ESPNStandardScoringSystem", points: 99.0).save(flush: true)
+        qb1.fantasyPoints = new HashSet()
+        qb1.fantasyPoints.add(fp1_2001)
+        qb1.fantasyPoints.add(fp1_2002)
+
+        def fp2_2001 = new FantasyPoints(player: qb2, season: 2001, week: -1, system: "ESPNStandardScoringSystem", points: 21.0).save(flush: true)
+        def fp2_2002 = new FantasyPoints(player: qb2, season: 2002, week: -1, system: "ESPNStandardScoringSystem", points: 65.0).save(flush: true)
+        qb2.fantasyPoints = new HashSet()
+        qb2.fantasyPoints.add(fp2_2001)
+        qb2.fantasyPoints.add(fp2_2002)
+
+        def fp3_2001 = new FantasyPoints(player: qb3, season: 2001, week: -1, system: "ESPNStandardScoringSystem", points: 25.0).save(flush: true)
+        def fp3_2002 = new FantasyPoints(player: qb3, season: 2002, week: -1, system: "ESPNStandardScoringSystem", points: 79.0).save(flush: true)
+        qb3.fantasyPoints = new HashSet()
+        qb3.fantasyPoints.add(fp3_2001)
+        qb3.fantasyPoints.add(fp3_2002)
+
+        def fp4_2001 = new FantasyPoints(player: qb4, season: 2001, week: -1, system: "ESPNStandardScoringSystem", points: 42.0).save(flush: true)
+        def fp4_2002 = new FantasyPoints(player: qb4, season: 2002, week: -1, system: "ESPNStandardScoringSystem", points: 75.0).save(flush: true)
+        qb4.fantasyPoints = new HashSet()
+        qb4.fantasyPoints.add(fp4_2001)
+        qb4.fantasyPoints.add(fp4_2002)
+
+        def fp5_2001 = new FantasyPoints(player: qb5, season: 2001, week: -1, system: "ESPNStandardScoringSystem", points: 57.0).save(flush: true)
+        def fp5_2002 = new FantasyPoints(player: qb5, season: 2002, week: -1, system: "ESPNStandardScoringSystem", points: 87.0).save(flush: true)
+        qb5.fantasyPoints = new HashSet()
+        qb5.fantasyPoints.add(fp5_2001)
+        qb5.fantasyPoints.add(fp5_2002)
+
+        def fp6_2001 = new FantasyPoints(player: qb6, season: 2001, week: -1, system: "ESPNStandardScoringSystem", points: 59.0).save(flush: true)
+        def fp6_2002 = new FantasyPoints(player: qb6, season: 2002, week: -1, system: "ESPNStandardScoringSystem", points: 81.0).save(flush: true)
+        qb6.fantasyPoints = new HashSet()
+        qb6.fantasyPoints.add(fp6_2001)
+        qb6.fantasyPoints.add(fp6_2002)
 
         try {
-            q1.calculateProjectedPoints(2002)
-
+            assert Double.valueOf(qb1.calculateProjectedPoints(2003)).trunc(2) == 90.53
+            assert Double.valueOf(qb2.calculateProjectedPoints(2003)).trunc(2) == 72.52
+            assert Double.valueOf(qb3.calculateProjectedPoints(2003)).trunc(2) == 79.94
+            assert Double.valueOf(qb4.calculateProjectedPoints(2003)).trunc(2) == 77.82
+            assert Double.valueOf(qb5.calculateProjectedPoints(2003)).trunc(2) == 84.17
+            assert Double.valueOf(qb6.calculateProjectedPoints(2003)).trunc(2) == 81
         }
         catch(Exception e) {
             fail(e.getMessage())
@@ -164,6 +222,17 @@ class PlayerTests {
         def fp8 = new FantasyPoints(player: player2, season: 2001, week: 4, system: "ESPNStandardScoringSystem", points: 30.0).save(flush: true)
 
         assert player.getScoringAverageForSeason(2001) == 12.5
+    }
+
+    def testGetScoringAverageForPositionForSeason_GoodSeason() {
+        def player = new Player(name: "Quarterback", position: "QB").save(flush: true)
+        def player2 = new Player(name: "Quarterback 2", position: "QB").save(flush: true)
+
+        // Register FantasyPoints for the weeks.
+        def fp1 = new FantasyPoints(player: player, season: 2001, week: -1, system: "ESPNStandardScoringSystem", points: 10.0).save(flush: true)
+        def fp5 = new FantasyPoints(player: player2, season: 2001, week: -1, system: "ESPNStandardScoringSystem", points: 20.0).save(flush: true)
+
+        assert Player.getScoringAverageForPositionForSeason("QB", 2001) == 15
     }
 
     def testGetCorrelation_OverallPoints_2001_2002_QB() {

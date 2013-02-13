@@ -40,6 +40,17 @@ class Player {
         return (result[0] == null) ? 0 : result[0]
     }
 
+    /**
+     * Calculates the average of the scores for all players at a position the specified season.
+     *
+     * @param season    The season to calculate average points for.
+     * @return          The average number of points scored, or zero if there is no data.
+     */
+    static def getScoringAverageForPositionForSeason(position, season) {
+        def result = Player.executeQuery("select avg(f.points) from Player p inner join p.fantasyPoints f where f.season = ? and f.week = -1", [season])
+        return (result[0] == null) ? 0 : result[0]
+    }
+
     def computeFantasyPoints(IFantasyScoringSystem scoringSystem) {
         def points = [:]
 
@@ -167,8 +178,32 @@ class Player {
          */
         if (!statYears.contains(year-1))
             throw new Exception("Invalid year.")
+
+        def correlation = getCorrelation(position, null, null, year-2, year-1)
+        def positionAvg = getScoringAverageForPositionForSeason(position, year-1)
+        def points
+        for(f in fantasyPoints) {
+            if(f.season == year-1 && f.week == -1) {
+                points = f.points
+                break
+            }
+        }
+
+        return correlation*(points-positionAvg) + positionAvg
     }
 
+    /**
+     * Calculates the correlation of points for a position between two seasons.  Optionally, a stat
+     * can be specified to calculate the correlation exclusively of the points yielded by that stat.
+     * In that case, a scoring system needs to be specified.
+     *
+     * @param position      The position to determine correlation for.
+     * @param stat          (optional) A stat for the specified position to calculate correlation for.
+     * @param system        (optional) A scoring system that can translate the stat value to fantasy points.
+     * @param season1       The first season of the correlation.
+     * @param season2       The second season of the correlation.
+     * @return              A correlation value.
+     */
     static def getCorrelation(position, stat, IFantasyScoringSystem system, season1, season2) {
         // Returns all players at a position that have FantasyPoint records for both seasons.
         def results
@@ -216,7 +251,18 @@ class Player {
         return correlation
     }
 
+    /**
+     * Calculates standard deviation for a list of numbers
+     *
+     * @param values    The numbers to calculate standard deviation for.
+     * @return          The standard deviation.
+     */
     static def calculateStandardDeviation(values) {
+        // Make sure there's something in there
+        if (values.size == 0) {
+            return 0
+        }
+
         // Calculate mean
         def mean = values.sum()/values.size()
 
