@@ -62,40 +62,16 @@ class MinimaxTreeTests {
 		def child1 = tree.root.children[0]
 		assert child1.parent == tree.root
 		assert child1.draftedPlayer == q1
-//		assert child1.players[MinimaxTree.QUARTERBACK_INDEX].size() == 2
-//		assert child1.players[MinimaxTree.QUARTERBACK_INDEX][0] == q2         // Players still available
-//		assert child1.players[MinimaxTree.QUARTERBACK_INDEX][1] == q3
-//		assert child1.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child1.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child1.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child1.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child1.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB2 chosen
 		def child2 = tree.root.children[1]
 		assert child2.parent == tree.root
 		assert child2.draftedPlayer == q2
-//		assert child2.players[MinimaxTree.QUARTERBACK_INDEX].size() == 2
-//		assert child2.players[MinimaxTree.QUARTERBACK_INDEX][0] == q1         // Players still available
-//		assert child2.players[MinimaxTree.QUARTERBACK_INDEX][1] == q3
-//		assert child2.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child2.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child2.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child2.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child2.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB3 chosen
 		def child3 = tree.root.children[2]
 		assert child3.parent == tree.root
 		assert child3.draftedPlayer == q3
-//		assert child3.players[MinimaxTree.QUARTERBACK_INDEX].size() == 2
-//		assert child3.players[MinimaxTree.QUARTERBACK_INDEX][0] == q1         // Players still available
-//		assert child3.players[MinimaxTree.QUARTERBACK_INDEX][1] == q2
-//		assert child3.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child3.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child3.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child3.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child3.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		/**************
 			DEPTH 2
@@ -104,73 +80,31 @@ class MinimaxTreeTests {
 		def child1_1 = child1.children[0]                     // child1_1 means <1st pick branch #>_<2nd pick branch #>
 		assert child1_1.parent == child1
 		assert child1_1.draftedPlayer == q2
-//		assert child1_1.players[MinimaxTree.QUARTERBACK_INDEX].size() == 1
-//		assert child1_1.players[MinimaxTree.QUARTERBACK_INDEX][0] == q3         // Players still available
-//		assert child1_1.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child1_1.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child1_1.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child1_1.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child1_1.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB1, QB3 chosen
 		def child1_2 = child1.children[1]
 		assert child1_2.parent == child1
 		assert child1_2.draftedPlayer == q3
-//		assert child1_2.players[MinimaxTree.QUARTERBACK_INDEX].size() == 1
-//		assert child1_2.players[MinimaxTree.QUARTERBACK_INDEX][0] == q2         // Players still available
-//		assert child1_2.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child1_2.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child1_2.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child1_2.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child1_2.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB2, QB1 chosen
 		def child2_1 = child2.children[0]
 		assert child2_1.parent == child2
 		assert child2_1.draftedPlayer == q1
-//		assert child2_1.players[MinimaxTree.QUARTERBACK_INDEX].size() == 1
-//		assert child2_1.players[MinimaxTree.QUARTERBACK_INDEX][0] == q3         // Players still available
-//		assert child2_1.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child2_1.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child2_1.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child2_1.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child2_1.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB2, QB3 chosen
 		def child2_2 = child2.children[1]
 		assert child2_2.parent == child2
 		assert child2_2.draftedPlayer == q3
-//		assert child2_2.players[MinimaxTree.QUARTERBACK_INDEX].size() == 1
-//		assert child2_2.players[MinimaxTree.QUARTERBACK_INDEX][0] == q1         // Players still available
-//		assert child2_2.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child2_2.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child2_2.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child2_2.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child2_2.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB3, QB1 chosen
 		def child3_1 = child3.children[0]
 		assert child3_1.parent == child3
 		assert child3_1.draftedPlayer == q1
-//		assert child3_1.players[MinimaxTree.QUARTERBACK_INDEX].size() == 1
-//		assert child3_1.players[MinimaxTree.QUARTERBACK_INDEX][0] == q2         // Players still available
-//		assert child3_1.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child3_1.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child3_1.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child3_1.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child3_1.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB3, QB2 chosen
 		def child3_2 = child3.children[1]
 		assert child3_2.parent == child3
 		assert child3_2.draftedPlayer == q2
-//		assert child3_2.players[MinimaxTree.QUARTERBACK_INDEX].size() == 1
-//		assert child3_2.players[MinimaxTree.QUARTERBACK_INDEX][0] == q1         // Players still available
-//		assert child3_2.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child3_2.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child3_2.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child3_2.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child3_2.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		/*************
 			DEPTH 3
@@ -179,67 +113,143 @@ class MinimaxTreeTests {
 		def child1_1_1 = child1_1.children[0]
 		assert child1_1_1.parent == child1_1
 		assert child1_1_1.draftedPlayer == q3
-//		assert child1_2_3.players[MinimaxTree.QUARTERBACK_INDEX].size() == 0      // No players still available
-//		assert child1_2_3.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child1_2_3.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child1_2_3.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child1_2_3.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child1_2_3.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB1, QB3, QB2 chosen
 		def child1_2_1 = child1_2.children[0]
 		assert child1_2_1.parent == child1_2
 		assert child1_2_1.draftedPlayer == q2
-//		assert child1_3_2.players[MinimaxTree.QUARTERBACK_INDEX].size() == 0      // No players still available
-//		assert child1_3_2.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child1_3_2.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child1_3_2.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child1_3_2.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child1_3_2.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB2, QB1, QB3 chosen
 		def child2_1_1 = child2_1.children[0]
 		assert child2_1_1.parent == child2_1
 		assert child2_1_1.draftedPlayer == q3
-//		assert child2_1_3.players[MinimaxTree.QUARTERBACK_INDEX].size() == 0      // No players still available
-//		assert child2_1_3.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child2_1_3.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child2_1_3.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child2_1_3.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child2_1_3.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB2, QB3, QB1 chosen
 		def child2_2_1 = child2_2.children[0]
 		assert child2_2_1.parent == child2_2
 		assert child2_2_1.draftedPlayer == q1
-//		assert child2_3_1.players[MinimaxTree.QUARTERBACK_INDEX].size() == 0      // No players still available
-//		assert child2_3_1.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child2_3_1.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child2_3_1.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child2_3_1.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child2_3_1.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB3, QB1, QB2 chosen
 		def child3_1_1 = child3_1.children[0]
 		assert child3_1_1.parent == child3_1
 		assert child3_1_1.draftedPlayer == q2
-//		assert child3_1_2.players[MinimaxTree.QUARTERBACK_INDEX].size() == 0      // No players still available
-//		assert child3_1_2.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child3_1_2.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child3_1_2.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child3_1_2.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child3_1_2.players[MinimaxTree.KICKER_INDEX].size() == 0
 
 		// QB3, QB2, QB1 chosen
 		def child3_2_1 = child3_2.children[0]
 		assert child3_2_1.parent == child3_2
 		assert child3_2_1.draftedPlayer == q1
-//		assert child3_2_1.players[MinimaxTree.QUARTERBACK_INDEX].size() == 0      // No players still available
-//		assert child3_2_1.players[MinimaxTree.RUNNING_BACK_INDEX].size() == 0
-//		assert child3_2_1.players[MinimaxTree.WIDE_RECEIVER_INDEX].size() == 0
-//		assert child3_2_1.players[MinimaxTree.TIGHT_END_INDEX].size() == 0
-//		assert child3_2_1.players[MinimaxTree.DST_INDEX].size() == 0
-//		assert child3_2_1.players[MinimaxTree.KICKER_INDEX].size() == 0
+	}
+
+	void testConstructTree_ConfirmStructure_QB_RB_WR() {
+		def system = new ESPNStandardScoringSystem()
+
+		// Create players
+		def p1 = new Player(name: "Quarterback", position: "QB")
+		def p2 = new Player(name: "Running back", position: "RB")
+		def p3 = new Player(name: "Wide Receiver", position: "WR")
+
+		// Create projected stats
+		def p1_stats = new FantasyPoints(player: p1, season: 2013, week: -1, system: system, points: 300)
+		def p2_stats = new FantasyPoints(player: p2, season: 2013, week: -1, system: system, points: 290)
+		def p3_stats = new FantasyPoints(player: p3, season: 2013, week: -1, system: system, points: 270)
+
+		// Associate stats with players
+		p1.fantasyPoints = new HashSet<FantasyPoints>([p1_stats])
+		p2.fantasyPoints = new HashSet<FantasyPoints>([p2_stats])
+		p3.fantasyPoints = new HashSet<FantasyPoints>([p3_stats])
+
+		// Add players to tree list
+		tree.players[MinimaxTree.QUARTERBACK_INDEX] << p1
+		tree.players[MinimaxTree.RUNNING_BACK_INDEX] << p2
+		tree.players[MinimaxTree.WIDE_RECEIVER_INDEX] << p3
+
+		tree.constructTree()
+
+		assert tree.root.children.size() == 3
+
+		/*************
+		 DEPTH 1
+		 ************/
+		// QB1 chosen
+		def child1 = tree.root.children[0]
+		assert child1.parent == tree.root
+		assert child1.draftedPlayer == p1
+
+		// QB2 chosen
+		def child2 = tree.root.children[1]
+		assert child2.parent == tree.root
+		assert child2.draftedPlayer == p2
+
+		// QB3 chosen
+		def child3 = tree.root.children[2]
+		assert child3.parent == tree.root
+		assert child3.draftedPlayer == p3
+
+		/**************
+		 DEPTH 2
+		 *************/
+		// QB1, QB2 chosen
+		def child1_1 = child1.children[0]                     // child1_1 means <1st pick branch #>_<2nd pick branch #>
+		assert child1_1.parent == child1
+		assert child1_1.draftedPlayer == p2
+
+		// QB1, QB3 chosen
+		def child1_2 = child1.children[1]
+		assert child1_2.parent == child1
+		assert child1_2.draftedPlayer == p3
+
+		// QB2, QB1 chosen
+		def child2_1 = child2.children[0]
+		assert child2_1.parent == child2
+		assert child2_1.draftedPlayer == p1
+
+		// QB2, QB3 chosen
+		def child2_2 = child2.children[1]
+		assert child2_2.parent == child2
+		assert child2_2.draftedPlayer == p3
+
+		// QB3, QB1 chosen
+		def child3_1 = child3.children[0]
+		assert child3_1.parent == child3
+		assert child3_1.draftedPlayer == p1
+
+		// QB3, QB2 chosen
+		def child3_2 = child3.children[1]
+		assert child3_2.parent == child3
+		assert child3_2.draftedPlayer == p2
+
+		/*************
+		 DEPTH 3
+		 ************/
+		// QB1, QB2, QB3 chosen
+		def child1_1_1 = child1_1.children[0]
+		assert child1_1_1.parent == child1_1
+		assert child1_1_1.draftedPlayer == p3
+
+		// QB1, QB3, QB2 chosen
+		def child1_2_1 = child1_2.children[0]
+		assert child1_2_1.parent == child1_2
+		assert child1_2_1.draftedPlayer == p2
+
+		// QB2, QB1, QB3 chosen
+		def child2_1_1 = child2_1.children[0]
+		assert child2_1_1.parent == child2_1
+		assert child2_1_1.draftedPlayer == p3
+
+		// QB2, QB3, QB1 chosen
+		def child2_2_1 = child2_2.children[0]
+		assert child2_2_1.parent == child2_2
+		assert child2_2_1.draftedPlayer == p1
+
+		// QB3, QB1, QB2 chosen
+		def child3_1_1 = child3_1.children[0]
+		assert child3_1_1.parent == child3_1
+		assert child3_1_1.draftedPlayer == p2
+
+		// QB3, QB2, QB1 chosen
+		def child3_2_1 = child3_2.children[0]
+		assert child3_2_1.parent == child3_2
+		assert child3_2_1.draftedPlayer == p1
 	}
 
 	void testConstructTree() {

@@ -51,6 +51,32 @@ class Player {
         return (result[0] == null) ? 0 : result[0]
     }
 
+	/**
+	 * Returns a list of players at the specified position for a given season.  This method clears
+	 * out the fantasyPoints set (which contains all FantasyPoints objects for the player coming
+	 * back from the database) and only puts the FantasyPoints object for the specified season in.
+	 *
+	 * The method is used to quickly get a sorted list of players for the draft Minimax tree.
+	 *
+	 * TODO: Add scoring system.
+	 *
+	 * @param position      The position we're interested in
+	 * @param season        The season we're interested in
+	 * @return              A list of Player objects, sorted in order of Fantasy Points scored.
+	 */
+	static def getPlayersInPointsOrder(position, season) {
+		def results = Player.executeQuery("from Player p inner join p.fantasyPoints f " +
+				"where p.position = ? and f.season = ? and f.week = -1 order by f.points desc", [position, season])
+
+		def players = []
+		for(int i=0; i<results.size(); i++) {
+			players << results[i][0]
+			players[i].fantasyPoints = new HashSet([results[i][1]])
+		}
+
+		return players
+	}
+
     /**
      * Calculates the fantasy points for the player based on their statistics and
      * the provided scoring system.

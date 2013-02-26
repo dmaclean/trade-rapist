@@ -13,7 +13,7 @@ class MinimaxTreeNode {
 	/**
 	 * The perceived value of this state to the owner we're creating the tree for.
 	 */
-	Double value
+	Short value
 
 	/**
 	 * The parent node in the tree.

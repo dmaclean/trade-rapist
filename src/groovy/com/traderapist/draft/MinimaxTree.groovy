@@ -63,7 +63,7 @@ class MinimaxTree {
 	def constructTree() {
 		root = new MinimaxTreeNode()
 
-		constructTree(root)
+		constructTree(root, 0)
 	}
 
 	/**
@@ -71,21 +71,25 @@ class MinimaxTree {
 	 *
 	 * @param node      The root node of this subtree.
 	 */
-	def constructTree(MinimaxTreeNode node) {
+	def constructTree(MinimaxTreeNode node, depth) {
+//		if (depth%10 == 0) {
+			Runtime rt = Runtime.getRuntime()
+			print("Memory stats (used/free) at depth ${depth}: ${rt.totalMemory()/1000000}/${rt.freeMemory()/1000000}")
+//		}
+
 		for(int i=0; i<players.size(); i++) {
 			for(int j=0; j<players[i].size(); j++) {
 				// The player at index j is going to be drafted for this iteration of the
 				// loop, so build the child without him.
 				def draftedPlayer = players[i].remove(j)
 
-				// Create a new child node that represents the current player being drafted.
 				def child = new MinimaxTreeNode(players: players, draftedPlayer: draftedPlayer, parent: node)
 
 				// Add our newly-created child to the current root's list of children.
 				node.children << child
 
 				// Construct the subtree for the child we just created.
-				constructTree(child)
+				constructTree(child, depth+1)
 
 				// Put the drafted player back in the list since the next iteration will
 				// mean a different player has been drafted.
