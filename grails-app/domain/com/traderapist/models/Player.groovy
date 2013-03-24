@@ -3,7 +3,8 @@ package com.traderapist.models
 import com.traderapist.scoringsystem.IFantasyScoringSystem
 
 class Player {
-    static hasMany = [stats: Stat, fantasyPoints: FantasyPoints]
+    static hasMany = [stats: Stat, fantasyPoints: FantasyPoints,
+		    teamMemberships: TeamMembership, averageDraftPositions: AverageDraftPosition]
 
     String name
     String position
