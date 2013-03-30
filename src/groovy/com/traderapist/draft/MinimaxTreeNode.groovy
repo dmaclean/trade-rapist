@@ -13,7 +13,12 @@ class MinimaxTreeNode {
 	/**
 	 * The perceived value of this state to the owner we're creating the tree for.
 	 */
-	Short value
+	Double value
+
+	/**
+	 * The depth in the Minimax tree that this node lives at.
+	 */
+	int depth
 
 	/**
 	 * The parent node in the tree.
@@ -44,6 +49,7 @@ class MinimaxTreeNode {
 		def bestNode
 
 		for(child in children) {
+			child.getOptimalChoice()
 			if (bestNode == null || (useMax && child.value > bestNode.value) || (!useMax && child.value < bestNode.value)) {
 				bestNode = child
 			}
