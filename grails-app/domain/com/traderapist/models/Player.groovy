@@ -6,6 +6,18 @@ class Player {
     static hasMany = [stats: Stat, fantasyPoints: FantasyPoints,
 		    teamMemberships: TeamMembership, averageDraftPositions: AverageDraftPosition]
 
+	static final String POSITION_QB = "QB"
+
+	static final String POSITION_RB = "RB"
+
+	static final String POSITION_WR = "WR"
+
+	static final String POSITION_TE = "TE"
+
+	static final String POSITION_DEF = "DEF"
+
+	static final String POSITION_K = "K"
+
     String name
     String position
 
