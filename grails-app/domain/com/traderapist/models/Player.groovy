@@ -78,13 +78,15 @@ class Player {
 	 * @return              A list of Player objects, sorted in order of Fantasy Points scored.
 	 */
 	static def getPlayersInPointsOrder(position, season) {
-		def results = Player.executeQuery("from Player p inner join p.fantasyPoints f " +
-				"where p.position = ? and f.season = ? and f.week = -1 order by f.points desc", [position, season])
+		def results = Player.executeQuery("from Player p inner join p.fantasyPoints f inner join p.averageDraftPositions adp " +
+				"where p.position = ? and f.season = ? and f.week = -1 and adp.season = ? " +
+				"order by f.points desc", [position, season, season])
 
 		def players = []
 		for(int i=0; i<results.size(); i++) {
 			players << results[i][0]
 			players[i].fantasyPoints = new HashSet([results[i][1]])
+			players[i].averageDraftPositions = new HashSet([results[i][2]])
 		}
 
 		return players

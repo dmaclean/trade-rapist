@@ -315,4 +315,72 @@ class PlayerTests {
         // sqrt( (6.25 + 12.25 + 2.25 + 56.25)/4 ) = sqrt(77/4) = sqrt(19.25) = 4.387
         assert Player.calculateStandardDeviation(scores).trunc(3) == 4.387
     }
+
+	def testGetPlayersInPointsOrder() {
+		/*
+		 * Define players
+		 */
+		def q1 = new Player(name: "Quarterback 1", position: Player.POSITION_QB).save(flush: true)
+		def q2 = new Player(name: "Quarterback 2", position: Player.POSITION_QB).save(flush: true)
+
+		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB).save(flush: true)
+		def r2 = new Player(name: "Running back 2", position: Player.POSITION_RB).save(flush: true)
+
+		/*
+		 * Define fantasy points for players
+		 */
+		def q1_stats = new FantasyPoints(player: q1, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getName(), points: 300).save(flush: true)
+		def q2_stats = new FantasyPoints(player: q2, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getName(), points: 295).save(flush: true)
+
+		def r1_stats = new FantasyPoints(player: r1, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getName(), points: 250).save(flush: true)
+		def r2_stats = new FantasyPoints(player: r2, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getName(), points: 245).save(flush: true)
+
+		/*
+		 * Define ADP for players
+		 */
+		def q1_adp_2002 = new AverageDraftPosition(player: q1, adp: 1, season: 2002).save(flush: true)
+		def q1_adp_2001 = new AverageDraftPosition(player: q1, adp: 4, season: 2001).save(flush: true)
+		def q2_adp_2002 = new AverageDraftPosition(player: q2, adp: 5, season: 2002).save(flush: true)
+		def q2_adp_2001 = new AverageDraftPosition(player: q2, adp: 10, season: 2001).save(flush: true)
+
+		def r1_adp_2002 = new AverageDraftPosition(player: r1, adp: 2, season: 2002).save(flush: true)
+		def r1_adp_2001 = new AverageDraftPosition(player: r1, adp: 8, season: 2001).save(flush: true)
+		def r2_adp_2002 = new AverageDraftPosition(player: r2, adp: 8, season: 2002).save(flush: true)
+		def r2_adp_2001 = new AverageDraftPosition(player: r2, adp: 50, season: 2001).save(flush: true)
+
+
+		/*
+		 * Quarterback results
+		 */
+		def qb_results = Player.getPlayersInPointsOrder(Player.POSITION_QB, 2002)
+		assert qb_results.size() == 2
+		assert qb_results[0].name == "Quarterback 1"
+		assert qb_results[0].position == Player.POSITION_QB
+		assert qb_results[0].fantasyPoints.toArray()[0].points == 300
+		assert qb_results[0].averageDraftPositions.size() == 1
+		assert qb_results[0].averageDraftPositions.toArray()[0].adp == 1
+
+		assert qb_results[1].name == "Quarterback 2"
+		assert qb_results[1].position == Player.POSITION_QB
+		assert qb_results[1].fantasyPoints.toArray()[0].points == 295
+		assert qb_results[1].averageDraftPositions.size() == 1
+		assert qb_results[1].averageDraftPositions.toArray()[0].adp == 5
+
+		/*
+		 * Running back results
+		 */
+		def rb_results = Player.getPlayersInPointsOrder(Player.POSITION_RB, 2002)
+		assert rb_results.size() == 2
+		assert rb_results[0].name == "Running back 1"
+		assert rb_results[0].position == Player.POSITION_RB
+		assert rb_results[0].fantasyPoints.toArray()[0].points == 250
+		assert rb_results[0].averageDraftPositions.size() == 1
+		assert rb_results[0].averageDraftPositions.toArray()[0].adp == 2
+
+		assert rb_results[1].name == "Running back 2"
+		assert rb_results[1].position == Player.POSITION_RB
+		assert rb_results[1].fantasyPoints.toArray()[0].points == 245
+		assert rb_results[1].averageDraftPositions.size() == 1
+		assert rb_results[1].averageDraftPositions.toArray()[0].adp == 8
+	}
 }
