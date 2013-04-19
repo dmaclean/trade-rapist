@@ -21,57 +21,6 @@ angular.module('TradeRapist', []).
     .directive("owners", function() {
         function link($scope, element, attributes) {
             console.log("Linked", attributes.id);
-
-            $scope.$watch('initialized', function() {
-
-                /*
-                 * Establish and create the number of rows we need along with
-                 * the owner divs that will live in each row.
-                 *
-                 * We're defaulting to 6 owners per row.
-                 */
-//                var maxOwnersPerRow = 6;
-//                var numRows = $scope.numOwners/maxOwnersPerRow;
-//
-//                for(var i=0; i<numRows; i++) {
-//                    var start = i*maxOwnersPerRow;
-//                    var end = ( (start + maxOwnersPerRow) > $scope.numOwners) ? $scope.numOwners : start + maxOwnersPerRow;
-//
-//                    var html = '<div id="owners_row_' + i + '" class="row-fluid">';
-//
-//                    /*
-//                     * Add all owner divs that belong in the current row.
-//                     */
-//                    for(var j=start; j<end; j++) {
-//                        var newDiv =    '<div id="owner${owner_id}" class="span2">' +
-//                            '<h3>Owner ' + (j+1) + '</h3>${my_pick}${current_pick}' +
-//                            '<ol><li ng-repeat="player in owners[${owner_id}]">{{ player.name }}</li></ol>' +
-//                            '</div>';
-//                        newDiv = newDiv.replace(/\${owner_id}/g, "" + j);
-//
-//                        // Add the "My pick" badge if this is our pick.
-//                        if(j+1 == $scope.myPick) {
-//                            newDiv = newDiv.replace("${my_pick}", "<span class=\"label label-success\">My pick</span>");
-//                        }
-//                        else {
-//                            newDiv = newDiv.replace("${my_pick}", "");
-//                        }
-//
-//                        // Add the "Current pick" badge if this is the current pick
-//                        if(j+1 == $scope.currentPick) {
-//                            newDiv = newDiv.replace("${current_pick}", "<span class=\"label label-important\">Current pick</span>");
-//                        }
-//                        else {
-//                            newDiv = newDiv.replace("${current_pick}", "");
-//                        }
-//
-//                        html += newDiv;
-//                    }
-//                    html += '</div>';
-//
-//                    element.append(html);
-//                }
-            });
         }
 
         return({
