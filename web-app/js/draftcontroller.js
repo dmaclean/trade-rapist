@@ -241,13 +241,20 @@ function DraftController($scope, $http) {
             draftedPlayer = $scope.available_ks.splice(i,1);
         }
 
-        // If this is the first player's pick, we need to create a new array
-        // for that owner.
-        if($scope.owners[$scope.currentPick-1] == undefined) {
-            $scope.owners[$scope.currentPick-1] = new Array();
+        // Which owner made this pick?
+        for(var owner=0; owner<$scope.numOwners; owner++) {
+            if($scope.isOwnersPick(owner+1)) {
+                break;
+            }
         }
 
-        $scope.owners[$scope.currentPick-1].push(draftedPlayer[0]);
+        // If this is the first player's pick, we need to create a new array
+        // for that owner.
+        if($scope.owners[owner] == undefined) {
+            $scope.owners[owner] = new Array();
+        }
+
+        $scope.owners[owner].push(draftedPlayer[0]);
 
         $scope.currentPick++;
     }

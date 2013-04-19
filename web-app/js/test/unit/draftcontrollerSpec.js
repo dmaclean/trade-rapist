@@ -507,6 +507,111 @@ describe('DraftController spec', function() {
             expect(scope.available_ks.length).toEqual(0);
             expect(scope.currentPick).toEqual(13);
         });
+
+        it('should draft all players for one owner', function() {
+            expect(scope.players).toBeUndefined();
+            $httpBackend.flush();
+
+            scope.numOwners = 1;
+
+            expect(scope.currentPick).toEqual(1);
+
+            // First player drafted - QB 1
+            var selectedPlayer = scope.available_qbs[0];
+
+            scope.draftPlayer(scope.QUARTERBACK, selectedPlayer.id);
+            expect(scope.owners[0][0]).toEqual(selectedPlayer);
+            expect(scope.available_qbs.length).toEqual(1);
+            expect(scope.currentPick).toEqual(2);
+
+            // Second player drafted - QB 2
+            selectedPlayer = scope.available_qbs[0];
+
+            scope.draftPlayer(scope.QUARTERBACK, selectedPlayer.id);
+            expect(scope.owners[0][1]).toEqual(selectedPlayer);
+            expect(scope.available_qbs.length).toEqual(0);
+            expect(scope.currentPick).toEqual(3);
+
+            // Third player drafted - RB 1
+            selectedPlayer = scope.available_rbs[0];
+
+            scope.draftPlayer(scope.RUNNING_BACK, selectedPlayer.id);
+            expect(scope.owners[0][2]).toEqual(selectedPlayer);
+            expect(scope.available_rbs.length).toEqual(1);
+            expect(scope.currentPick).toEqual(4);
+
+            // Fourth player drafted - RB 2
+            selectedPlayer = scope.available_rbs[0];
+
+            scope.draftPlayer(scope.RUNNING_BACK, selectedPlayer.id);
+            expect(scope.owners[0][3]).toEqual(selectedPlayer);
+            expect(scope.available_rbs.length).toEqual(0);
+            expect(scope.currentPick).toEqual(5);
+
+            // Fifth player drafted - WR 1
+            selectedPlayer = scope.available_wrs[0];
+
+            scope.draftPlayer(scope.WIDE_RECEIVER, selectedPlayer.id);
+            expect(scope.owners[0][4]).toEqual(selectedPlayer);
+            expect(scope.available_wrs.length).toEqual(1);
+            expect(scope.currentPick).toEqual(6);
+
+            // Sixth player drafted - WR 2
+            selectedPlayer = scope.available_wrs[0];
+
+            scope.draftPlayer(scope.WIDE_RECEIVER, selectedPlayer.id);
+            expect(scope.owners[0][5]).toEqual(selectedPlayer);
+            expect(scope.available_wrs.length).toEqual(0);
+            expect(scope.currentPick).toEqual(7);
+
+            // Seventh player drafted - TE 1
+            selectedPlayer = scope.available_tes[0];
+
+            scope.draftPlayer(scope.TIGHT_END, selectedPlayer.id);
+            expect(scope.owners[0][6]).toEqual(selectedPlayer);
+            expect(scope.available_tes.length).toEqual(1);
+            expect(scope.currentPick).toEqual(8);
+
+            // Eighth player drafted - TE 2
+            selectedPlayer = scope.available_tes[0];
+
+            scope.draftPlayer(scope.TIGHT_END, selectedPlayer.id);
+            expect(scope.owners[0][7]).toEqual(selectedPlayer);
+            expect(scope.available_tes.length).toEqual(0);
+            expect(scope.currentPick).toEqual(9);
+
+            // Ninth player drafted - DEF 1
+            selectedPlayer = scope.available_ds[0];
+
+            scope.draftPlayer(scope.DEFENSE, selectedPlayer.id);
+            expect(scope.owners[0][8]).toEqual(selectedPlayer);
+            expect(scope.available_ds.length).toEqual(1);
+            expect(scope.currentPick).toEqual(10);
+
+            // Tenth player drafted - DEF 2
+            selectedPlayer = scope.available_ds[0];
+
+            scope.draftPlayer(scope.DEFENSE, selectedPlayer.id);
+            expect(scope.owners[0][9]).toEqual(selectedPlayer);
+            expect(scope.available_ds.length).toEqual(0);
+            expect(scope.currentPick).toEqual(11);
+
+            // Eleventh player drafted - K 1
+            selectedPlayer = scope.available_ks[0];
+
+            scope.draftPlayer(scope.KICKER, selectedPlayer.id);
+            expect(scope.owners[0][10]).toEqual(selectedPlayer);
+            expect(scope.available_ks.length).toEqual(1);
+            expect(scope.currentPick).toEqual(12);
+
+            // Twelfth player drafted - K 2
+            selectedPlayer = scope.available_ks[0];
+
+            scope.draftPlayer(scope.KICKER, selectedPlayer.id);
+            expect(scope.owners[0][11]).toEqual(selectedPlayer);
+            expect(scope.available_ks.length).toEqual(0);
+            expect(scope.currentPick).toEqual(13);
+        });
     });
 
     describe('ownersPerRow function', function() {
