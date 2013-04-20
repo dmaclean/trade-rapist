@@ -31,10 +31,13 @@ class FantasyPointsController {
 
         def players = Player.findAll()
 
+	    long start = System.currentTimeMillis()
         for(player in players) {
             log.info("Calculating fantasy points for ${player.name}")
             player.computeFantasyPoints(scoringSystem)
         }
+	    long end = System.currentTimeMillis()
+	    print("Generated fantasy points for all players in ${ (end-start)/1000.0 } seconds")
     }
 
     def save() {
