@@ -129,8 +129,10 @@ class Player {
             if (!fp) {
                 fp = new FantasyPoints(player: this, season: keyPieces[0], week: keyPieces[1], system: scoringSystem.class.getName(), points:  p.value)
             }
-            fp.save(flush: true)
+            fp.save()
         }
+	    end = System.currentTimeMillis();
+	    println("Created FantasyPoint entries for ${name} in ${(end-start)/1000.0}")
     }
 
     /**
