@@ -57,6 +57,30 @@ class PlayerTests {
         assert fantasyPoints[0].points == 16
     }
 
+	void testCalculatePoints_SeasonStats_ESPNStandardScoring_AlreadyExist() {
+		Player player = new Player(name: "Dan", position: "QB")
+		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200).save(flush: true)
+		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		Set stats = new HashSet()
+		stats.add(s1)
+		stats.add(s2)
+		player.setStats(stats)
+
+		IFantasyScoringSystem system = new ESPNStandardScoringSystem()
+
+		// Create existing FantasyPoints entry for 2001 season
+		FantasyPoints fp2001 = new FantasyPoints(player: player, points: 16, season: 2001, week: -1, system: system).save(flush: true)
+
+		player.computeFantasyPoints(system)
+
+		def fantasyPoints = FantasyPoints.list()
+		assertTrue "Expecting 1 entry for FantasyPoints", fantasyPoints.size() == 1
+
+		assert fantasyPoints[0].season == 2001
+		assert fantasyPoints[0].week == -1
+		assert fantasyPoints[0].points == 16
+	}
+
     void testCalculatePoints_WeekStats_ESPNStandardScoring() {
         Player player = new Player(name: "Dan", position: "QB")
         Stat s1 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
@@ -76,4 +100,29 @@ class PlayerTests {
         assert fantasyPoints[0].week == 1
         assert fantasyPoints[0].points == 16
     }
+
+	void testCalculatePoints_WeekStats_ESPNStandardScoring_AlreadyExists() {
+		Player player = new Player(name: "Dan", position: "QB")
+		Stat s1 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
+		Stat s2 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+		Set stats = new HashSet()
+		stats.add(s1)
+		stats.add(s2)
+		player.setStats(stats)
+
+		IFantasyScoringSystem system = new ESPNStandardScoringSystem()
+
+		// Create existing FantasyPoints entry for 2001 season
+		FantasyPoints fp2001 = new FantasyPoints(player: player, points: 16, season: 2001, week: 1, system: system).save(flush: true)
+
+
+		player.computeFantasyPoints(system)
+
+		def fantasyPoints = FantasyPoints.list()
+		assertTrue "Expecting 1 entry for FantasyPoints", fantasyPoints.size() == 1
+
+		assert fantasyPoints[0].season == 2001
+		assert fantasyPoints[0].week == 1
+		assert fantasyPoints[0].points == 16
+	}
 }
