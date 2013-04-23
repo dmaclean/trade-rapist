@@ -20,7 +20,23 @@ angular.module('TradeRapistE2E', ['TradeRapist', 'ngMockE2E'])
             {id: 11, name: 'K 1', position: 'KICKER', points: 120.0, adp: 2.5, vorp: 30.0},
             {id: 12, name: 'K 2', position: 'KICKER', points: 90.0, adp: 5.0, vorp: 0}];
 
-        $httpBackend.whenGET('draft/players').respond(players);
+        var players_2001 =   [{id: 1, name: 'QB 1_2001', position: 'QUARTERBACK', points: 300.0, adp: 2.5, vorp: 20.0},
+            {id: 2, name: 'QB 2_2001', position: 'QUARTERBACK', points: 280.0, adp: 5.0, vorp: 0},
+            {id: 3, name: 'RB 1_2001', position: 'RUNNING_BACK', points: 250.0, adp: 2.5, vorp: 30.0},
+            {id: 4, name: 'RB 2_2001', position: 'RUNNING_BACK', points: 220.0, adp: 5.0, vorp: 0},
+            {id: 5, name: 'WR 2_2001', position: 'WIDE_RECEIVER', points: 200.0, adp: 2.5, vorp: 20.0},
+            {id: 6, name: 'WR 1_2001', position: 'WIDE_RECEIVER', points: 180.0, adp: 5.0, vorp: 0},
+            {id: 7, name: 'TE 2_2001', position: 'TIGHT_END', points: 180.0, adp: 2.5, vorp: 5.0},
+            {id: 8, name: 'TE 1_2001', position: 'TIGHT_END', points: 175.0, adp: 5.0, vorp: 0},
+            {id: 9, name: 'DEF 1_2001', position: 'DEFENSE', points: 120.0, adp: 2.5, vorp: 20.0},
+            {id: 10, name: 'DEF 2_2001', position: 'DEFENSE', points: 100.0, adp: 5.0, vorp: 0},
+            {id: 11, name: 'K 1_2001', position: 'KICKER', points: 120.0, adp: 2.5, vorp: 30.0},
+            {id: 12, name: 'K 2_2001', position: 'KICKER', points: 90.0, adp: 5.0, vorp: 0}];
+
+        $httpBackend.whenGET('draft/players?year=2013').respond(players);
+        $httpBackend.whenGET('draft/players?year=2012').passThrough();
+        $httpBackend.whenGET('draft/players?year=2002').respond(players);
+        $httpBackend.whenGET('draft/players?year=2001').respond(players_2001);
 
         $httpBackend.whenGET('partials/draft.html').passThrough();
     });
