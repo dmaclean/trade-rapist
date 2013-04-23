@@ -61,6 +61,7 @@ describe('Trade Rapist Draft Setup', function() {
 
     describe('Owner div creation', function() {
         it('should create 1 row and 6 owner divs when 6 owners entered', function() {
+            input('draftYear').enter("2002");
             input('numOwners').enter("6");
             input('myPick').enter("1");
             element('#draft_init button').click();
@@ -143,8 +144,29 @@ describe('Trade Rapist Draft Setup', function() {
         });
     });
 
+    describe('Players available', function() {
+        it('should have RB 1_2001 as first RB in 2001', function() {
+            input('draftYear').enter("2001");
+            input('numOwners').enter("18");
+            input('myPick').enter("1");
+            element('#draft_init button').click();
+
+            expect(element('li:contains("RB 1_2001")').count()).toEqual(1);
+        });
+
+        it('should have RB 1 as first RB in 2002', function() {
+            input('draftYear').enter("2002");
+            input('numOwners').enter("18");
+            input('myPick').enter("1");
+            element('#draft_init button').click();
+
+            expect(element('li:contains("RB 1")').count()).toEqual(1);
+        });
+    });
+
     describe('Player drafting', function() {
         it('should move current pick badge to next owner', function() {
+            input('draftYear').enter("2002");
             input('numOwners').enter("18");
             input('myPick').enter("1");
             element('#draft_init button').click();
@@ -164,6 +186,7 @@ describe('Trade Rapist Draft Setup', function() {
         });
 
         it('should add drafted player in current owner list when clicking draft', function() {
+            input('draftYear').enter("2002");
             input('numOwners').enter("5");
             input('myPick').enter("1");
             element('#draft_init button').click();
@@ -181,6 +204,7 @@ describe('Trade Rapist Draft Setup', function() {
         });
 
         it('should move Current Pick badge forward, backward, and forward in snake draft', function() {
+            input('draftYear').enter("2002");
             input('numOwners').enter("3");
             input('myPick').enter("1");
             element('#draft_init button').click();

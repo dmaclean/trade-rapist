@@ -38,37 +38,118 @@ angular.module('TradeRapist', []).
     });
 
 function DraftController($scope, $http) {
-    $http.get('draft/players').success(function(data) {
-        $scope.players = data;
+    $scope.QUARTERBACK = "QUARTERBACK";
+    $scope.RUNNING_BACK = "RUNNING_BACK";
+    $scope.WIDE_RECEIVER = "WIDE_RECEIVER";
+    $scope.TIGHT_END = "TIGHT_END";
+    $scope.DEFENSE = "DEFENSE";
+    $scope.KICKER = "KICKER";
 
-        var index = [0,0,0,0,0,0];
-        for(p in $scope.players) {
-            if($scope.players[p].position == $scope.QUARTERBACK) {
-                console.log("Adding quarterback " + $scope.players[p].name + " to list of available quarterbacks.");
-                $scope.available_qbs[index[0]++] = $scope.players[p];
+    $scope.DRAFT_TYPE_SNAKE = "SNAKE";
+
+    /**
+     * Flag to keep track of whether the draft has been initialized.
+     *
+     * @type {boolean}
+     */
+    $scope.initialized = false;
+
+    /**
+     * Initialize the current pick to 1.
+     *
+     * @type {number}
+     */
+    $scope.currentPick = 1;
+
+    /**
+     *
+     *
+     * @type {Array}
+     */
+    $scope.owners = new Array();
+
+    $scope.available_qbs = new Array();
+    $scope.available_rbs = new Array();
+    $scope.available_wrs = new Array();
+    $scope.available_tes = new Array();
+    $scope.available_ds = new Array();
+    $scope.available_ks = new Array();
+
+    /**
+     * The number of owners participating in this draft.
+     *
+     * @type {number}
+     */
+    $scope.numOwners = 0;
+
+    /**
+     * The # pick that I have in the draft.
+     *
+     * @type {number}
+     */
+    $scope.myPick = 1;
+
+    /**
+     * The current pick.
+     *
+     * @type {number}
+     */
+    $scope.currentPick = 1;
+
+    /**
+     * In the section containing the owners, allow up to 6 owners in each row.
+     *
+     * @type {number}
+     */
+    $scope.maxOwnersPerRow = 6;
+
+    /**
+     * The style of draft we're using.  Defaults to snake.
+     *
+     * @type {string}
+     */
+    $scope.draftType = $scope.DRAFT_TYPE_SNAKE;
+
+    /**
+     * The year that the draft is taking place.  Defaults to the current year.
+     *
+     * @type {number}
+     */
+    $scope.draftYear = new Date().getFullYear();
+
+    $scope.fetchPlayers = function() {
+        $http.get("draft/players?year=" + $scope.draftYear).success(function(data) {
+            $scope.players = data;
+
+            var index = [0,0,0,0,0,0];
+            for(p in $scope.players) {
+                if($scope.players[p].position == $scope.QUARTERBACK) {
+                    console.log("Adding quarterback " + $scope.players[p].name + " to list of available quarterbacks.");
+                    $scope.available_qbs[index[0]++] = $scope.players[p];
+                }
+                else if($scope.players[p].position == $scope.RUNNING_BACK) {
+                    console.log("Adding running back " + $scope.players[p].name + " to list of available running backs.");
+                    $scope.available_rbs[index[1]++] = $scope.players[p];
+                }
+                else if($scope.players[p].position == $scope.WIDE_RECEIVER) {
+                    console.log("Adding wide receiver " + $scope.players[p].name + " to list of available wide receiver.");
+                    $scope.available_wrs[index[2]++] = $scope.players[p];
+                }
+                else if($scope.players[p].position == $scope.TIGHT_END) {
+                    console.log("Adding tight end " + $scope.players[p].name + " to list of available tight end.");
+                    $scope.available_tes[index[3]++] = $scope.players[p];
+                }
+                else if($scope.players[p].position == $scope.DEFENSE) {
+                    console.log("Adding defense " + $scope.players[p].name + " to list of available defenses.");
+                    $scope.available_ds[index[4]++] = $scope.players[p];
+                }
+                else if($scope.players[p].position == $scope.KICKER) {
+                    console.log("Adding kicker " + $scope.players[p].name + " to list of available kickers.");
+                    $scope.available_ks[index[5]++] = $scope.players[p];
+                }
             }
-            else if($scope.players[p].position == $scope.RUNNING_BACK) {
-                console.log("Adding running back " + $scope.players[p].name + " to list of available running backs.");
-                $scope.available_rbs[index[1]++] = $scope.players[p];
-            }
-            else if($scope.players[p].position == $scope.WIDE_RECEIVER) {
-                console.log("Adding wide receiver " + $scope.players[p].name + " to list of available wide receiver.");
-                $scope.available_wrs[index[2]++] = $scope.players[p];
-            }
-            else if($scope.players[p].position == $scope.TIGHT_END) {
-                console.log("Adding tight end " + $scope.players[p].name + " to list of available tight end.");
-                $scope.available_tes[index[3]++] = $scope.players[p];
-            }
-            else if($scope.players[p].position == $scope.DEFENSE) {
-                console.log("Adding defense " + $scope.players[p].name + " to list of available defenses.");
-                $scope.available_ds[index[4]++] = $scope.players[p];
-            }
-            else if($scope.players[p].position == $scope.KICKER) {
-                console.log("Adding kicker " + $scope.players[p].name + " to list of available kickers.");
-                $scope.available_ks[index[5]++] = $scope.players[p];
-            }
-        }
-    });
+        });
+    }
 
     $scope.calculateValue = function(adp, vorp, need) {
         var adpFactor = 1;
@@ -238,76 +319,4 @@ function DraftController($scope, $http) {
             }
         }
     }
-
-    $scope.QUARTERBACK = "QUARTERBACK";
-    $scope.RUNNING_BACK = "RUNNING_BACK";
-    $scope.WIDE_RECEIVER = "WIDE_RECEIVER";
-    $scope.TIGHT_END = "TIGHT_END";
-    $scope.DEFENSE = "DEFENSE";
-    $scope.KICKER = "KICKER";
-
-    $scope.DRAFT_TYPE_SNAKE = "SNAKE";
-
-    /**
-     * Flag to keep track of whether the draft has been initialized.
-     *
-     * @type {boolean}
-     */
-    $scope.initialized = false;
-
-    /**
-     * Initialize the current pick to 1.
-     *
-     * @type {number}
-     */
-    $scope.currentPick = 1;
-
-    /**
-     *
-     *
-     * @type {Array}
-     */
-    $scope.owners = new Array();
-
-    $scope.available_qbs = new Array();
-    $scope.available_rbs = new Array();
-    $scope.available_wrs = new Array();
-    $scope.available_tes = new Array();
-    $scope.available_ds = new Array();
-    $scope.available_ks = new Array();
-
-    /**
-     * The number of owners participating in this draft.
-     *
-     * @type {number}
-     */
-    $scope.numOwners = 0;
-
-    /**
-     * The # pick that I have in the draft.
-     *
-     * @type {number}
-     */
-    $scope.myPick = 1;
-
-    /**
-     * The current pick.
-     *
-     * @type {number}
-     */
-    $scope.currentPick = 1;
-
-    /**
-     * In the section containing the owners, allow up to 6 owners in each row.
-     *
-     * @type {number}
-     */
-    $scope.maxOwnersPerRow = 6;
-
-    /**
-     * The style of draft we're using.  Defaults to snake.
-     *
-     * @type {string}
-     */
-    $scope.draftType = $scope.DRAFT_TYPE_SNAKE;
 }

@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <div class="container-fluid" ng-controller="DraftController">
     <div id="draft_init" class="row-fluid" ng-hide="initialized">
+        <input type="text" id="draftYear" ng-model="draftYear"/>
         <input type="text" id="numOwners" ng-model="numOwners"/>
         <input type="text" id="myPick" ng-model="myPick" ng-hide="isNumOwnersValid(numOwners) == false"/>
-        <button class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="initialized = true">Start Draft!</button>
+        <button class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="initialized = true; fetchPlayers();">Start Draft!</button>
     </div>
     <div id="owners" owners class="row-fluid" ng-hide="!initialized"></div>
     <div id="available_players" class="row-fluid" ng-hide="!initialized">
-        <div class="span2">
+        <div id="available_qbs" class="span2">
             <h3>Quarterbacks</h3>
             <ul>
                 <li ng-repeat="player in available_qbs">
@@ -16,7 +17,7 @@
                 </li>
             </ul>
         </div>
-        <div class="span2">
+        <div id="available_rbs" class="span2">
             <h3>Running Backs</h3>
             <ol>
                 <li ng-repeat="player in available_rbs">
@@ -25,7 +26,7 @@
                 </li>
             </ol>
         </div>
-        <div class="span2">
+        <div id="available_wrs" class="span2">
             <h3>Wide Receivers</h3>
             <ul>
                 <li ng-repeat="player in available_wrs">
@@ -34,7 +35,7 @@
                 </li>
             </ul>
         </div>
-        <div class="span2">
+        <div id="available_tes" class="span2">
             <h3>Tight Ends</h3>
             <ul>
                 <li ng-repeat="player in available_tes">
@@ -43,7 +44,7 @@
                 </li>
             </ul>
         </div>
-        <div class="span2">
+        <div id="available_ds" class="span2">
             <h3>Defenses</h3>
             <ul>
                 <li ng-repeat="player in available_ds">
@@ -52,7 +53,7 @@
                 </li>
             </ul>
         </div>
-        <div class="span2">
+        <div id="available_ks" class="span2">
             <h3>Kickers</h3>
             <ul>
                 <li ng-repeat="player in available_ks">
