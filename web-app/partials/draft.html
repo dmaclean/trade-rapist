@@ -12,7 +12,7 @@
             <h3>Quarterbacks</h3>
             <ul>
                 <li ng-repeat="player in available_qbs">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, 1) }}
+                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[QUARTERBACK]/ownerMaxNeed[QUARTERBACK], QUARTERBACK) }}
                     <button class="btn btn-mini btn-primary" id="qb_{{ player.id }}" ng-click="draftPlayer('QUARTERBACK', player.id)">Draft</button>
                 </li>
             </ul>
@@ -21,7 +21,7 @@
             <h3>Running Backs</h3>
             <ol>
                 <li ng-repeat="player in available_rbs">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, 1) }}
+                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[RUNNING_BACK]/ownerMaxNeed[RUNNING_BACK], RUNNING_BACK) }}
                     <button class="btn btn-mini btn-primary" id="rb_{{ player.id }}" ng-click="draftPlayer('RUNNING_BACK', player.id)">Draft</button>
                 </li>
             </ol>
@@ -30,7 +30,7 @@
             <h3>Wide Receivers</h3>
             <ul>
                 <li ng-repeat="player in available_wrs">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, 1) }}
+                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[WIDE_RECEIVER]/ownerMaxNeed[WIDE_RECEIVER], WIDE_RECEIVER) }}
                     <button class="btn btn-mini btn-primary" id="wr_{{ player.id }}" ng-click="draftPlayer('WIDE_RECEIVER', player.id)">Draft</button>
                 </li>
             </ul>
@@ -39,7 +39,7 @@
             <h3>Tight Ends</h3>
             <ul>
                 <li ng-repeat="player in available_tes">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, 1) }}
+                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[TIGHT_END]/ownerMaxNeed[TIGHT_END], TIGHT_END) }}
                     <button class="btn btn-mini btn-primary" id="te_{{ player.id }}" ng-click="draftPlayer('TIGHT_END', player.id)">Draft</button>
                 </li>
             </ul>
@@ -48,7 +48,7 @@
             <h3>Defenses</h3>
             <ul>
                 <li ng-repeat="player in available_ds">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, 1) }}
+                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[DEFENSE]/ownerMaxNeed[DEFENSE], DEFENSE) }}
                     <button class="btn btn-mini btn-primary" id="d_{{ player.id }}" ng-click="draftPlayer('DEFENSE', player.id)">Draft</button>
                 </li>
             </ul>
@@ -57,7 +57,7 @@
             <h3>Kickers</h3>
             <ul>
                 <li ng-repeat="player in available_ks">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, 1) }}
+                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[KICKER]/ownerMaxNeed[KICKER], KICKER) }}
                     <button class="btn btn-mini btn-primary" id="k_{{ player.id }}" ng-click="draftPlayer('KICKER', player.id)">Draft</button>
                 </li>
             </ul>

@@ -45,6 +45,27 @@ function DraftController($scope, $http) {
     $scope.DEFENSE = "DEFENSE";
     $scope.KICKER = "KICKER";
 
+    $scope.ownerMaxNeed = {};
+    $scope.ownerMaxNeed[$scope.QUARTERBACK] = 2;
+    $scope.ownerMaxNeed[$scope.RUNNING_BACK] = 7;
+    $scope.ownerMaxNeed[$scope.WIDE_RECEIVER] = 7;
+    $scope.ownerMaxNeed[$scope.TIGHT_END] = 3;
+    $scope.ownerMaxNeed[$scope.DEFENSE] = 1;
+    $scope.ownerMaxNeed[$scope.KICKER] = 1;
+
+    $scope.ownerNeed = {};
+    $scope.ownerNeed[$scope.QUARTERBACK] = $scope.ownerMaxNeed[$scope.QUARTERBACK];
+    $scope.ownerNeed[$scope.RUNNING_BACK] = $scope.ownerMaxNeed[$scope.RUNNING_BACK];
+    $scope.ownerNeed[$scope.WIDE_RECEIVER] = $scope.ownerMaxNeed[$scope.WIDE_RECEIVER];
+    $scope.ownerNeed[$scope.TIGHT_END] = $scope.ownerMaxNeed[$scope.TIGHT_END];
+    $scope.ownerNeed[$scope.DEFENSE] = $scope.ownerMaxNeed[$scope.DEFENSE];
+    $scope.ownerNeed[$scope.KICKER] = $scope.ownerMaxNeed[$scope.KICKER];
+
+    /**
+     * Defines the draft type that we're using.  Defaults to snake draft.
+     *
+     * @type {string}
+     */
     $scope.DRAFT_TYPE_SNAKE = "SNAKE";
 
     /**
@@ -151,7 +172,32 @@ function DraftController($scope, $http) {
         });
     }
 
-    $scope.calculateValue = function(adp, vorp, need) {
+    $scope.calculateValue = function(adp, vorp, need, position) {
+        /*
+         * Tight end - 0.62
+         * Quarterback - 0.60
+         * Running back - 0.48
+         * Wide receivers - 0.42
+         * Defense - 0.1
+         * Kickers - 0.1
+         */
+        var consistency = 0;
+        if(position == $scope.QUARTERBACK) {
+            consistency = 0.60;
+        }
+        else if(position == $scope.RUNNING_BACK) {
+            consistency = 0.48;
+        }
+        else if(position == $scope.WIDE_RECEIVER) {
+            consistency = 0.42;
+        }
+        else if(position == $scope.TIGHT_END) {
+            consistency = 0.62;
+        }
+        else if(position == $scope.DEFENSE || position == $scope.KICKER) {
+            consistency = 0.1;
+        }
+
         var adpFactor = 1;
 
         // ADP is less than current pick --> Getting a bargain
@@ -163,7 +209,8 @@ function DraftController($scope, $http) {
             adpFactor = 1 - (Math.abs($scope.currentPick - adp)/adp);
         }
 
-        return adpFactor * vorp * need;
+        // Truncate the value to three decimal spots.
+        return Math.floor( adpFactor * (vorp+1) * need * consistency * 1000) / 1000;
     }
 
     /**
@@ -229,6 +276,11 @@ function DraftController($scope, $http) {
                 }
             }
             draftedPlayer = $scope.available_qbs.splice(i,1);
+
+            // Decrement our owner's needed quarterback count
+            if($scope.isOwnersPick($scope.myPick)) {
+                $scope.ownerNeed[$scope.QUARTERBACK]--;
+            }
         }
         else if(playerType == $scope.RUNNING_BACK) {
             for(var i=0; i<$scope.available_rbs.length; i++) {
@@ -237,6 +289,11 @@ function DraftController($scope, $http) {
                 }
             }
             draftedPlayer = $scope.available_rbs.splice(i,1);
+
+            // Decrement our owner's needed running back count
+            if($scope.isOwnersPick($scope.myPick)) {
+                $scope.ownerNeed[$scope.RUNNING_BACK]--;
+            }
         }
         else if(playerType == $scope.WIDE_RECEIVER) {
             for(var i=0; i<$scope.available_wrs.length; i++) {
@@ -245,6 +302,11 @@ function DraftController($scope, $http) {
                 }
             }
             draftedPlayer = $scope.available_wrs.splice(i,1);
+
+            // Decrement our owner's needed wide receiver count
+            if($scope.isOwnersPick($scope.myPick)) {
+                $scope.ownerNeed[$scope.WIDE_RECEIVER]--;
+            }
         }
         else if(playerType == $scope.TIGHT_END) {
             for(var i=0; i<$scope.available_tes.length; i++) {
@@ -253,6 +315,11 @@ function DraftController($scope, $http) {
                 }
             }
             draftedPlayer = $scope.available_tes.splice(i,1);
+
+            // Decrement our owner's needed tight end count
+            if($scope.isOwnersPick($scope.myPick)) {
+                $scope.ownerNeed[$scope.TIGHT_END]--;
+            }
         }
         else if(playerType == $scope.DEFENSE) {
             for(var i=0; i<$scope.available_ds.length; i++) {
@@ -261,6 +328,11 @@ function DraftController($scope, $http) {
                 }
             }
             draftedPlayer = $scope.available_ds.splice(i,1);
+
+            // Decrement our owner's needed defense count
+            if($scope.isOwnersPick($scope.myPick)) {
+                $scope.ownerNeed[$scope.DEFENSE]--;
+            }
         }
         else if(playerType == $scope.KICKER) {
             for(var i=0; i<$scope.available_ks.length; i++) {
@@ -269,6 +341,11 @@ function DraftController($scope, $http) {
                 }
             }
             draftedPlayer = $scope.available_ks.splice(i,1);
+
+            // Decrement our owner's needed kicker count
+            if($scope.isOwnersPick($scope.myPick)) {
+                $scope.ownerNeed[$scope.KICKER]--;
+            }
         }
 
         // Which owner made this pick?
@@ -293,6 +370,8 @@ function DraftController($scope, $http) {
      * Determine whether it is my pick based on the depth of the tree that we're analyzing.
      *
      * Due to the math, it's easier to use 0-based currentPick and myPick.
+     *
+     * @param pick      The number pick of the owner in question.
      */
     $scope.isOwnersPick = function(pick) {
         // If it's a snake draft, are we going forwards or backwards through the owners?

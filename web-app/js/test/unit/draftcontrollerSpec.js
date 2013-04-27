@@ -389,9 +389,133 @@ describe('DraftController spec', function() {
             var need = 1;
             expect(scope.calculateValue(adp, vorp, need)).toEqual(10.0);
         });
+
+        it('should be half of average when adp is equal to current draft pick and have 1 of 2 players at position', function() {
+            scope.currentPick = 10;
+            var adp = 10;
+            var vorp = 5;
+            var need = 0.5;
+            expect(scope.calculateValue(adp, vorp, need)).toEqual(2.5);
+        });
     });
 
     describe('Player drafting', function() {
+        it('should decrement owner need when player drafted', function() {
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            expect(scope.ownerNeed[scope.QUARTERBACK]).toEqual(2);
+            expect(scope.ownerNeed[scope.RUNNING_BACK]).toEqual(7);
+            expect(scope.ownerNeed[scope.WIDE_RECEIVER]).toEqual(7);
+            expect(scope.ownerNeed[scope.TIGHT_END]).toEqual(3);
+            expect(scope.ownerNeed[scope.DEFENSE]).toEqual(1);
+            expect(scope.ownerNeed[scope.KICKER]).toEqual(1);
+
+            scope.numOwners = 10;
+            scope.myPick = 1;
+
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.QUARTERBACK, scope.available_qbs[0].id);
+            expect(scope.ownerNeed[scope.QUARTERBACK]).toEqual(1);
+
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.RUNNING_BACK, scope.available_rbs[0].id);
+            expect(scope.ownerNeed[scope.RUNNING_BACK]).toEqual(6);
+
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.WIDE_RECEIVER, scope.available_wrs[0].id);
+            expect(scope.ownerNeed[scope.WIDE_RECEIVER]).toEqual(6);
+
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.TIGHT_END, scope.available_tes[0].id);
+            expect(scope.ownerNeed[scope.TIGHT_END]).toEqual(2);
+
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.DEFENSE, scope.available_ds[0].id);
+            expect(scope.ownerNeed[scope.DEFENSE]).toEqual(0);
+
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.KICKER, scope.available_ks[0].id);
+            expect(scope.ownerNeed[scope.KICKER]).toEqual(0);
+        });
+
+        it('should not decrement owner need when player drafted', function() {
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            expect(scope.ownerNeed[scope.QUARTERBACK]).toEqual(2);
+            expect(scope.ownerNeed[scope.RUNNING_BACK]).toEqual(7);
+            expect(scope.ownerNeed[scope.WIDE_RECEIVER]).toEqual(7);
+            expect(scope.ownerNeed[scope.TIGHT_END]).toEqual(3);
+            expect(scope.ownerNeed[scope.DEFENSE]).toEqual(1);
+            expect(scope.ownerNeed[scope.KICKER]).toEqual(1);
+
+            scope.numOwners = 10;
+            scope.myPick = 1;
+
+            /*
+             * Draft two quarterbacks, need should only decrement once.
+             */
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.QUARTERBACK, scope.available_qbs[0].id);
+            expect(scope.ownerNeed[scope.QUARTERBACK]).toEqual(1);
+
+            scope.draftPlayer(scope.QUARTERBACK, scope.available_qbs[0].id);
+            expect(scope.ownerNeed[scope.QUARTERBACK]).toEqual(1);
+
+            /*
+             * Draft two running backs, need should only decrement once.
+             */
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.RUNNING_BACK, scope.available_rbs[0].id);
+            expect(scope.ownerNeed[scope.RUNNING_BACK]).toEqual(6);
+
+            scope.draftPlayer(scope.RUNNING_BACK, scope.available_rbs[0].id);
+            expect(scope.ownerNeed[scope.RUNNING_BACK]).toEqual(6);
+
+            /*
+             * Draft two wide receivers, need should only decrement once.
+             */
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.WIDE_RECEIVER, scope.available_wrs[0].id);
+            expect(scope.ownerNeed[scope.WIDE_RECEIVER]).toEqual(6);
+
+            scope.draftPlayer(scope.WIDE_RECEIVER, scope.available_wrs[0].id);
+            expect(scope.ownerNeed[scope.WIDE_RECEIVER]).toEqual(6);
+
+            /*
+             * Draft two tight ends, need should only decrement once.
+             */
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.TIGHT_END, scope.available_tes[0].id);
+            expect(scope.ownerNeed[scope.TIGHT_END]).toEqual(2);
+
+            scope.draftPlayer(scope.TIGHT_END, scope.available_tes[0].id);
+            expect(scope.ownerNeed[scope.TIGHT_END]).toEqual(2);
+
+            /*
+             * Draft two defenses, need should only decrement once.
+             */
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.DEFENSE, scope.available_ds[0].id);
+            expect(scope.ownerNeed[scope.DEFENSE]).toEqual(0);
+
+            scope.draftPlayer(scope.DEFENSE, scope.available_ds[0].id);
+            expect(scope.ownerNeed[scope.DEFENSE]).toEqual(0);
+
+            /*
+             * Draft two kickers, need should only decrement once.
+             */
+            scope.currentPick = 1;
+            scope.draftPlayer(scope.KICKER, scope.available_ks[0].id);
+            expect(scope.ownerNeed[scope.KICKER]).toEqual(0);
+
+            scope.draftPlayer(scope.KICKER, scope.available_ks[0].id);
+            expect(scope.ownerNeed[scope.KICKER]).toEqual(0);
+        });
+
         it('should draft one player for each of 12 owners', function() {
             expect(scope.players).toBeUndefined();
             scope.fetchPlayers();
