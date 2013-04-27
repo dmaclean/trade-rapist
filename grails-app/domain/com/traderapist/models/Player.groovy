@@ -103,6 +103,19 @@ class Player {
 
         long start = System.currentTimeMillis();
         for(s in stats) {
+	        boolean exists = false;
+	        for(fp in fantasyPoints) {
+		        if(fp.player == this && fp.season == s.season && fp.week == s.week) {
+			        exists = true
+			        break
+		        }
+	        }
+
+	        if(exists) {
+		        print("Fantasy points for ${name} for ${s.season}/${s.week} already exists.  Skipping...")
+		        continue
+	        }
+
             def seasonStr = String.valueOf(s.season)
             def weekStr = String.valueOf(s.week)
             def key = "${seasonStr}__${weekStr}"
@@ -117,19 +130,8 @@ class Player {
 
         for(p in points) {
             String[] keyPieces = p.key.split("__")
-            double pts = p.value
-
-            FantasyPoints fp = FantasyPoints.findByPlayerAndSeasonAndWeekAndSystemAndPoints(
-                    this,
-                    keyPieces[0].toInteger(),
-                    keyPieces[1].toInteger(),
-                    scoringSystem.class.getName(),
-                    pts)
-
-            if (!fp) {
-                fp = new FantasyPoints(player: this, season: keyPieces[0], week: keyPieces[1], system: scoringSystem.class.getName(), points:  p.value)
-            }
-            fp.save()
+            FantasyPoints fp = new FantasyPoints(player: this, season: keyPieces[0], week: keyPieces[1], system: scoringSystem.class.getName(), points:  p.value)
+            fp.save(flush: true)
         }
 	    end = System.currentTimeMillis();
 	    println("Created FantasyPoint entries for ${name} in ${(end-start)/1000.0}")
