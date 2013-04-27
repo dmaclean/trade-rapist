@@ -33,12 +33,14 @@ class DraftController {
 	 * @return        A JSON string representing all players.
 	 */
 	def players() {
-		def qb = Player.getPlayersInPointsOrder(Player.POSITION_QB, 2002)
-		def rb = Player.getPlayersInPointsOrder(Player.POSITION_RB, 2002)
-		def wr = Player.getPlayersInPointsOrder(Player.POSITION_WR, 2002)
-		def te = Player.getPlayersInPointsOrder(Player.POSITION_TE, 2002)
-		def dst = Player.getPlayersInPointsOrder(Player.POSITION_DEF, 2002)
-		def k = Player.getPlayersInPointsOrder(Player.POSITION_K, 2002)
+		def year = Integer.parseInt(params["year"])
+
+		def qb = Player.getPlayersInPointsOrder(Player.POSITION_QB, year)
+		def rb = Player.getPlayersInPointsOrder(Player.POSITION_RB, year)
+		def wr = Player.getPlayersInPointsOrder(Player.POSITION_WR, year)
+		def te = Player.getPlayersInPointsOrder(Player.POSITION_TE, year)
+		def dst = Player.getPlayersInPointsOrder(Player.POSITION_DEF, year)
+		def k = Player.getPlayersInPointsOrder(Player.POSITION_K, year)
 
 		// Construct a JSON string representing all the necessary data for drafting.
 		def json = "["
