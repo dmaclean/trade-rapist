@@ -29,6 +29,7 @@ angular.module('TradeRapist', []).
             template:   '<div id="owners_row_{{ n }}" ng-repeat="n in [] | range:getOwnerRows()" class="row-fluid">' +
                             '<div id="owner{{ o }}" ng-repeat="o in ownersPerRow(n, numOwners)" class="span2">' +
                                 '<h3>Owner {{ o+1 }}</h3>' +
+                                '<span id="owner{{ o }}_points">Total Projected Points: {{ calculateTotalPoints(o) }}</span>' +
                                 '<span class="label label-success" ng-hide="o != myPick-1">My pick</span>' +
                                 '<span class="label label-important" ng-hide="!isOwnersPick(o+1)">Current pick</span>' +
                                 '<ol><li ng-repeat="player in owners[o]">{{ player.name }}</li></ol>' +
@@ -60,6 +61,27 @@ function DraftController($scope, $http) {
     $scope.ownerNeed[$scope.TIGHT_END] = $scope.ownerMaxNeed[$scope.TIGHT_END];
     $scope.ownerNeed[$scope.DEFENSE] = $scope.ownerMaxNeed[$scope.DEFENSE];
     $scope.ownerNeed[$scope.KICKER] = $scope.ownerMaxNeed[$scope.KICKER];
+
+    /**
+     * Keeps track of how many players at each position an owner is allowed to start.
+     *
+     * @type {{}}
+     */
+    $scope.startablePositions = {};
+    $scope.startablePositions[$scope.QUARTERBACK] = 1;
+    $scope.startablePositions[$scope.RUNNING_BACK] = 2;
+    $scope.startablePositions[$scope.WIDE_RECEIVER] = 3;
+    $scope.startablePositions[$scope.TIGHT_END] = 1;
+    $scope.startablePositions[$scope.DEFENSE] = 1;
+    $scope.startablePositions[$scope.KICKER] = 1;
+
+
+    /**
+     * Set up replacement players.
+     *
+     * @type {{}}
+     */
+    $scope.replacements = {};
 
     /**
      * Defines the draft type that we're using.  Defaults to snake draft.
@@ -139,37 +161,98 @@ function DraftController($scope, $http) {
     $scope.draftYear = new Date().getFullYear();
 
     $scope.fetchPlayers = function() {
+        for(var i=0; i<$scope.numOwners; i++) {
+            $scope.owners[i] = new Array();
+        }
+
         $http.get("draft/players?year=" + $scope.draftYear).success(function(data) {
             $scope.players = data;
 
             var index = [0,0,0,0,0,0];
             for(p in $scope.players) {
                 if($scope.players[p].position == $scope.QUARTERBACK) {
-                    console.log("Adding quarterback " + $scope.players[p].name + " to list of available quarterbacks.");
+//                    console.log("Adding quarterback " + $scope.players[p].name + " to list of available quarterbacks.");
                     $scope.available_qbs[index[0]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.RUNNING_BACK) {
-                    console.log("Adding running back " + $scope.players[p].name + " to list of available running backs.");
+//                    console.log("Adding running back " + $scope.players[p].name + " to list of available running backs.");
                     $scope.available_rbs[index[1]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.WIDE_RECEIVER) {
-                    console.log("Adding wide receiver " + $scope.players[p].name + " to list of available wide receiver.");
+//                    console.log("Adding wide receiver " + $scope.players[p].name + " to list of available wide receiver.");
                     $scope.available_wrs[index[2]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.TIGHT_END) {
-                    console.log("Adding tight end " + $scope.players[p].name + " to list of available tight end.");
+//                    console.log("Adding tight end " + $scope.players[p].name + " to list of available tight end.");
                     $scope.available_tes[index[3]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.DEFENSE) {
-                    console.log("Adding defense " + $scope.players[p].name + " to list of available defenses.");
+//                    console.log("Adding defense " + $scope.players[p].name + " to list of available defenses.");
                     $scope.available_ds[index[4]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.KICKER) {
-                    console.log("Adding kicker " + $scope.players[p].name + " to list of available kickers.");
+//                    console.log("Adding kicker " + $scope.players[p].name + " to list of available kickers.");
                     $scope.available_ks[index[5]++] = $scope.players[p];
                 }
             }
+
+            /*
+             * Determine replacement players and calculate VORP.
+             */
+            var qb_idx = ($scope.startablePositions[$scope.QUARTERBACK] * $scope.numOwners)-1;
+            var rb_idx = ($scope.startablePositions[$scope.RUNNING_BACK] * $scope.numOwners)-1;
+            var wr_idx = ($scope.startablePositions[$scope.WIDE_RECEIVER] * $scope.numOwners)-1;
+            var te_idx = ($scope.startablePositions[$scope.TIGHT_END] * $scope.numOwners)-1;
+            var d_idx = ($scope.startablePositions[$scope.DEFENSE] * $scope.numOwners)-1;
+            var k_idx = ($scope.startablePositions[$scope.KICKER] * $scope.numOwners)-1;
+
+            $scope.replacements[$scope.QUARTERBACK] = $scope.available_qbs[ qb_idx ];
+            $scope.replacements[$scope.RUNNING_BACK] = $scope.available_rbs[ rb_idx ];
+            $scope.replacements[$scope.WIDE_RECEIVER] = $scope.available_wrs[ wr_idx ];
+            $scope.replacements[$scope.TIGHT_END] = $scope.available_tes[ te_idx ];
+            $scope.replacements[$scope.DEFENSE] = $scope.available_ds[d_idx];
+            $scope.replacements[$scope.KICKER] = $scope.available_ks[k_idx];
+
+            $scope.calculateVORP($scope.QUARTERBACK);
+            $scope.calculateVORP($scope.RUNNING_BACK);
+            $scope.calculateVORP($scope.WIDE_RECEIVER);
+            $scope.calculateVORP($scope.TIGHT_END);
+            $scope.calculateVORP($scope.DEFENSE);
+            $scope.calculateVORP($scope.KICKER);
         });
+    }
+
+    $scope.calculateVORP = function(position) {
+        if(position == $scope.QUARTERBACK) {
+            for(p in $scope.available_qbs) {
+                $scope.available_qbs[p].vorp = $scope.available_qbs[p].points - $scope.replacements[$scope.QUARTERBACK].points;
+            }
+        }
+        else if(position == $scope.RUNNING_BACK) {
+            for(p in $scope.available_rbs) {
+                $scope.available_rbs[p].vorp = $scope.available_rbs[p].points - $scope.replacements[$scope.RUNNING_BACK].points;
+            }
+        }
+        else if(position == $scope.WIDE_RECEIVER) {
+            for(p in $scope.available_wrs) {
+                $scope.available_wrs[p].vorp = $scope.available_wrs[p].points - $scope.replacements[$scope.WIDE_RECEIVER].points;
+            }
+        }
+        else if(position == $scope.TIGHT_END) {
+            for(p in $scope.available_tes) {
+                $scope.available_tes[p].vorp = $scope.available_tes[p].points - $scope.replacements[$scope.TIGHT_END].points;
+            }
+        }
+        else if(position == $scope.DEFENSE) {
+            for(p in $scope.available_ds) {
+                $scope.available_ds[p].vorp = $scope.available_ds[p].points - $scope.replacements[$scope.DEFENSE].points;
+            }
+        }
+        else if(position == $scope.KICKER) {
+            for(p in $scope.available_ks) {
+                $scope.available_ks[p].vorp = $scope.available_ks[p].points - $scope.replacements[$scope.KICKER].points;
+            }
+        }
     }
 
     $scope.calculateValue = function(adp, vorp, need, position) {
@@ -268,14 +351,29 @@ function DraftController($scope, $http) {
      */
     $scope.draftPlayer = function(playerType, playerId) {
         var draftedPlayer = undefined;
+        var replacementIndex = -1;
 
         if(playerType == $scope.QUARTERBACK) {
             for(var i=0; i<$scope.available_qbs.length; i++) {
+                /*
+                 * Check to see if we've reached the replacement player.  If we've
+                 * gotten here then regardless of who gets drafted, we need to change
+                 * who the replacement player is.
+                 */
+                if($scope.available_qbs[i] == $scope.replacements[$scope.QUARTERBACK]) {
+                    replacementIndex = i;
+                }
+
                 if($scope.available_qbs[i].id == playerId) {
                     break;
                 }
             }
             draftedPlayer = $scope.available_qbs.splice(i,1);
+
+            // Did we reach the replacement player?  If so, adjust.
+            if(replacementIndex != -1) {
+                $scope.replacements[$scope.QUARTERBACK] = $scope.available_qbs[replacementIndex-1];
+            }
 
             // Decrement our owner's needed quarterback count
             if($scope.isOwnersPick($scope.myPick)) {
@@ -284,11 +382,25 @@ function DraftController($scope, $http) {
         }
         else if(playerType == $scope.RUNNING_BACK) {
             for(var i=0; i<$scope.available_rbs.length; i++) {
+                /*
+                 * Check to see if we've reached the replacement player.  If we've
+                 * gotten here then regardless of who gets drafted, we need to change
+                 * who the replacement player is.
+                 */
+                if($scope.available_rbs[i] == $scope.replacements[$scope.RUNNING_BACK]) {
+                    replacementIndex = i;
+                }
+
                 if($scope.available_rbs[i].id == playerId) {
                     break;
                 }
             }
             draftedPlayer = $scope.available_rbs.splice(i,1);
+
+            // Did we reach the replacement player?  If so, adjust.
+            if(replacementIndex != -1) {
+                $scope.replacements[$scope.RUNNING_BACK] = $scope.available_rbs[replacementIndex-1];
+            }
 
             // Decrement our owner's needed running back count
             if($scope.isOwnersPick($scope.myPick)) {
@@ -297,11 +409,25 @@ function DraftController($scope, $http) {
         }
         else if(playerType == $scope.WIDE_RECEIVER) {
             for(var i=0; i<$scope.available_wrs.length; i++) {
+                /*
+                 * Check to see if we've reached the replacement player.  If we've
+                 * gotten here then regardless of who gets drafted, we need to change
+                 * who the replacement player is.
+                 */
+                if($scope.available_wrs[i] == $scope.replacements[$scope.WIDE_RECEIVER]) {
+                    replacementIndex = i;
+                }
+
                 if($scope.available_wrs[i].id == playerId) {
                     break;
                 }
             }
             draftedPlayer = $scope.available_wrs.splice(i,1);
+
+            // Did we reach the replacement player?  If so, adjust.
+            if(replacementIndex != -1) {
+                $scope.replacements[$scope.WIDE_RECEIVER] = $scope.available_wrs[replacementIndex-1];
+            }
 
             // Decrement our owner's needed wide receiver count
             if($scope.isOwnersPick($scope.myPick)) {
@@ -310,11 +436,25 @@ function DraftController($scope, $http) {
         }
         else if(playerType == $scope.TIGHT_END) {
             for(var i=0; i<$scope.available_tes.length; i++) {
+                /*
+                 * Check to see if we've reached the replacement player.  If we've
+                 * gotten here then regardless of who gets drafted, we need to change
+                 * who the replacement player is.
+                 */
+                if($scope.available_tes[i] == $scope.replacements[$scope.TIGHT_END]) {
+                    replacementIndex = i;
+                }
+
                 if($scope.available_tes[i].id == playerId) {
                     break;
                 }
             }
             draftedPlayer = $scope.available_tes.splice(i,1);
+
+            // Did we reach the replacement player?  If so, adjust.
+            if(replacementIndex != -1) {
+                $scope.replacements[$scope.TIGHT_END] = $scope.available_tes[replacementIndex-1];
+            }
 
             // Decrement our owner's needed tight end count
             if($scope.isOwnersPick($scope.myPick)) {
@@ -323,11 +463,25 @@ function DraftController($scope, $http) {
         }
         else if(playerType == $scope.DEFENSE) {
             for(var i=0; i<$scope.available_ds.length; i++) {
+                /*
+                 * Check to see if we've reached the replacement player.  If we've
+                 * gotten here then regardless of who gets drafted, we need to change
+                 * who the replacement player is.
+                 */
+                if($scope.available_ds[i] == $scope.replacements[$scope.DEFENSE]) {
+                    replacementIndex = i;
+                }
+
                 if($scope.available_ds[i].id == playerId) {
                     break;
                 }
             }
             draftedPlayer = $scope.available_ds.splice(i,1);
+
+            // Did we reach the replacement player?  If so, adjust.
+            if(replacementIndex != -1) {
+                $scope.replacements[$scope.DEFENSE] = $scope.available_ds[replacementIndex-1];
+            }
 
             // Decrement our owner's needed defense count
             if($scope.isOwnersPick($scope.myPick)) {
@@ -336,11 +490,25 @@ function DraftController($scope, $http) {
         }
         else if(playerType == $scope.KICKER) {
             for(var i=0; i<$scope.available_ks.length; i++) {
+                /*
+                 * Check to see if we've reached the replacement player.  If we've
+                 * gotten here then regardless of who gets drafted, we need to change
+                 * who the replacement player is.
+                 */
+                if($scope.available_ks[i] == $scope.replacements[$scope.KICKER]) {
+                    replacementIndex = i;
+                }
+
                 if($scope.available_ks[i].id == playerId) {
                     break;
                 }
             }
             draftedPlayer = $scope.available_ks.splice(i,1);
+
+            // Did we reach the replacement player?  If so, adjust.
+            if(replacementIndex != -1) {
+                $scope.replacements[$scope.KICKER] = $scope.available_ks[replacementIndex-1];
+            }
 
             // Decrement our owner's needed kicker count
             if($scope.isOwnersPick($scope.myPick)) {
@@ -397,5 +565,23 @@ function DraftController($scope, $http) {
                 return Math.ceil(($scope.currentPick-1) % $scope.numOwners) == reversePick;
             }
         }
+    }
+
+    /**
+     * Determine the total projected points so far for an owner.
+     *
+     * @param owner     The number (0-based) of the owner that we want to calculate points for.
+     */
+    $scope.calculateTotalPoints = function(owner) {
+        if(!$scope.initialized) {
+            return;
+        }
+
+        var sum = 0;
+        for(var i=0; i<$scope.owners[owner].length; i++) {
+            sum += $scope.owners[owner][i].points;
+        }
+
+        return sum;
     }
 }

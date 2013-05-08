@@ -299,4 +299,34 @@ describe('Trade Rapist Draft Setup', function() {
             expect(element('#owner2 span.label-important').css('display')).toBe("none");
         });
     });
+
+    describe('Total point calculation', function() {
+        it('should be 0 for both owners initially', function() {
+            input('numOwners').enter("2");
+            input('myPick').enter("1");
+            element('#draft_init button').click();
+
+            expect(element('#owner0_points').text()).toEqual("Total Projected Points: 0");
+            expect(element('#owner1_points').text()).toEqual("Total Projected Points: 0");
+        });
+
+        it('should be 300 for owner 1 (QB1) and 280 for owner 2 (QB2)', function() {
+            input('numOwners').enter("2");
+            input('myPick').enter("1");
+            element('#draft_init button').click();
+
+            expect(element('#owner0_points').text()).toEqual("Total Projected Points: 0");
+            expect(element('#owner1_points').text()).toEqual("Total Projected Points: 0");
+
+            // Owner 1 drafts QB 1
+            element('#qb_1').click();
+            expect(element('#owner0_points').text()).toEqual("Total Projected Points: 300");
+            expect(element('#owner1_points').text()).toEqual("Total Projected Points: 0");
+
+            // Owner 2 drafts QB 2
+            element('#qb_2').click();
+            expect(element('#owner0_points').text()).toEqual("Total Projected Points: 300");
+            expect(element('#owner1_points').text()).toEqual("Total Projected Points: 280");
+        });
+    });
 });
