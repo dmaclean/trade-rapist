@@ -567,6 +567,8 @@ function DraftController($scope, $http) {
         }
     }
 
+
+
     /**
      * Determine the total projected points so far for an owner.
      *
@@ -583,5 +585,48 @@ function DraftController($scope, $http) {
         }
 
         return sum;
+    }
+
+    /**
+     * TEMP!
+     */
+    $scope.getBPA = function(owner) {
+        if(!$scope.initialized) {
+            return;
+        }
+
+        var list = [$scope.available_qbs, $scope.available_rbs, $scope.available_wrs, $scope.available_tes, $scope.available_ds,
+            $scope.available_ks];
+
+        var max = 0;
+        var name = "";
+        for(var i=0; i<list.length; i++) {
+            if(list[i][0].points > max) {
+                max = list[i][0].points;
+                name = list[i][0].name;
+            }
+        }
+
+        return name;
+    }
+
+    $scope.getVORP = function() {
+        if(!$scope.initialized) {
+            return;
+        }
+
+        var list = [$scope.available_qbs, $scope.available_rbs, $scope.available_wrs, $scope.available_tes, $scope.available_ds,
+        $scope.available_ks];
+
+        var max = 0;
+        var name = "";
+        for(var i=0; i<list.length; i++) {
+            if(list[i][0].vorp > max) {
+                max = list[i][0].vorp;
+                name = list[i][0].name;
+            }
+        }
+
+        return name;
     }
 }
