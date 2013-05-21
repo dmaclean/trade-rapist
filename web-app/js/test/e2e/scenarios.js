@@ -165,19 +165,6 @@ describe('Trade Rapist Draft Setup', function() {
     });
 
     describe('Player drafting', function() {
-        it('should adjust value to reflect decremented player need', function() {
-            input('draftYear').enter("2000");
-            input('numOwners').enter("6");
-            input('myPick').enter("1");
-            element('#draft_init button').click();
-
-            expect(element('li:contains("QB 1 - 8")').count()).toEqual(1);
-            expect(element('li:contains("QB 2 - 0.9")').count()).toEqual(1);
-            element('#qb_1').click();
-
-            expect(element('li:contains("QB 2 - 1")').count()).toEqual(1);
-        });
-
         it('should move current pick badge to next owner', function() {
             input('draftYear').enter("2002");
             input('numOwners').enter("18");
@@ -209,7 +196,7 @@ describe('Trade Rapist Draft Setup', function() {
 
             // Make sure QB 1 is in the firsts owner's list, and no one else's.
             expect(element('#qb_1').count()).toEqual(0);
-            expect(element('#owner0 ol li').text()).toBe("QB 1");
+            expect(element('#owner0 ol li').text()).toBe("QB 1 (QB)");
             expect(element('#owner1 ol li').count()).toBe(0);
             expect(element('#owner2 ol li').count()).toBe(0);
             expect(element('#owner3 ol li').count()).toBe(0);
