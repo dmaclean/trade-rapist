@@ -29,10 +29,11 @@ angular.module('TradeRapist', []).
             template:   '<div id="owners_row_{{ n }}" ng-repeat="n in [] | range:getOwnerRows()" class="row-fluid">' +
                             '<div id="owner{{ o }}" ng-repeat="o in ownersPerRow(n, numOwners)" class="span2">' +
                                 '<h3>Owner {{ o+1 }}</h3>' +
-                                '<span id="owner{{ o }}_points">Total Projected Points: {{ calculateTotalPoints(o) }}</span>' +
+                                '<span id="owner{{ o }}_points">Total Projected Points: {{ calculateTotalPoints(o) }}</span><br/>' +
+                                '<span id="owner{{ o }}_starter_points">Starter Projected Points: {{ calculateStarterPoints(o) }}</span>' +
                                 '<span class="label label-success" ng-hide="o != myPick-1">My pick</span>' +
                                 '<span class="label label-important" ng-hide="!isOwnersPick(o+1)">Current pick</span>' +
-                                '<ol><li ng-repeat="player in owners[o]">{{ player.name }}</li></ol>' +
+                                '<ol><li ng-repeat="player in owners[o]">{{ player.name }} ({{ getPositionDisplayText(player.position) }})</li></ol>' +
                             '</div>' +
                         '</div>'
         });
@@ -50,17 +51,14 @@ function DraftController($scope, $http) {
     $scope.ownerMaxNeed[$scope.QUARTERBACK] = 2;
     $scope.ownerMaxNeed[$scope.RUNNING_BACK] = 7;
     $scope.ownerMaxNeed[$scope.WIDE_RECEIVER] = 7;
-    $scope.ownerMaxNeed[$scope.TIGHT_END] = 3;
+    $scope.ownerMaxNeed[$scope.TIGHT_END] = 2;
     $scope.ownerMaxNeed[$scope.DEFENSE] = 1;
     $scope.ownerMaxNeed[$scope.KICKER] = 1;
 
-    $scope.ownerNeed = {};
-    $scope.ownerNeed[$scope.QUARTERBACK] = $scope.ownerMaxNeed[$scope.QUARTERBACK];
-    $scope.ownerNeed[$scope.RUNNING_BACK] = $scope.ownerMaxNeed[$scope.RUNNING_BACK];
-    $scope.ownerNeed[$scope.WIDE_RECEIVER] = $scope.ownerMaxNeed[$scope.WIDE_RECEIVER];
-    $scope.ownerNeed[$scope.TIGHT_END] = $scope.ownerMaxNeed[$scope.TIGHT_END];
-    $scope.ownerNeed[$scope.DEFENSE] = $scope.ownerMaxNeed[$scope.DEFENSE];
-    $scope.ownerNeed[$scope.KICKER] = $scope.ownerMaxNeed[$scope.KICKER];
+    /*
+     * Initialize the needs of each owner.
+     */
+    $scope.ownerNeed = [];
 
     /**
      * Keeps track of how many players at each position an owner is allowed to start.
@@ -74,6 +72,13 @@ function DraftController($scope, $http) {
     $scope.startablePositions[$scope.TIGHT_END] = 1;
     $scope.startablePositions[$scope.DEFENSE] = 1;
     $scope.startablePositions[$scope.KICKER] = 1;
+
+    /**
+     * The total number of spots on each owner's roster.
+     *
+     * @type {number}
+     */
+    $scope.totalRosterSpots = 16;
 
 
     /**
@@ -160,9 +165,26 @@ function DraftController($scope, $http) {
      */
     $scope.draftYear = new Date().getFullYear();
 
+    /**
+     * Flag to let us know if we're running the draft as a simulation.
+     *
+     * @type {boolean}
+     */
+    $scope.simulation = false;
+
     $scope.fetchPlayers = function() {
         for(var i=0; i<$scope.numOwners; i++) {
             $scope.owners[i] = new Array();
+        }
+
+        for(var i=0; i<$scope.numOwners; i++) {
+            $scope.ownerNeed[i] = {};
+            $scope.ownerNeed[i][$scope.QUARTERBACK] = $scope.ownerMaxNeed[$scope.QUARTERBACK];
+            $scope.ownerNeed[i][$scope.RUNNING_BACK] = $scope.ownerMaxNeed[$scope.RUNNING_BACK];
+            $scope.ownerNeed[i][$scope.WIDE_RECEIVER] = $scope.ownerMaxNeed[$scope.WIDE_RECEIVER];
+            $scope.ownerNeed[i][$scope.TIGHT_END] = $scope.ownerMaxNeed[$scope.TIGHT_END];
+            $scope.ownerNeed[i][$scope.DEFENSE] = $scope.ownerMaxNeed[$scope.DEFENSE];
+            $scope.ownerNeed[i][$scope.KICKER] = $scope.ownerMaxNeed[$scope.KICKER];
         }
 
         $http.get("draft/players?year=" + $scope.draftYear).success(function(data) {
@@ -171,27 +193,21 @@ function DraftController($scope, $http) {
             var index = [0,0,0,0,0,0];
             for(p in $scope.players) {
                 if($scope.players[p].position == $scope.QUARTERBACK) {
-//                    console.log("Adding quarterback " + $scope.players[p].name + " to list of available quarterbacks.");
                     $scope.available_qbs[index[0]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.RUNNING_BACK) {
-//                    console.log("Adding running back " + $scope.players[p].name + " to list of available running backs.");
                     $scope.available_rbs[index[1]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.WIDE_RECEIVER) {
-//                    console.log("Adding wide receiver " + $scope.players[p].name + " to list of available wide receiver.");
                     $scope.available_wrs[index[2]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.TIGHT_END) {
-//                    console.log("Adding tight end " + $scope.players[p].name + " to list of available tight end.");
                     $scope.available_tes[index[3]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.DEFENSE) {
-//                    console.log("Adding defense " + $scope.players[p].name + " to list of available defenses.");
                     $scope.available_ds[index[4]++] = $scope.players[p];
                 }
                 else if($scope.players[p].position == $scope.KICKER) {
-//                    console.log("Adding kicker " + $scope.players[p].name + " to list of available kickers.");
                     $scope.available_ks[index[5]++] = $scope.players[p];
                 }
             }
@@ -219,6 +235,10 @@ function DraftController($scope, $http) {
             $scope.calculateVORP($scope.TIGHT_END);
             $scope.calculateVORP($scope.DEFENSE);
             $scope.calculateVORP($scope.KICKER);
+
+            if($scope.simulation) {
+                $scope.simulateDraft();
+            }
         });
     }
 
@@ -255,7 +275,7 @@ function DraftController($scope, $http) {
         }
     }
 
-    $scope.calculateValue = function(adp, vorp, need, position) {
+    $scope.calculateValue = function(adp, vorp, need) {
         /*
          * Tight end - 0.62
          * Quarterback - 0.60
@@ -264,22 +284,22 @@ function DraftController($scope, $http) {
          * Defense - 0.1
          * Kickers - 0.1
          */
-        var consistency = 0;
-        if(position == $scope.QUARTERBACK) {
-            consistency = 0.60;
-        }
-        else if(position == $scope.RUNNING_BACK) {
-            consistency = 0.48;
-        }
-        else if(position == $scope.WIDE_RECEIVER) {
-            consistency = 0.42;
-        }
-        else if(position == $scope.TIGHT_END) {
-            consistency = 0.62;
-        }
-        else if(position == $scope.DEFENSE || position == $scope.KICKER) {
-            consistency = 0.1;
-        }
+//        var consistency = 0;
+//        if(position == $scope.QUARTERBACK) {
+//            consistency = 0.60;
+//        }
+//        else if(position == $scope.RUNNING_BACK) {
+//            consistency = 0.48;
+//        }
+//        else if(position == $scope.WIDE_RECEIVER) {
+//            consistency = 0.42;
+//        }
+//        else if(position == $scope.TIGHT_END) {
+//            consistency = 0.62;
+//        }
+//        else if(position == $scope.DEFENSE || position == $scope.KICKER) {
+//            consistency = 0.1;
+//        }
 
         var adpFactor = 1;
 
@@ -293,7 +313,34 @@ function DraftController($scope, $http) {
         }
 
         // Truncate the value to three decimal spots.
-        return Math.floor( adpFactor * (vorp+1) * need * consistency * 1000) / 1000;
+        return Math.floor( adpFactor * (vorp+1) * need * /*consistency */ 1000) / 1000;
+    }
+
+    /**
+     * Translate the encoded position name into a shorter, more familiar one.
+     *
+     * @param position
+     * @returns {string}
+     */
+    $scope.getPositionDisplayText = function(position) {
+        if(position == $scope.QUARTERBACK) {
+            return "QB";
+        }
+        else if(position == $scope.RUNNING_BACK) {
+            return "RB";
+        }
+        else if(position == $scope.WIDE_RECEIVER) {
+            return "WR";
+        }
+        else if(position == $scope.TIGHT_END) {
+            return "TE";
+        }
+        else if(position == $scope.DEFENSE) {
+            return "DEF";
+        }
+        else if(position == $scope.KICKER) {
+            return "K";
+        }
     }
 
     /**
@@ -353,6 +400,8 @@ function DraftController($scope, $http) {
         var draftedPlayer = undefined;
         var replacementIndex = -1;
 
+        var ownerIndex = $scope.getOwnerPick();
+
         if(playerType == $scope.QUARTERBACK) {
             for(var i=0; i<$scope.available_qbs.length; i++) {
                 /*
@@ -376,9 +425,7 @@ function DraftController($scope, $http) {
             }
 
             // Decrement our owner's needed quarterback count
-            if($scope.isOwnersPick($scope.myPick)) {
-                $scope.ownerNeed[$scope.QUARTERBACK]--;
-            }
+            $scope.ownerNeed[ownerIndex][$scope.QUARTERBACK]--;
         }
         else if(playerType == $scope.RUNNING_BACK) {
             for(var i=0; i<$scope.available_rbs.length; i++) {
@@ -403,9 +450,7 @@ function DraftController($scope, $http) {
             }
 
             // Decrement our owner's needed running back count
-            if($scope.isOwnersPick($scope.myPick)) {
-                $scope.ownerNeed[$scope.RUNNING_BACK]--;
-            }
+            $scope.ownerNeed[ownerIndex][$scope.RUNNING_BACK]--;
         }
         else if(playerType == $scope.WIDE_RECEIVER) {
             for(var i=0; i<$scope.available_wrs.length; i++) {
@@ -430,9 +475,7 @@ function DraftController($scope, $http) {
             }
 
             // Decrement our owner's needed wide receiver count
-            if($scope.isOwnersPick($scope.myPick)) {
-                $scope.ownerNeed[$scope.WIDE_RECEIVER]--;
-            }
+            $scope.ownerNeed[ownerIndex][$scope.WIDE_RECEIVER]--;
         }
         else if(playerType == $scope.TIGHT_END) {
             for(var i=0; i<$scope.available_tes.length; i++) {
@@ -457,9 +500,7 @@ function DraftController($scope, $http) {
             }
 
             // Decrement our owner's needed tight end count
-            if($scope.isOwnersPick($scope.myPick)) {
-                $scope.ownerNeed[$scope.TIGHT_END]--;
-            }
+            $scope.ownerNeed[ownerIndex][$scope.TIGHT_END]--;
         }
         else if(playerType == $scope.DEFENSE) {
             for(var i=0; i<$scope.available_ds.length; i++) {
@@ -484,9 +525,7 @@ function DraftController($scope, $http) {
             }
 
             // Decrement our owner's needed defense count
-            if($scope.isOwnersPick($scope.myPick)) {
-                $scope.ownerNeed[$scope.DEFENSE]--;
-            }
+            $scope.ownerNeed[ownerIndex][$scope.DEFENSE]--;
         }
         else if(playerType == $scope.KICKER) {
             for(var i=0; i<$scope.available_ks.length; i++) {
@@ -511,25 +550,16 @@ function DraftController($scope, $http) {
             }
 
             // Decrement our owner's needed kicker count
-            if($scope.isOwnersPick($scope.myPick)) {
-                $scope.ownerNeed[$scope.KICKER]--;
-            }
-        }
-
-        // Which owner made this pick?
-        for(var owner=0; owner<$scope.numOwners; owner++) {
-            if($scope.isOwnersPick(owner+1)) {
-                break;
-            }
+            $scope.ownerNeed[ownerIndex][$scope.KICKER]--;
         }
 
         // If this is the first player's pick, we need to create a new array
         // for that owner.
-        if($scope.owners[owner] == undefined) {
-            $scope.owners[owner] = new Array();
+        if($scope.owners[ownerIndex] == undefined) {
+            $scope.owners[ownerIndex] = new Array();
         }
 
-        $scope.owners[owner].push(draftedPlayer[0]);
+        $scope.owners[ownerIndex].push(draftedPlayer[0]);
 
         $scope.currentPick++;
     }
@@ -539,9 +569,9 @@ function DraftController($scope, $http) {
      *
      * Due to the math, it's easier to use 0-based currentPick and myPick.
      *
-     * @param pick      The number pick of the owner in question.
+     * @param draftPosition      The number pick of the owner in question (1-based).
      */
-    $scope.isOwnersPick = function(pick) {
+    $scope.isOwnersPick = function(draftPosition) {
         // If it's a snake draft, are we going forwards or backwards through the owners?
         if ($scope.draftType == $scope.DRAFT_TYPE_SNAKE) {
             /*
@@ -552,7 +582,7 @@ function DraftController($scope, $http) {
              * Picks p={20-29} (third round) will yield p/#owners = 2
              */
             if ( Math.floor(($scope.currentPick-1)/$scope.numOwners) % 2 == 0) {
-                return Math.ceil( ($scope.currentPick-1) % $scope.numOwners) == pick-1;
+                return Math.ceil( ($scope.currentPick-1) % $scope.numOwners) == draftPosition-1;
             }
             /*
              * Backwards
@@ -561,8 +591,41 @@ function DraftController($scope, $http) {
              * Picks p={30-39} (fourth round) will yield p/#owners = 3
              */
             else {
-                var reversePick = $scope.numOwners - pick;
+                var reversePick = $scope.numOwners - draftPosition;
                 return Math.ceil(($scope.currentPick-1) % $scope.numOwners) == reversePick;
+            }
+        }
+    }
+
+    /**
+     * Determine which owner has the current pick.
+     *
+     * @param pick          The current pick (1-based).
+     * @returns {boolean}
+     */
+    $scope.getOwnerPick = function() {
+        // If it's a snake draft, are we going forwards or backwards through the owners?
+        if ($scope.draftType == $scope.DRAFT_TYPE_SNAKE) {
+            var forwardPick = Math.ceil( ($scope.currentPick-1) % $scope.numOwners);
+
+            /*
+             * Forward
+             *
+             * Assume 10 owners
+             * Picks p={0-9} (first round) will yield p/#owners = 0
+             * Picks p={20-29} (third round) will yield p/#owners = 2
+             */
+            if ( Math.floor(($scope.currentPick-1)/$scope.numOwners) % 2 == 0) {
+                return forwardPick;
+            }
+            /*
+             * Backwards
+             *
+             * Picks p={10-19} (second round) will yield p/#owners = 1
+             * Picks p={30-39} (fourth round) will yield p/#owners = 3
+             */
+            else {
+                return ($scope.numOwners - forwardPick)-1;
             }
         }
     }
@@ -588,45 +651,330 @@ function DraftController($scope, $http) {
     }
 
     /**
-     * TEMP!
+     * Determine the total projected points for your starters, who are defined as the top n players
+     * at each position, where n is the number of startable players at that position.
+     *
+     * @param owner         Index of the owner (0-based)
+     * @returns {Object}    The sum of the points projected by your starters.
      */
-    $scope.getBPA = function(owner) {
+    $scope.calculateStarterPoints = function(owner) {
+        if(!$scope.initialized || $scope.owners[owner].length < $scope.totalRosterSpots) {
+            return;
+        }
+
+        var sortFunc = function(p1,p2) {
+            return p2.points - p1.points;
+        }
+
+        var arrSum = function(prev,curr) {
+            return prev + curr.points;
+        }
+
+        var qbs = [];
+        var rbs = [];
+        var wrs = [];
+        var tes = [];
+        var ds = [];
+        var ks = [];
+        for(var i=0; i<$scope.owners[owner].length; i++) {
+            if($scope.owners[owner][i].position == $scope.QUARTERBACK) {
+                qbs.push($scope.owners[owner][i]);
+            }
+            else if($scope.owners[owner][i].position == $scope.RUNNING_BACK) {
+                rbs.push($scope.owners[owner][i]);
+            }
+            if($scope.owners[owner][i].position == $scope.WIDE_RECEIVER) {
+                wrs.push($scope.owners[owner][i]);
+            }
+            if($scope.owners[owner][i].position == $scope.TIGHT_END) {
+                tes.push($scope.owners[owner][i]);
+            }
+            if($scope.owners[owner][i].position == $scope.DEFENSE) {
+                ds.push($scope.owners[owner][i]);
+            }
+            if($scope.owners[owner][i].position == $scope.KICKER) {
+                ks.push($scope.owners[owner][i]);
+            }
+        }
+
+        qbs.sort(sortFunc);
+        rbs.sort(sortFunc);
+        wrs.sort(sortFunc);
+        tes.sort(sortFunc);
+        ds.sort(sortFunc);
+        ks.sort(sortFunc);
+
+
+        try {
+            var qbSum = qbs.slice(0, $scope.startablePositions[$scope.QUARTERBACK]).reduce(arrSum, 0);
+        }
+        catch(e) {
+            console.log(e);
+        }
+
+        try {
+            var rbSum = rbs.slice(0, $scope.startablePositions[$scope.RUNNING_BACK]).reduce(arrSum, 0);
+        }
+        catch(e) {
+            console.log(e);
+        }
+
+        try {
+            var wrSum = wrs.slice(0, $scope.startablePositions[$scope.WIDE_RECEIVER]).reduce(arrSum, 0);
+        }
+        catch(e) {
+            console.log(e);
+        }
+
+        try {
+            var teSum = tes.slice(0, $scope.startablePositions[$scope.TIGHT_END]).reduce(arrSum, 0);
+        }
+        catch(e) {
+            console.log(e);
+        }
+
+        try {
+            var dSum = ds.slice(0, $scope.startablePositions[$scope.DEFENSE]).reduce(arrSum, 0);
+        }
+        catch(e) {
+            console.log(e);
+        }
+
+        try {
+            var kSum = ks.slice(0, $scope.startablePositions[$scope.KICKER]).reduce(arrSum, 0);
+        }
+        catch(e) {
+            console.log(e);
+        }
+
+        return qbSum + rbSum + wrSum + teSum + dSum + kSum;
+    }
+
+    $scope.getPlayerPosition = function(playerId) {
+        for(var i=0; i<$scope.players; i++) {
+            if($scope.players[i].id == playerId) {
+                return $scope.players[i].position;
+            }
+        }
+    }
+
+    $scope.simulateDraft = function() {
+        console.log("Simulating draft...");
+
+        var player = undefined;
+
+        while($scope.owners[0].length < $scope.totalRosterSpots || $scope.owners[$scope.numOwners-1].length < $scope.totalRosterSpots) {
+            // Is this my pick?  If so, use VORP.
+            if($scope.isOwnersPick($scope.myPick)) {
+                player = $scope.getVORP();
+                if(player == undefined) {
+                    console.log("Found undefined player");
+                    player = $scope.getVORP();
+                }
+            }
+            // Not my pick.  Use BPA.
+            else {
+                player = $scope.getBPAWithStartersFirst();
+                if(player == undefined) {
+                    console.log("Found undefined player");
+                }
+            }
+
+            $scope.draftPlayer(player.position, player.id);
+        }
+    }
+
+    /**
+     * Chooses the best player for the current owner based on their need and
+     * the best player available (by points) at the those positions.
+     *
+     * @returns Id of the available player with the highest projected points.
+     */
+    $scope.getBPA = function() {
         if(!$scope.initialized) {
             return;
         }
 
-        var list = [$scope.available_qbs, $scope.available_rbs, $scope.available_wrs, $scope.available_tes, $scope.available_ds,
-            $scope.available_ks];
+        var owner = $scope.getOwnerPick();
+        var round = Math.floor( ($scope.currentPick-1)/$scope.numOwners) + 1;
 
-        var max = 0;
-        var name = "";
-        for(var i=0; i<list.length; i++) {
-            if(list[i][0].points > max) {
-                max = list[i][0].points;
-                name = list[i][0].name;
+        var list = [];
+
+        // Only pick non-kickers and defenses in all but last two rounds.
+        if(round < $scope.totalRosterSpots-1) {
+            if($scope.ownerNeed[owner][$scope.QUARTERBACK] > 0 && $scope.available_qbs.length > 0) {
+                list.splice(0,0,$scope.available_qbs);
+            }
+            if($scope.ownerNeed[owner][$scope.RUNNING_BACK] > 0 && $scope.available_rbs.length > 0) {
+                list.splice(0,0,$scope.available_rbs);
+            }
+            if($scope.ownerNeed[owner][$scope.WIDE_RECEIVER] > 0 && $scope.available_wrs.length > 0) {
+                list.splice(0,0,$scope.available_wrs);
+            }
+            if($scope.ownerNeed[owner][$scope.TIGHT_END] > 0 && $scope.available_tes.length > 0) {
+                list.splice(0,0,$scope.available_tes);
+            }
+        }
+        else {
+            if($scope.ownerNeed[owner][$scope.DEFENSE] > 0 && $scope.available_ds.length > 0) {
+                list.splice(0,0,$scope.available_ds);
+            }
+            if($scope.ownerNeed[owner][$scope.KICKER] > 0 && $scope.available_ks.length > 0) {
+                list.splice(0,0,$scope.available_ks);
             }
         }
 
-        return name;
+        var max = -9999;
+        var player = undefined;
+        for(var i=0; i<list.length; i++) {
+            if(list[i][0].points > max) {
+                max = list[i][0].points;
+                player = list[i][0];
+            }
+        }
+
+        return player;
     }
 
+    /**
+     * Chooses the best player for the current owner based on their need and
+     * the best player available (by points) at the those positions.
+     *
+     * Unlike getBPA, we're going to satisfy all the starter positions first.
+     *
+     * @returns Id of the available player with the highest projected points.
+     */
+    $scope.getBPAWithStartersFirst = function() {
+        if(!$scope.initialized) {
+            return;
+        }
+
+        var owner = $scope.getOwnerPick();
+        var round = Math.floor( ($scope.currentPick-1)/$scope.numOwners) + 1;
+
+        var list = [];
+
+        if( ($scope.ownerMaxNeed[$scope.QUARTERBACK] - $scope.ownerNeed[owner][$scope.QUARTERBACK]) < $scope.startablePositions[$scope.QUARTERBACK] && $scope.available_qbs.length > 0) {
+            list.splice(0,0,$scope.available_qbs);
+        }
+        if( ($scope.ownerMaxNeed[$scope.RUNNING_BACK] - $scope.ownerNeed[owner][$scope.RUNNING_BACK]) < $scope.startablePositions[$scope.RUNNING_BACK] && $scope.available_rbs.length > 0) {
+            list.splice(0,0,$scope.available_rbs);
+        }
+        if( ($scope.ownerMaxNeed[$scope.WIDE_RECEIVER] - $scope.ownerNeed[owner][$scope.WIDE_RECEIVER]) < $scope.startablePositions[$scope.WIDE_RECEIVER] && $scope.available_wrs.length > 0) {
+            list.splice(0,0,$scope.available_wrs);
+        }
+        if( ($scope.ownerMaxNeed[$scope.TIGHT_END] - $scope.ownerNeed[owner][$scope.TIGHT_END]) < $scope.startablePositions[$scope.TIGHT_END] && $scope.available_tes.length > 0) {
+            list.splice(0,0,$scope.available_tes);
+        }
+
+        /*
+         * Looks like we've drafted all our starters.
+         */
+        if(list.length == 0) {
+            // Only pick non-kickers and defenses in all but last two rounds.
+            if(round < $scope.totalRosterSpots-1) {
+                if($scope.ownerNeed[owner][$scope.QUARTERBACK] > 0 && $scope.available_qbs.length > 0) {
+                    list.splice(0,0,$scope.available_qbs);
+                }
+                if($scope.ownerNeed[owner][$scope.RUNNING_BACK] > 0 && $scope.available_rbs.length > 0) {
+                    list.splice(0,0,$scope.available_rbs);
+                }
+                if($scope.ownerNeed[owner][$scope.WIDE_RECEIVER] > 0 && $scope.available_wrs.length > 0) {
+                    list.splice(0,0,$scope.available_wrs);
+                }
+                if($scope.ownerNeed[owner][$scope.TIGHT_END] > 0 && $scope.available_tes.length > 0) {
+                    list.splice(0,0,$scope.available_tes);
+                }
+            }
+            else {
+                if($scope.ownerNeed[owner][$scope.DEFENSE] > 0 && $scope.available_ds.length > 0) {
+                    list.splice(0,0,$scope.available_ds);
+                }
+                if($scope.ownerNeed[owner][$scope.KICKER] > 0 && $scope.available_ks.length > 0) {
+                    list.splice(0,0,$scope.available_ks);
+                }
+            }
+        }
+
+        var max = -9999;
+        var player = undefined;
+        for(var i=0; i<list.length; i++) {
+            if(list[i][0].points > max) {
+                max = list[i][0].points;
+                player = list[i][0];
+            }
+        }
+
+        return player;
+    }
+
+    /**
+     * Chooses the player remaining with the highest VORP.
+     *
+     * @returns Id of the available player with the highest VORP.
+     */
     $scope.getVORP = function() {
         if(!$scope.initialized) {
             return;
         }
 
-        var list = [$scope.available_qbs, $scope.available_rbs, $scope.available_wrs, $scope.available_tes, $scope.available_ds,
-        $scope.available_ks];
+        var round = Math.floor( ($scope.currentPick-1)/$scope.numOwners) + 1;
+        var list = [];
 
-        var max = 0;
-        var name = "";
+        /*
+         * Only pick non-kickers and defenses in all but last two rounds.
+         *
+         * We're going to evaluate the starter situation and make sure that the first n picks get starters.
+         * This is to prevent situations where the owner may never be in a situation where a certain position,
+         * like quarterback, is the highest VORP, and they don't pick any quarterbacks.
+         */
+        if(round < $scope.totalRosterSpots-1) {
+            // Check starter situation for QB, RB, WR, and TE.  If there are still starting spots available,
+            // qualify the list of players at that position for being picked.
+            if($scope.ownerMaxNeed[$scope.QUARTERBACK] - $scope.ownerNeed[$scope.myPick-1][$scope.QUARTERBACK] < $scope.startablePositions[$scope.QUARTERBACK]) {
+//                console.log("Still have " + $scope.ownerNeed[$scope.myPick-1][$scope.QUARTERBACK] + " starting spot at QB");
+                list.push($scope.available_qbs);
+            }
+            if($scope.ownerMaxNeed[$scope.RUNNING_BACK] - $scope.ownerNeed[$scope.myPick-1][$scope.RUNNING_BACK] < $scope.startablePositions[$scope.RUNNING_BACK]) {
+//                console.log("Still have " + $scope.ownerNeed[$scope.myPick-1][$scope.RUNNING_BACK] + " starting spot at RB");
+                list.push($scope.available_rbs);
+            }
+            if($scope.ownerMaxNeed[$scope.WIDE_RECEIVER] - $scope.ownerNeed[$scope.myPick-1][$scope.WIDE_RECEIVER] < $scope.startablePositions[$scope.WIDE_RECEIVER]) {
+//                console.log("Still have " + $scope.ownerNeed[$scope.myPick-1][$scope.WIDE_RECEIVER] + " starting spot at WR");
+                list.push($scope.available_wrs);
+            }
+            if($scope.ownerMaxNeed[$scope.TIGHT_END] - $scope.ownerNeed[$scope.myPick-1][$scope.TIGHT_END] < $scope.startablePositions[$scope.TIGHT_END]) {
+//                console.log("Still have " + $scope.ownerNeed[$scope.myPick-1][$scope.TIGHT_END] + " starting spot at TE");
+                list.push($scope.available_tes);
+            }
+
+            // list length is 0.  We've filled all our starting positions.
+            if(list.length == 0) {
+                list = [$scope.available_qbs, $scope.available_rbs, $scope.available_wrs, $scope.available_tes];
+            }
+        }
+        else {
+            list = [$scope.available_ds, $scope.available_ks];
+        }
+
+        var max = -9999;
+        var player = undefined;
+//        console.log("Current choices for round " + round);
         for(var i=0; i<list.length; i++) {
-            if(list[i][0].vorp > max) {
-                max = list[i][0].vorp;
-                name = list[i][0].name;
+            // Only draft players we need.
+            var need = $scope.ownerNeed[$scope.myPick-1][list[i][0].position]/$scope.ownerMaxNeed[list[i][0].position];
+            if(need == 0) {
+                continue;
+            }
+
+            var value = $scope.calculateValue(list[i][0].adp, list[i][0].vorp, need, list[i][0].position);
+//            console.log("\t" + list[i][0].name + " (" + $scope.getPositionDisplayText(list[i][0].position) + ") - " + value);
+            if(value > max) {
+                max = value;
+                player = list[i][0];
             }
         }
 
-        return name;
+        return player;
     }
 }
