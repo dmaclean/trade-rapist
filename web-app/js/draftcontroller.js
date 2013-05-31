@@ -96,6 +96,14 @@ function DraftController($scope, $http) {
     $scope.DRAFT_TYPE_SNAKE = "SNAKE";
 
     /**
+     * Flag to keep track of whether the user has entered the necessary information
+     * for draft year and number of owners in the league.
+     *
+     * @type {boolean}
+     */
+    $scope.initNumOwners = false;
+
+    /**
      * Flag to keep track of whether the draft has been initialized.
      *
      * @type {boolean}

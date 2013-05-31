@@ -30,6 +30,10 @@ describe('DraftController spec', function() {
         expect(scope.myPick).toEqual(1);
     });
 
+    it('should default initNumOwners to false', function() {
+        expect(scope.initNumOwners).toEqual(false);
+    });
+
     it('should default initialized to false', function() {
         expect(scope.initialized).toEqual(false);
     });

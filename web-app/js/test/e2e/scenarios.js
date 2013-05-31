@@ -13,48 +13,81 @@ describe('Trade Rapist Draft Setup', function() {
         expect(browser().location().url()).toBe('/draft');
     });
 
-    it('should default numOwners to 0', function() {
-        expect(element('#numOwners').val()).toMatch("0");
-    });
+    describe('First init screen', function() {
+        it('should default numOwners to 0', function() {
+            expect(element('#numOwners').val()).toMatch("0");
+        });
 
-    it('should not see my pick by default', function() {
-        expect(element('#myPick').css('display')).toBe("none");
-    });
+        it('should see Number of rounds by default', function() {
+            expect(element('#numRounds').css('display')).not().toBe("none");
+        });
 
-    it('should not see Start Draft button by default', function() {
-        expect(element('#draft_init button').css('display')).toBe("none");
-    });
+        it('should not see my pick by default', function() {
+            expect(element('#myPick').css('display')).toBe("none");
+        });
 
-    it('should not see owners div by default', function() {
-        expect(element('#owners').css('display')).toBe("none");
-    });
+        it('should not see explanation text by default', function() {
+            expect(element('#draft_init span.help-block').css('display')).toBe('none');
+        });
 
-    it('should not see available_players div by default', function() {
-        expect(element('#available_players').css('display')).toBe("none");
-    });
+        it('should not see "Go to roster settings..." or "Start Draft" buttons by default', function() {
+            expect(element('#draft_init #screen1 button').text()).toBe("Go to roster settings...");
+            expect(element('#draft_init #screen1 button').css('display')).toBe("none");
+        });
 
-    it('should see My Pick field and Start Draft button as soon as any positive, non-zero value is entered', function() {
-        // Positive, non-zero
-        input('numOwners').enter("12");
-        expect(element('#myPick').css('display')).not().toBe("none");
-        expect(element('#draft_init button').css('display')).not().toBe("none");
+        it('should not see owners div by default', function() {
+            expect(element('#owners').css('display')).toBe("none");
+        });
 
-        // Negative
-        input('numOwners').enter("-1");
-        expect(element('#myPick').css('display')).toBe("none");
-        expect(element('#draft_init button').css('display')).toBe("none");
+        it('should not see available_players div by default', function() {
+            expect(element('#available_players').css('display')).toBe("none");
+        });
 
-        // Non-numeric
-        input('numOwners').enter("abc");
-        expect(element('#myPick').css('display')).toBe("none");
-        expect(element('#draft_init button').css('display')).toBe("none");
+        it('should not see init screen 2 div by default', function() {
+            expect(element('#screen2').css('display')).toBe("none");
+        });
+
+        it('should see My Pick field and "Go to roster settings..." button as soon as any positive, non-zero value is entered', function() {
+            // Positive, non-zero
+            input('numOwners').enter("12");
+            expect(element('#myPick').css('display')).not().toBe("none");
+            expect(element('#draft_init #screen1 button').css('display')).not().toBe("none");
+
+            // Negative
+            input('numOwners').enter("-1");
+            expect(element('#myPick').css('display')).toBe("none");
+            expect(element('#draft_init #screen1 button').css('display')).toBe("none");
+
+            // Non-numeric
+            input('numOwners').enter("abc");
+            expect(element('#myPick').css('display')).toBe("none");
+            expect(element('#draft_init #screen1 button').css('display')).toBe("none");
+        });
+
+        it('should see init screen 2 after clicking "Go to roster settings..."', function() {
+            expect(element('#screen1').css('display')).not().toBe("none");
+            expect(element('#screen2').css('display')).toBe("none");
+
+            input('numOwners').enter("12");
+            input('myPick').enter("1");
+            element('#draft_init #screen1 button').click();
+
+            expect(element('#screen1').css('display')).toBe("none");
+            expect(element('#screen2').css('display')).not().toBe("none");
+        });
     });
 
     it('should show draft_action and owners divs when "Start Draft" button is clicked', function() {
         input('numOwners').enter("12");
         input('myPick').enter("1");
-        element('#draft_init button').click();
+        element('#draft_init #screen1 button').click();
 
+        // 2nd screen should display, take defaults and click it's button.
+        expect(element('#screen1').css('display')).toBe("none");
+        expect(element('#screen2').css('display')).not().toBe("none");
+        element('#draft_init #screen2 button').click();
+
+        // Should see players and owners.
         expect(element('#available_players').css('display')).not().toBe("none");
         expect(element('#owners').css('display')).not().toBe("none");
     });

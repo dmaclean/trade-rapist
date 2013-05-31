@@ -3,11 +3,92 @@
     <!--<p>BPA: {{ getBPA().name }}</p>
     <p>VORP: {{ getVORP().name }}</p>-->
     <div id="draft_init" class="row-fluid" ng-hide="initialized">
-        <input type="text" id="draftYear" ng-model="draftYear"/>
-        <input type="text" id="numOwners" ng-model="numOwners"/>
-        <input type="text" id="myPick" ng-model="myPick" ng-hide="isNumOwnersValid(numOwners) == false"/>
-        Simulation? <input type="checkbox" id="simulation" ng-model="simulation"/>
-        <button class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="initialized = true; fetchPlayers();">Start Draft!</button>
+        <div class="span4 offset4" id="screen1" ng-hide="initNumOwners">
+            <form>
+                <fieldset>
+                    <label>Draft Year</label>
+                    <input type="text" id="draftYear" ng-model="draftYear"/>
+
+                    <label>Number of rounds</label>
+                    <input type="text" id="numRounds" ng-model="totalRosterSpots"/>
+
+                    <label>Number of owners</label>
+                    <input type="text" id="numOwners" ng-model="numOwners"/>
+
+                    <label ng-hide="isNumOwnersValid(numOwners) == false">My Pick</label>
+                    <input type="text" id="myPick" ng-model="myPick" ng-hide="isNumOwnersValid(numOwners) == false"/>
+
+                    <span class="help-block" ng-hide="isNumOwnersValid(numOwners) == false">
+                        Before we can start the draft, we need to get some information about how your league's rosters
+                        are configured.  Specifically, we need to know how many starters as well as the total number of
+                        players you're allowed at each position.
+                    </span>
+                    <button class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="initNumOwners = true;">Go to roster settings...</button>
+                </fieldset>
+            </form>
+        </div>
+
+        <div class="row-fluid" id="screen2" ng-hide="!initNumOwners">
+            <div class="span8 offset3">
+                <div class="row-fluid">
+                    <div class="span4">
+                        <fieldset>
+                            <legend>Number of starters</legend>
+                            <label>Quarterbacks</label>
+                            <input type="text" id="starter_quarterback" ng-model="startablePositions[QUARTERBACK]"/>
+
+                            <label>Running Backs</label>
+                            <input type="text" id="starter_runningback" ng-model="startablePositions[RUNNING_BACK]"/>
+
+                            <label>Wide Receivers</label>
+                            <input type="text" id="starter_widereceiver" ng-model="startablePositions[WIDE_RECEIVER]"/>
+
+                            <label>Tight Ends</label>
+                            <input type="text" id="starter_tightend" ng-model="startablePositions[TIGHT_END]"/>
+
+                            <label>Defenses</label>
+                            <input type="text" id="starter_defense" ng-model="startablePositions[DEFENSE]"/>
+
+                            <label>Kickers</label>
+                            <input type="text" id="starter_kicker" ng-model="startablePositions[KICKER]"/>
+                        </fieldset>
+                    </div>
+
+                    <div class="span4">
+                        <fieldset>
+                            <legend>Total positions</legend>
+                            <label>Quarterbacks</label>
+                            <input type="text" id="total_quarterback" ng-model="ownerMaxNeed[QUARTERBACK]"/>
+
+                            <label>Running Backs</label>
+                            <input type="text" id="total_runningback" ng-model="ownerMaxNeed[RUNNING_BACK]"/>
+
+                            <label>Wide Receivers</label>
+                            <input type="text" id="total_widereceiver" ng-model="ownerMaxNeed[WIDE_RECEIVER]"/>
+
+                            <label>Tight Ends</label>
+                            <input type="text" id="total_tightend" ng-model="ownerMaxNeed[TIGHT_END]"/>
+
+                            <label>Defenses</label>
+                            <input type="text" id="total_defense" ng-model="ownerMaxNeed[DEFENSE]"/>
+
+                            <label>Kickers</label>
+                            <input type="text" id="total_kicker" ng-model="ownerMaxNeed[KICKER]"/>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div class="span4 offset2">
+                        <fieldset>
+                            <label class="checkbox" ng-hide="isNumOwnersValid(numOwners) == false">
+                                <input type="checkbox" id="simulation" ng-model="simulation"/>Simulation?
+                            </label>
+                            <button class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="initialized = true; fetchPlayers();">Start Draft!</button>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div id="owners" owners class="row-fluid" ng-hide="!initialized"></div>
     <div id="available_players" class="row-fluid" ng-hide="!initialized">
