@@ -26,13 +26,8 @@ describe('Trade Rapist Draft Setup', function() {
             expect(element('#myPick').css('display')).toBe("none");
         });
 
-        it('should not see explanation text by default', function() {
-            expect(element('#draft_init span.help-block').css('display')).toBe('none');
-        });
-
-        it('should not see "Go to roster settings..." or "Start Draft" buttons by default', function() {
-            expect(element('#draft_init #screen1 button').text()).toBe("Go to roster settings...");
-            expect(element('#draft_init #screen1 button').css('display')).toBe("none");
+        it('should not see explanation text or "Go to roster settings..." button by default', function() {
+            expect(element('#screen1contbutton').css('display')).toBe('none');
         });
 
         it('should not see owners div by default', function() {
@@ -56,12 +51,12 @@ describe('Trade Rapist Draft Setup', function() {
             // Negative
             input('numOwners').enter("-1");
             expect(element('#myPick').css('display')).toBe("none");
-            expect(element('#draft_init #screen1 button').css('display')).toBe("none");
+            expect(element('#draft_init #screen1contbutton').css('display')).toBe("none");
 
             // Non-numeric
             input('numOwners').enter("abc");
             expect(element('#myPick').css('display')).toBe("none");
-            expect(element('#draft_init #screen1 button').css('display')).toBe("none");
+            expect(element('#draft_init #screen1contbutton').css('display')).toBe("none");
         });
 
         it('should see init screen 2 after clicking "Go to roster settings..."', function() {

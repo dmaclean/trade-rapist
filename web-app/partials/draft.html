@@ -4,27 +4,45 @@
     <p>VORP: {{ getVORP().name }}</p>-->
     <div id="draft_init" class="row-fluid" ng-hide="initialized">
         <div class="span4 offset4" id="screen1" ng-hide="initNumOwners">
-            <form>
-                <fieldset>
-                    <label>Draft Year</label>
-                    <input type="text" id="draftYear" ng-model="draftYear"/>
+            <form class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label" for="draftYear">Draft Year</label>
+                    <div class="controls">
+                        <input type="text" class="input-mini" id="draftYear" ng-model="draftYear"/>
+                    </div>
+                </div>
 
-                    <label>Number of rounds</label>
-                    <input type="text" id="numRounds" ng-model="totalRosterSpots"/>
+                <div class="control-group">
+                    <label class="control-label" for="numRounds">Number of rounds</label>
+                    <div class="controls">
+                        <input type="text" class="input-mini" id="numRounds" ng-model="totalRosterSpots"/>
+                    </div>
+                </div>
 
-                    <label>Number of owners</label>
-                    <input type="text" id="numOwners" ng-model="numOwners"/>
+                <div class="control-group">
+                    <label class="control-label" for="numOwners">Number of owners</label>
+                    <div class="controls">
+                        <input type="text" class="input-mini" id="numOwners" ng-model="numOwners"/>
+                    </div>
+                </div>
 
-                    <label ng-hide="isNumOwnersValid(numOwners) == false">My Pick</label>
-                    <input type="text" id="myPick" ng-model="myPick" ng-hide="isNumOwnersValid(numOwners) == false"/>
+                <div class="control-group" ng-hide="isNumOwnersValid(numOwners) == false">
+                    <label class="control-label">My Pick</label>
+                    <div class="controls">
+                        <input type="text" class="input-mini" id="myPick" ng-model="myPick" ng-hide="isNumOwnersValid(numOwners) == false"/>
+                    </div>
+                </div>
 
-                    <span class="help-block" ng-hide="isNumOwnersValid(numOwners) == false">
-                        Before we can start the draft, we need to get some information about how your league's rosters
-                        are configured.  Specifically, we need to know how many starters as well as the total number of
-                        players you're allowed at each position.
-                    </span>
-                    <button class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="initNumOwners = true;">Go to roster settings...</button>
-                </fieldset>
+                <div id="screen1contbutton" class="control-group" ng-hide="isNumOwnersValid(numOwners) == false">
+                    <div class="controls">
+                        <span class="help-block">
+                            Before we can start the draft, we need to get some information about how your league's rosters
+                            are configured.  Specifically, we need to know how many starters as well as the total number of
+                            players you're allowed at each position.
+                        </span>
+                        <button class="btn btn-primary" ng-click="initNumOwners = true;">Go to roster settings...</button>
+                    </div>
+                </div>
             </form>
         </div>
 
@@ -32,49 +50,99 @@
             <div class="span8 offset3">
                 <div class="row-fluid">
                     <div class="span4">
-                        <fieldset>
+                        <form class="form-horizontal">
                             <legend>Number of starters</legend>
-                            <label>Quarterbacks</label>
-                            <input type="text" id="starter_quarterback" ng-model="startablePositions[QUARTERBACK]"/>
 
-                            <label>Running Backs</label>
-                            <input type="text" id="starter_runningback" ng-model="startablePositions[RUNNING_BACK]"/>
+                            <div class="control-group">
+                                <label class="control-label">Quarterbacks</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="starter_quarterback" ng-model="startablePositions[QUARTERBACK]"/>
+                                </div>
+                            </div>
 
-                            <label>Wide Receivers</label>
-                            <input type="text" id="starter_widereceiver" ng-model="startablePositions[WIDE_RECEIVER]"/>
+                            <div class="control-group">
+                                <label class="control-label">Running Backs</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="starter_runningback" ng-model="startablePositions[RUNNING_BACK]"/>
+                                </div>
+                            </div>
 
-                            <label>Tight Ends</label>
-                            <input type="text" id="starter_tightend" ng-model="startablePositions[TIGHT_END]"/>
+                            <div class="control-group">
+                                <label class="control-label">Wide Receivers</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="starter_widereceiver" ng-model="startablePositions[WIDE_RECEIVER]"/>
+                                </div>
+                            </div>
 
-                            <label>Defenses</label>
-                            <input type="text" id="starter_defense" ng-model="startablePositions[DEFENSE]"/>
+                            <div class="control-group">
+                                <label class="control-label">Tight Ends</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="starter_tightend" ng-model="startablePositions[TIGHT_END]"/>
+                                </div>
+                            </div>
 
-                            <label>Kickers</label>
-                            <input type="text" id="starter_kicker" ng-model="startablePositions[KICKER]"/>
-                        </fieldset>
+                            <div class="control-group">
+                                <label class="control-label">Defenses</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="starter_defense" ng-model="startablePositions[DEFENSE]"/>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">Kickers</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="starter_kicker" ng-model="startablePositions[KICKER]"/>
+                                </div>
+                            </div>
+                        </form>
                     </div>
 
                     <div class="span4">
-                        <fieldset>
+                        <form class="form-horizontal">
                             <legend>Total positions</legend>
-                            <label>Quarterbacks</label>
-                            <input type="text" id="total_quarterback" ng-model="ownerMaxNeed[QUARTERBACK]"/>
 
-                            <label>Running Backs</label>
-                            <input type="text" id="total_runningback" ng-model="ownerMaxNeed[RUNNING_BACK]"/>
+                            <div class="control-group">
+                                <label class="control-label">Quarterbacks</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="total_quarterback" ng-model="ownerMaxNeed[QUARTERBACK]"/>
+                                </div>
+                            </div>
 
-                            <label>Wide Receivers</label>
-                            <input type="text" id="total_widereceiver" ng-model="ownerMaxNeed[WIDE_RECEIVER]"/>
+                            <div class="control-group">
+                                <label class="control-label">Running Backs</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="total_runningback" ng-model="ownerMaxNeed[RUNNING_BACK]"/>
+                                </div>
+                            </div>
 
-                            <label>Tight Ends</label>
-                            <input type="text" id="total_tightend" ng-model="ownerMaxNeed[TIGHT_END]"/>
+                            <div class="control-group">
+                                <label class="control-label">Wide Receivers</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="total_widereceiver" ng-model="ownerMaxNeed[WIDE_RECEIVER]"/>
+                                </div>
+                            </div>
 
-                            <label>Defenses</label>
-                            <input type="text" id="total_defense" ng-model="ownerMaxNeed[DEFENSE]"/>
+                            <div class="control-group">
+                                <label class="control-label">Tight Ends</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="total_tightend" ng-model="ownerMaxNeed[TIGHT_END]"/>
+                                </div>
+                            </div>
 
-                            <label>Kickers</label>
-                            <input type="text" id="total_kicker" ng-model="ownerMaxNeed[KICKER]"/>
-                        </fieldset>
+                            <div class="control-group">
+                                <label class="control-label">Defenses</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="total_defense" ng-model="ownerMaxNeed[DEFENSE]"/>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label class="control-label">Kickers</label>
+                                <div class="controls">
+                                    <input type="text" class="input-mini" id="total_kicker" ng-model="ownerMaxNeed[KICKER]"/>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
                 <div class="row-fluid">
@@ -92,59 +160,65 @@
     </div>
     <div id="owners" owners class="row-fluid" ng-hide="!initialized"></div>
     <div id="available_players" class="row-fluid" ng-hide="!initialized">
-        <div id="available_qbs" class="span2">
-            <h3>Quarterbacks</h3>
-            <ul>
-                <li ng-repeat="player in available_qbs">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][QUARTERBACK]/ownerMaxNeed[QUARTERBACK]) }}
-                    <button class="btn btn-mini btn-primary" id="qb_{{ player.id }}" ng-click="draftPlayer('QUARTERBACK', player.id)">Draft</button>
-                </li>
-            </ul>
-        </div>
-        <div id="available_rbs" class="span2">
-            <h3>Running Backs</h3>
-            <ol>
-                <li ng-repeat="player in available_rbs">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][RUNNING_BACK]/ownerMaxNeed[RUNNING_BACK]) }}
-                    <button class="btn btn-mini btn-primary" id="rb_{{ player.id }}" ng-click="draftPlayer('RUNNING_BACK', player.id)">Draft</button>
-                </li>
-            </ol>
-        </div>
-        <div id="available_wrs" class="span2">
-            <h3>Wide Receivers</h3>
-            <ul>
-                <li ng-repeat="player in available_wrs">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][WIDE_RECEIVER]/ownerMaxNeed[WIDE_RECEIVER]) }}
-                    <button class="btn btn-mini btn-primary" id="wr_{{ player.id }}" ng-click="draftPlayer('WIDE_RECEIVER', player.id)">Draft</button>
-                </li>
-            </ul>
-        </div>
-        <div id="available_tes" class="span2">
-            <h3>Tight Ends</h3>
-            <ul>
-                <li ng-repeat="player in available_tes">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][TIGHT_END]/ownerMaxNeed[TIGHT_END]) }}
-                    <button class="btn btn-mini btn-primary" id="te_{{ player.id }}" ng-click="draftPlayer('TIGHT_END', player.id)">Draft</button>
-                </li>
-            </ul>
-        </div>
-        <div id="available_ds" class="span2">
-            <h3>Defenses</h3>
-            <ul>
-                <li ng-repeat="player in available_ds">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][DEFENSE]/ownerMaxNeed[DEFENSE]) }}
-                    <button class="btn btn-mini btn-primary" id="d_{{ player.id }}" ng-click="draftPlayer('DEFENSE', player.id)">Draft</button>
-                </li>
-            </ul>
-        </div>
-        <div id="available_ks" class="span2">
-            <h3>Kickers</h3>
-            <ul>
-                <li ng-repeat="player in available_ks">
-                    {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][KICKER]/ownerMaxNeed[KICKER]) }}
-                    <button class="btn btn-mini btn-primary" id="k_{{ player.id }}" ng-click="draftPlayer('KICKER', player.id)">Draft</button>
-                </li>
-            </ul>
+        <div class="span12">
+            <h1>Available Players</h1>
+
+            <div class="row-fluid">
+                <div id="available_qbs" class="span2">
+                    <h3>Quarterbacks</h3>
+                    <ul>
+                        <li ng-repeat="player in available_qbs">
+                            {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][QUARTERBACK]/ownerMaxNeed[QUARTERBACK]) }}
+                            <button class="btn btn-mini btn-primary" id="qb_{{ player.id }}" ng-click="draftPlayer('QUARTERBACK', player.id)">Draft</button>
+                        </li>
+                    </ul>
+                </div>
+                <div id="available_rbs" class="span2">
+                    <h3>Running Backs</h3>
+                    <ol>
+                        <li ng-repeat="player in available_rbs">
+                            {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][RUNNING_BACK]/ownerMaxNeed[RUNNING_BACK]) }}
+                            <button class="btn btn-mini btn-primary" id="rb_{{ player.id }}" ng-click="draftPlayer('RUNNING_BACK', player.id)">Draft</button>
+                        </li>
+                    </ol>
+                </div>
+                <div id="available_wrs" class="span2">
+                    <h3>Wide Receivers</h3>
+                    <ul>
+                        <li ng-repeat="player in available_wrs">
+                            {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][WIDE_RECEIVER]/ownerMaxNeed[WIDE_RECEIVER]) }}
+                            <button class="btn btn-mini btn-primary" id="wr_{{ player.id }}" ng-click="draftPlayer('WIDE_RECEIVER', player.id)">Draft</button>
+                        </li>
+                    </ul>
+                </div>
+                <div id="available_tes" class="span2">
+                    <h3>Tight Ends</h3>
+                    <ul>
+                        <li ng-repeat="player in available_tes">
+                            {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][TIGHT_END]/ownerMaxNeed[TIGHT_END]) }}
+                            <button class="btn btn-mini btn-primary" id="te_{{ player.id }}" ng-click="draftPlayer('TIGHT_END', player.id)">Draft</button>
+                        </li>
+                    </ul>
+                </div>
+                <div id="available_ds" class="span2">
+                    <h3>Defenses</h3>
+                    <ul>
+                        <li ng-repeat="player in available_ds">
+                            {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][DEFENSE]/ownerMaxNeed[DEFENSE]) }}
+                            <button class="btn btn-mini btn-primary" id="d_{{ player.id }}" ng-click="draftPlayer('DEFENSE', player.id)">Draft</button>
+                        </li>
+                    </ul>
+                </div>
+                <div id="available_ks" class="span2">
+                    <h3>Kickers</h3>
+                    <ul>
+                        <li ng-repeat="player in available_ks">
+                            {{player.name}} - {{ calculateValue(player.adp, player.vorp, ownerNeed[getOwnerPick(currentPick)][KICKER]/ownerMaxNeed[KICKER]) }}
+                            <button class="btn btn-mini btn-primary" id="k_{{ player.id }}" ng-click="draftPlayer('KICKER', player.id)">Draft</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 </div>
