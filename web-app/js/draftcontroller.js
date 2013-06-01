@@ -26,14 +26,19 @@ angular.module('TradeRapist', []).
         return({
             link: link,
             restrict: "A",
-            template:   '<div id="owners_row_{{ n }}" ng-repeat="n in [] | range:getOwnerRows()" class="row-fluid">' +
-                            '<div id="owner{{ o }}" ng-repeat="o in ownersPerRow(n, numOwners)" class="span2">' +
-                                '<h3>Owner {{ o+1 }}</h3>' +
-                                '<span id="owner{{ o }}_points">Total Projected Points: {{ calculateTotalPoints(o) }}</span><br/>' +
-                                '<span id="owner{{ o }}_starter_points">Starter Projected Points: {{ calculateStarterPoints(o) }}</span>' +
-                                '<span class="label label-success" ng-hide="o != myPick-1">My pick</span>' +
-                                '<span class="label label-important" ng-hide="!isOwnersPick(o+1)">Current pick</span>' +
-                                '<ol><li ng-repeat="player in owners[o]">{{ player.name }} ({{ getPositionDisplayText(player.position) }})</li></ol>' +
+            template:   '<div class="row-fluid">' +
+                            '<div class="span12">' +
+                                '<h1>Owner Rosters</h1>' +
+                                '<div id="owners_row_{{ n }}" ng-repeat="n in [] | range:getOwnerRows()" class="row-fluid">' +
+                                    '<div id="owner{{ o }}" ng-repeat="o in ownersPerRow(n, numOwners)" class="span2">' +
+                                        '<h3>Owner {{ o+1 }}</h3>' +
+                                        '<span id="owner{{ o }}_points">Total Projected Points: {{ calculateTotalPoints(o) }}</span><br/>' +
+                                        '<span id="owner{{ o }}_starter_points">Starter Projected Points: {{ calculateStarterPoints(o) }}</span>' +
+                                        '<span class="label label-success" ng-hide="o != myPick-1">My pick</span>' +
+                                        '<span class="label label-important" ng-hide="!isOwnersPick(o+1)">Current pick</span>' +
+                                        '<ol><li ng-repeat="player in owners[o]">{{ player.name }} ({{ getPositionDisplayText(player.position) }})</li></ol>' +
+                                    '</div>' +
+                                '</div>' +
                             '</div>' +
                         '</div>'
         });
@@ -666,7 +671,7 @@ function DraftController($scope, $http) {
      * @returns {Object}    The sum of the points projected by your starters.
      */
     $scope.calculateStarterPoints = function(owner) {
-        if(!$scope.initialized || $scope.owners[owner].length < $scope.totalRosterSpots) {
+        if(!$scope.initialized) {
             return;
         }
 
