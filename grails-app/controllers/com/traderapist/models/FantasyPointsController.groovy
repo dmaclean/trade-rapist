@@ -29,10 +29,16 @@ class FantasyPointsController {
         Class clazz = Class.forName("com.traderapist.scoringsystem.${params["system"]}", true, Thread.currentThread().contextClassLoader)
         def scoringSystem = clazz.newInstance()
 
-        def players = Player.findAll()
+	    def players = null
+	    if(params["position"]) {
+		    players = Player.findAllByPosition(params["position"])
+	    }
+	    else {
+		    players = Player.findAll()
+	    }
 
 	    long start = System.currentTimeMillis()
-        for(player in players) {
+	    for(player in players) {
             log.info("Calculating fantasy points for ${player.name}")
             player.computeFantasyPoints(scoringSystem)
         }
