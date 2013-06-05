@@ -88,4 +88,12 @@ log4j = {
            'org.springframework',
            'org.hibernate',
            'net.sf.ehcache.hibernate'
+
+	info   'com.traderapist.models',
+		   'com.traderapist.draft'
 }
+
+// Added by the Spring Security Core plugin:
+grails.plugins.springsecurity.userLookup.userDomainClassName = 'com.traderapist.security.User'
+grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'com.traderapist.security.UserRole'
+grails.plugins.springsecurity.authority.className = 'com.traderapist.security.Role'
