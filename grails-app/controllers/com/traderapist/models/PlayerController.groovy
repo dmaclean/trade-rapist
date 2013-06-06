@@ -4,6 +4,7 @@ import com.traderapist.scoringsystem.ESPNStandardScoringSystem
 import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 
+@Secured(["hasRole('admin')"])
 class PlayerController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]

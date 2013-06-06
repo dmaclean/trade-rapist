@@ -1,12 +1,14 @@
 package com.traderapist.models
 
+import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 
+@Secured(["hasRole('admin')"])
 class AverageDraftPositionController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
-    def index() {
+	def index() {
         redirect(action: "list", params: params)
     }
 

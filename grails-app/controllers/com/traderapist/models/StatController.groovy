@@ -1,7 +1,9 @@
 package com.traderapist.models
 
+import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 
+@Secured(["hasRole('admin')"])
 class StatController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
