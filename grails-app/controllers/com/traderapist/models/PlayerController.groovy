@@ -1,5 +1,7 @@
 package com.traderapist.models
 
+import com.traderapist.scoringsystem.ESPNStandardScoringSystem
+import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 
 class PlayerController {
@@ -13,7 +15,7 @@ class PlayerController {
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
         [playerInstanceList: Player.list(params), playerInstanceTotal: Player.count(),
-                qbCorrelation: Player.getCorrelation("QB", null, 2001, 2002)]
+                qbCorrelation: Player.getCorrelation("QB", null, new ESPNStandardScoringSystem(), 2001, 2002)]
     }
 
     def create() {
