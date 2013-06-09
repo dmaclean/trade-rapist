@@ -93,6 +93,7 @@ class DraftControllerIntegrationTests {
 		def k1_adp = new AverageDraftPosition(player: k1, season: 2002, adp: 32).save(flush: true)
 		def k2_adp = new AverageDraftPosition(player: k2, season: 2002, adp: 33).save(flush: true)
 
+		request.addParameter("year", "2002")
 
 		controller.players()
 

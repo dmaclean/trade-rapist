@@ -3,7 +3,7 @@ package com.traderapist.models
 import com.traderapist.constants.FantasyConstants
 import org.junit.*
 
-class PlayerDropoffControllerTests {
+class PlayerDropoffControllerIntegrationTests {
 
     @Before
     void setUp() {
