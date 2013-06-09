@@ -2,10 +2,13 @@ package com.traderapist.models
 
 import com.traderapist.constants.FantasyConstants
 import com.traderapist.scoringsystem.ESPNStandardScoringSystem
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 
 import static org.junit.Assert.*
 import org.junit.*
 
+@Mock([Player])
 class PlayerIntegrationTests {
 
     @Before
