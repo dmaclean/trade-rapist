@@ -5,7 +5,7 @@ import com.traderapist.constants.FantasyConstants
 import static org.junit.Assert.*
 import org.junit.*
 
-class StatTests {
+class StatIntegrationTests {
 
     @Before
     void setUp() {
