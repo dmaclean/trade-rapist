@@ -1,7 +1,6 @@
 package com.traderapist.models
 
-
-
+import com.traderapist.scoringsystem.ESPNStandardScoringSystem
 import grails.test.mixin.*
 import org.junit.*
 
@@ -75,4 +74,13 @@ class FantasyPointsTests {
 
         assert "nullable" == fp.errors["system"]
     }
+
+	void testProjectionDefaultFalse() {
+		def player = new Player(id: 1, name: "Dan", position: "QB")
+		FantasyPoints fp = new FantasyPoints(player: player, season: 2013, week: -1, system: ESPNStandardScoringSystem.class.getName(), points: 100)
+
+		mockForConstraintsTests(FantasyPoints, [fp])
+
+		assertTrue fp.validate()
+	}
 }
