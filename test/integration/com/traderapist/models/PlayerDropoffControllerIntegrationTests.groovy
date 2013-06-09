@@ -1,8 +1,13 @@
 package com.traderapist.models
 
 import com.traderapist.constants.FantasyConstants
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import groovy.mock.interceptor.MockFor
 import org.junit.*
 
+@TestFor(PlayerDropoffController)
+@Mock([Player])
 class PlayerDropoffControllerIntegrationTests {
 
     @Before
