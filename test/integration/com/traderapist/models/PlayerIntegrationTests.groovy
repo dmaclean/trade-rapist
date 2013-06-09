@@ -6,7 +6,7 @@ import com.traderapist.scoringsystem.ESPNStandardScoringSystem
 import static org.junit.Assert.*
 import org.junit.*
 
-class PlayerTests {
+class PlayerIntegrationTests {
 
     @Before
     void setUp() {
