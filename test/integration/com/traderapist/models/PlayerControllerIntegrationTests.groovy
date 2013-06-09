@@ -13,18 +13,24 @@ import org.junit.Test
  * Time: 6:55 PM
  * To change this template use File | Settings | File Templates.
  */
-@TestFor(PlayerController)
-@Mock([Player,FantasyPoints])
+//@TestFor(PlayerController)
+//@Mock([Player,FantasyPoints])
 class PlayerControllerIntegrationTests {
+
+	def controller
+	def params
 
 	@Before
 	void setUp() {
-		Player.metaClass.getStatYears = { [2002] }
-		Player.metaClass.getScoringAverageForSeason = { season -> 0 }
-		Stat.metaClass.static.getStatYears = { [2002] }
+		controller = new PlayerController()
 
-		params["name"] = "Dan"
-		params["position"] = "QB"
+//		Player.metaClass.getStatYears = { [2002] }
+//		Player.metaClass.getScoringAverageForSeason = { season -> 0 }
+//		Stat.metaClass.static.getStatYears = { [2002] }
+
+		controller.request.addParameter("name", "Dan")
+		controller.request.addParameter("position", "QB")
+		params = controller.request.getParameterMap()
 	}
 
 	@After
@@ -48,7 +54,7 @@ class PlayerControllerIntegrationTests {
 
 		assert player.save(flush: true) != null
 
-		params.id = player.id
+//		params.id = player.id
 
 		def model = controller.show(player.id)
 

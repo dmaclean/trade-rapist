@@ -16,11 +16,13 @@ import org.junit.Test
  * Time: 10:47 PM
  * To change this template use File | Settings | File Templates.
  */
-@TestFor(DraftController)
 class DraftControllerIntegrationTests {
+
+	def controller
+
 	@Before
 	void setUp() {
-
+		controller = new DraftController()
 	}
 
 	@After
@@ -93,11 +95,11 @@ class DraftControllerIntegrationTests {
 		def k1_adp = new AverageDraftPosition(player: k1, season: 2002, adp: 32).save(flush: true)
 		def k2_adp = new AverageDraftPosition(player: k2, season: 2002, adp: 33).save(flush: true)
 
-		request.addParameter("year", "2002")
+		controller.request.addParameter("year", "2002")
 
 		controller.players()
 
-		assert response.text == "[" +
+		assert controller.response.text == "[" +
 				"{\"id\":${q1.id},\"name\":\"Quarterback 1\",\"position\":\"QUARTERBACK\",\"points\":300.0,\"adp\":1.0,\"vorp\":5.0}," +
 				"{\"id\":${q2.id},\"name\":\"Quarterback 2\",\"position\":\"QUARTERBACK\",\"points\":295.0,\"adp\":15.0,\"vorp\":0}," +
 				"{\"id\":${r2.id},\"name\":\"Running back 2\",\"position\":\"RUNNING_BACK\",\"points\":275.0,\"adp\":2.0,\"vorp\":25.0}," +

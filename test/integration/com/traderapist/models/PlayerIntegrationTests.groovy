@@ -8,12 +8,14 @@ import grails.test.mixin.TestFor
 import static org.junit.Assert.*
 import org.junit.*
 
-@Mock([Player])
 class PlayerIntegrationTests {
 
     @Before
     void setUp() {
-        // Setup logic here
+//        Player.metaClass.static.getDropoffData = { String position, Integer season -> [
+//		        [new Player(name: "Player 1", position: "QB")],
+//		        [new Player(name: "Player 2", position: "QB")]
+//        ] }
     }
 
     @After
@@ -73,9 +75,12 @@ class PlayerIntegrationTests {
         assert tiers[2][0][1].points == 61.0
     }
 
-    def testGetProjectedPoints_BadYear() {
+	@Test
+    void testGetProjectedPoints_BadYear() {
         def q1 = new Player(name: "Quarterback", position: "QB").save(flush: true)
         def s1 = new Stat(player: q1, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 10).save(flush: true)
+
+//	    Stat.metaClass.static.getStatYear = { [2013] }
 
         try {
             q1.calculateProjectedPoints(2001)
@@ -86,7 +91,8 @@ class PlayerIntegrationTests {
         }
     }
 
-    def testGetProjectedPoints_QB() {
+	@Test
+	void testGetProjectedPoints_QB() {
         def qb1 = new Player(name: "Quarterback 1", position: "QB").save(flush: true)
         def qb2 = new Player(name: "Quarterback 2", position: "QB").save(flush: true)
         def qb3 = new Player(name: "Quarterback 3", position: "QB").save(flush: true)
@@ -157,14 +163,16 @@ class PlayerIntegrationTests {
         }
     }
 
-    def testCalculatePointsStandardDeviation_BadYear() {
+	@Test
+	void testCalculatePointsStandardDeviation_BadYear() {
         def player = new Player(name: "Quarterback", position: "QB").save(flush: true)
         def fp1 = new FantasyPoints(player: player, season: 2001, week: 1, system: "ESPNStandardScoringSystem", points: 10).save(flush: true)
 
         assert player.calculatePointsStandardDeviation(2002) == -1
     }
 
-    def testCalculatePointsStandardDeviation_2001() {
+	@Test
+	void testCalculatePointsStandardDeviation_2001() {
         def player = new Player(name: "Quarterback", position: "QB").save(flush: true)
 
         // Set up Stat object to satisfy Stat.getStatYears() check.
@@ -179,7 +187,8 @@ class PlayerIntegrationTests {
         assert player.calculatePointsStandardDeviation(2001).doubleValue().trunc(3) == 4.387
     }
 
-    def testGetStatYears_2001() {
+	@Test
+	void testGetStatYears_2001() {
         def player = new Player(name: "Quarterback", position: "QB").save(flush: true)
 
         // Set up Stat object to satisfy Stat.getStatYears() check.
@@ -189,7 +198,8 @@ class PlayerIntegrationTests {
         assert statYears.contains(2001) && statYears.size() == 1
     }
 
-    def testGetStatYears_2001_2002() {
+	@Test
+	void testGetStatYears_2001_2002() {
         def player = new Player(name: "Quarterback", position: "QB").save(flush: true)
 
         // Set up Stat object to satisfy Stat.getStatYears() check.
@@ -203,13 +213,15 @@ class PlayerIntegrationTests {
         assert statYears.contains(2002)
     }
 
-    def testGetScoringAverageForSeason_BadSeason() {
+	@Test
+	void testGetScoringAverageForSeason_BadSeason() {
         def player = new Player(name: "Quarterback", position: "QB").save(flush: true)
 
         assert player.getScoringAverageForSeason(2001) == 0
     }
 
-    def testGetScoringAverageForSeason_GoodSeason() {
+	@Test
+	void testGetScoringAverageForSeason_GoodSeason() {
         def player = new Player(name: "Quarterback", position: "QB").save(flush: true)
         def player2 = new Player(name: "Running Back", position: "RB").save(flush: true)
 
@@ -227,7 +239,8 @@ class PlayerIntegrationTests {
         assert player.getScoringAverageForSeason(2001) == 12.5
     }
 
-    def testGetScoringAverageForPositionForSeason_GoodSeason() {
+	@Test
+	void testGetScoringAverageForPositionForSeason_GoodSeason() {
         def player = new Player(name: "Quarterback", position: "QB").save(flush: true)
         def player2 = new Player(name: "Quarterback 2", position: "QB").save(flush: true)
 
@@ -238,7 +251,8 @@ class PlayerIntegrationTests {
         assert Player.getScoringAverageForPositionForSeason("QB", 2001) == 15
     }
 
-    def testGetCorrelation_OverallPoints_2001_2002_QB() {
+	@Test
+	void testGetCorrelation_OverallPoints_2001_2002_QB() {
         def qb1 = new Player(name: "Quarterback 1", position: "QB").save(flush: true)
         def qb2 = new Player(name: "Quarterback 2", position: "QB").save(flush: true)
         def qb3 = new Player(name: "Quarterback 3", position: "QB").save(flush: true)
@@ -284,7 +298,8 @@ class PlayerIntegrationTests {
      *   = 1108/1108.5413
      *   = .999
      */
-    def testGetCorrelation_PassingTouchdowns_2001_2002_QB() {
+	@Test
+	void testGetCorrelation_PassingTouchdowns_2001_2002_QB() {
         def qb1 = new Player(name: "Quarterback 1", position: "QB").save(flush: true)
         def qb2 = new Player(name: "Quarterback 2", position: "QB").save(flush: true)
         def qb3 = new Player(name: "Quarterback 3", position: "QB").save(flush: true)
@@ -305,7 +320,8 @@ class PlayerIntegrationTests {
         assert Double.valueOf(Player.getCorrelation("QB", FantasyConstants.STAT_PASSING_TOUCHDOWNS, espnStandard, 2001, 2002)).trunc(3) == 0.999
     }
 
-    def testCalculateStandardDeviation() {
+	@Test
+	void testCalculateStandardDeviation() {
         def scores = [10.0, 9.0, 11.0, 20.0]
 
         // Mean = (10.0 + 9.0 + 11.0 + 20.0)/4 = 12.5
@@ -319,7 +335,8 @@ class PlayerIntegrationTests {
         assert Player.calculateStandardDeviation(scores).trunc(3) == 4.387
     }
 
-	def testGetPlayersInPointsOrder() {
+	@Test
+	void testGetPlayersInPointsOrder() {
 		/*
 		 * Define players
 		 */
