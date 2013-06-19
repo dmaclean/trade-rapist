@@ -47,9 +47,9 @@
 			</div>
 		</div>
 
-        <div>
+        <!--<div>
             <p>Correlation</p>
             <p>QB (2001 - 2002) - ${qbCorrelation}</p>
-        </div>
+        </div>-->
 	</body>
 </html>

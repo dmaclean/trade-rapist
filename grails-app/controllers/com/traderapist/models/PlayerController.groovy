@@ -15,8 +15,7 @@ class PlayerController {
 
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        [playerInstanceList: Player.list(params), playerInstanceTotal: Player.count(),
-                qbCorrelation: Player.getCorrelation("QB", null, new ESPNStandardScoringSystem(), 2001, 2002)]
+        [playerInstanceList: Player.list(params), playerInstanceTotal: Player.count()]
     }
 
     def create() {
