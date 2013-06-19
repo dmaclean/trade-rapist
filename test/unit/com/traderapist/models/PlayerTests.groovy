@@ -151,4 +151,346 @@ class PlayerTests {
 
 		assert Player.getCorrelation(Player.POSITION_K, null) == 0.1
 	}
+
+	void testCalculateProjectedPointsQB_season_numStartable1_numOwners3() {
+		def numStartable = 1
+		def numOwners = 3
+
+		// Create three quarterbacks
+		def q1 = new Player(name: "Quarterback 1", position: Player.POSITION_QB).save(flush: true)
+		def q2 = new Player(name: "Quarterback 2", position: Player.POSITION_QB).save(flush: true)
+		def q3 = new Player(name: "Quarterback 3", position: Player.POSITION_QB).save(flush: true)
+		def q4 = new Player(name: "Quarterback 4", position: Player.POSITION_QB).save(flush: true)
+		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB).save(flush: true)
+
+		// Create stats for passing yards, passing touchdowns, interceptions, rushing yards, and rushing touchdowns
+		// for each quarterback for the previous season.
+		def py1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
+		def py2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 90).save(flush: true)
+		def py3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 80).save(flush: true)         // our avg player
+		def py4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 70).save(flush: true)
+
+		def pt1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 8).save(flush: true)     // our avg player
+		def pt2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 9).save(flush: true)
+		def pt3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 10).save(flush: true)
+		def pt4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 7).save(flush: true)
+
+		def i1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 1).save(flush: true)
+		def i2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 2).save(flush: true)
+		def i3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 3).save(flush: true)     // our avg player
+		def i4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 4).save(flush: true)
+
+		def ry1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 8).save(flush: true)
+		def ry2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 9).save(flush: true)      // our avg player
+		def ry3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 10).save(flush: true)
+		def ry4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 11).save(flush: true)
+		def ry5 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 100).save(flush: true)
+
+		def rt1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 3).save(flush: true)
+		def rt2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		def rt3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 1).save(flush: true)  // our avg player
+		def rt4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 0).save(flush: true)
+		def rt5 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 10).save(flush: true)
+
+		// Cannot figure out why re-querying the quarterbacks doesn't pull in stats.
+		q1.stats = new HashSet<Stat>([py1, pt1, i1, ry1, rt1])
+		q2.stats = new HashSet<Stat>([py2, pt2, i2, ry2, rt2])
+		q3.stats = new HashSet<Stat>([py3, pt3, i3, ry3, rt3])
+		q4.stats = new HashSet<Stat>([py4, pt4, i4, ry4, rt4])
+		r1.stats = new HashSet<Stat>([ry5, rt5])
+
+
+		/*
+		 * Do projections
+		 *
+		 * Quarterback 1
+		 *
+		 * 2013 passing yards =         (100 * 0.5 ) + (80 * 0.5) = 90 --> 90 / 25 = 3.6
+		 * 2013 passing touchdowns =    (8 * 0.37) + (8 * 0.63) = 2.96 + 5.04 = 8 --> 8 * 4 = 32
+		 * 2013 interceptions =         (1 * 0.08) + (3 * 0.92) = 0.08 + 2.76 = 2.84 --> 2 * -2 = -4
+		 * 2013 rushing yards =         (8 * 0.78) + (9 * 0.22) = 6.24 + 1.98 = 8.22 --> 8 /10 = .8
+		 * 2013 rushing touchdowns =    (3 * 0.5) + (1 * 0.5) = 1.5 + 0.5 = 2 --> 2 * 6 = 12
+		 */
+		assert q1.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 44.4
+
+		/*
+		 * Quarterback 2
+		 *
+		 * 2013 passing yards =         (90 * 0.5 ) + (80 * 0.5) = 85 --> 85 / 25 = 3.4
+		 * 2013 passing touchdowns =    (9 * 0.37) + (8 * 0.63) = 3.33 + 5.04 = 8.37 --> 8 * 4 = 32
+		 * 2013 interceptions =         (2 * 0.08) + (3 * 0.92) = 0.16 + 2.76 = 2.92 --> 2 * -2 = -4
+		 * 2013 rushing yards =         (9 * 0.78) + (9 * 0.22) = 7.02 + 1.98 = 9 --> 9 /10 = .9
+		 * 2013 rushing touchdowns =    (2 * 0.5) + (1 * 0.5) = 1 + 0.5 = 1.5 --> 1 * 6 = 6
+		 */
+		assert q2.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 38.3
+
+		/*
+		 * Quarterback 3
+		 *
+		 * 2013 passing yards =         (80 * 0.5 ) + (80 * 0.5) = 80 --> 80 / 25 = 3.2
+		 * 2013 passing touchdowns =    (10 * 0.37) + (8 * 0.63) = 3.7 + 5.04 = 8.74 --> 8 * 4 = 32
+		 * 2013 interceptions =         (3 * 0.08) + (3 * 0.92) = 0.24 + 2.76 = 3 --> 3 * -2 = -6
+		 * 2013 rushing yards =         (10 * 0.78) + (9 * 0.22) = 7.8 + 1.98 = 9.78 --> 9 /10 = .9
+		 * 2013 rushing touchdowns =    (1 * 0.5) + (1 * 0.5) = 0.5 + 0.5 = 1 --> 1 * 6 = 6
+		 */
+		assert q3.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 36.1
+
+		/*
+		 * Quarterback 4
+		 *
+		 * 2013 passing yards =         (70 * 0.5 ) + (80 * 0.5) = 75 --> 75 / 25 = 3
+		 * 2013 passing touchdowns =    (7 * 0.37) + (8 * 0.63) = 2.59 + 5.04 = 7.63 --> 7 * 4 = 28
+		 * 2013 interceptions =         (4 * 0.08) + (3 * 0.92) = 0.32 + 2.76 = 3.08 --> 3 * -2 = -6
+		 * 2013 rushing yards =         (11 * 0.78) + (9 * 0.22) = 8.58 + 1.98 = 10.56 --> 10 /10 = 1
+		 * 2013 rushing touchdowns =    (0 * 0.5) + (1 * 0.5) = 0 + 0.5 = 0.5 --> 0 * 6 = 0
+		 */
+		assert q4.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 26
+	}
+
+	void testCalculateProjectedPointsRB_season_numStartable1_numOwners3() {
+		def numStartable = 1
+		def numOwners = 3
+
+		// Create three quarterbacks
+		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB).save(flush: true)
+		def r2 = new Player(name: "Running back 2", position: Player.POSITION_RB).save(flush: true)
+		def r3 = new Player(name: "Running back 3", position: Player.POSITION_RB).save(flush: true)
+		def r4 = new Player(name: "Running back 4", position: Player.POSITION_RB).save(flush: true)
+		def q1 = new Player(name: "Quarterback 1", position: Player.POSITION_QB).save(flush: true)
+
+		// Create stats for passing yards, passing touchdowns, interceptions, rushing yards, and rushing touchdowns
+		// for each quarterback for the previous season.
+		def ry1 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 8).save(flush: true)
+		def ry2 = new Stat(player: r2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 9).save(flush: true)      // our avg player
+		def ry3 = new Stat(player: r3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 10).save(flush: true)
+		def ry4 = new Stat(player: r4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 11).save(flush: true)
+		def ry5 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 100).save(flush: true)
+
+		def rt1 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 3).save(flush: true)
+		def rt2 = new Stat(player: r2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		def rt3 = new Stat(player: r3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 1).save(flush: true)  // our avg player
+		def rt4 = new Stat(player: r4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 0).save(flush: true)
+		def rt5 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 10).save(flush: true)
+
+		def rcy1 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 100).save(flush: true)
+		def rcy2 = new Stat(player: r2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 90).save(flush: true)
+		def rcy3 = new Stat(player: r3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 80).save(flush: true)         // our avg player
+		def rcy4 = new Stat(player: r4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 70).save(flush: true)
+
+		def rct1 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 8).save(flush: true)     // our avg player
+		def rct2 = new Stat(player: r2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 9).save(flush: true)
+		def rct3 = new Stat(player: r3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 10).save(flush: true)
+		def rct4 = new Stat(player: r4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 7).save(flush: true)
+
+		def rc1 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 1).save(flush: true)
+		def rc2 = new Stat(player: r2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 2).save(flush: true)     // our avg player
+		def rc3 = new Stat(player: r3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 3).save(flush: true)
+		def rc4 = new Stat(player: r4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 4).save(flush: true)
+
+		// Cannot figure out why re-querying the quarterbacks doesn't pull in stats.
+		r1.stats = new HashSet<Stat>([rcy1, rct1, rc1, ry1, rt1])
+		r2.stats = new HashSet<Stat>([rcy2, rct2, rc2, ry2, rt2])
+		r3.stats = new HashSet<Stat>([rcy3, rct3, rc3, ry3, rt3])
+		r4.stats = new HashSet<Stat>([rcy4, rct4, rc4, ry4, rt4])
+		q1.stats = new HashSet<Stat>([ry5, rt5])
+
+
+		/*
+		 * Do projections
+		 *
+		 * RB 1
+		 *
+		 * 2013 rushing yards =         (8 * 0.5) + (9 * 0.5) = 4 + 4.5 = 8.5 --> 8/10 = .8
+		 * 2013 rushing touchdowns =    (3 * 0.5) + (1 * 0.5) = 1.5 + 0.5 = 2 --> 2 * 6 = 12
+		 * 2013 reception yards =       (100 * 0.51) + (80 * 0.49) = 51 + 39.2 = 90.2 --> 90 / 10 = 9
+		 * 2013 reception touchdowns =  (8 * 0.29) + (8 * 0.71) = 2.32 + 5.68 = 8 --> 8 * 6 = 48
+		 * 2013 receptions =            (1 * 0.54) + (2 * 0.46) = 0.54 + 0.92 = 1.46 --> 1 * 0 = 0
+		 */
+		assert r1.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 69.8
+
+		/*
+		 * RB 2
+		 *
+		 * 2013 rushing yards =         (9 * 0.5) + (9 * 0.5) = 4.5 + 4.5 = 8.5 --> 9 /10 = .9
+		 * 2013 rushing touchdowns =    (2 * 0.5) + (1 * 0.5) = 1 + 0.5 = 1.5 --> 1 * 6 = 6
+		 * 2013 reception yards =       (90 * 0.51) + (80 * 0.49) = 45.9 + 39.2 = 85.1 --> 85 / 10 = 8.5
+		 * 2013 reception touchdowns =  (9 * 0.29) + (8 * 0.71) = 2.61 + 5.68 = 8.29 --> 8 * 6 = 48
+		 * 2013 receptions =            (2 * 0.54) + (2 * 0.46) = 1.08 + 0.92 = 2 --> 2 * 0 = 0
+		 */
+		assert r2.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 63.4
+
+		/*
+		 * RB 3
+		 *
+		 * 2013 rushing yards =         (10 * 0.5) + (9 * 0.5) = 5 + 4.5 = 9.5 --> 9 /10 = .9
+		 * 2013 rushing touchdowns =    (1 * 0.5) + (1 * 0.5) = 0.5 + 0.5 = 1 --> 1 * 6 = 6
+		 * 2013 reception yards =       (80 * 0.51) + (80 * 0.49) = 40.8 + 39.2 = 80 --> 80 / 10 = 8
+		 * 2013 reception touchdowns =  (10 * 0.29) + (8 * 0.71) = 2.9 + 5.68 = 8.58 --> 8 * 6 = 48
+		 * 2013 receptions =            (3 * 0.54) + (2 * 0.46) = 1.62 + 0.92 = 2.54 --> 2 * 0 = 0
+		 */
+		assert r3.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 62.9
+
+		/*
+		 * RB 4
+		 *
+		 * 2013 rushing yards =         (11 * 0.5) + (9 * 0.5) = 5.5 + 4.5 = 10 --> 10 /10 = 1
+		 * 2013 rushing touchdowns =    (0 * 0.5) + (1 * 0.5) = 0 + 0.5 = 0.5 --> 0 * 6 = 0
+		 * 2013 reception yards =       (70 * 0.51) + (80 * 0.49) = 35/7 + 39.2 = 74.9 --> 74 / 10 = 7.4
+		 * 2013 reception touchdowns =  (7 * 0.29) + (8 * 0.71) = 2.03 + 5.68 = 7.71 --> 7 * 6 = 42
+		 * 2013 receptions =            (4 * 0.54) + (2 * 0.46) = 2.16 + 0.92 = 3.08 --> 3 * 0 = 0
+		 */
+		assert r4.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 50.4
+	}
+
+	void testCalculateProjectedPointsWR_season_numStartable1_numOwners3() {
+		def numStartable = 1
+		def numOwners = 3
+
+		// Create three quarterbacks
+		def w1 = new Player(name: "Wide Receiver 1", position: Player.POSITION_WR).save(flush: true)
+		def w2 = new Player(name: "Wide Receiver 2", position: Player.POSITION_WR).save(flush: true)
+		def w3 = new Player(name: "Wide Receiver 3", position: Player.POSITION_WR).save(flush: true)
+		def w4 = new Player(name: "Wide Receiver 4", position: Player.POSITION_WR).save(flush: true)
+		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB).save(flush: true)
+
+		// Create stats for passing yards, passing touchdowns, interceptions, rushing yards, and rushing touchdowns
+		// for each quarterback for the previous season.
+		def rcy1 = new Stat(player: w1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 100).save(flush: true)
+		def rcy2 = new Stat(player: w2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 90).save(flush: true)
+		def rcy3 = new Stat(player: w3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 80).save(flush: true)         // our avg player
+		def rcy4 = new Stat(player: w4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 70).save(flush: true)
+		def rcy5 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 170).save(flush: true)
+
+		def rct1 = new Stat(player: w1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 8).save(flush: true)     // our avg player
+		def rct2 = new Stat(player: w2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 9).save(flush: true)
+		def rct3 = new Stat(player: w3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 10).save(flush: true)
+		def rct4 = new Stat(player: w4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 7).save(flush: true)
+
+		def rc1 = new Stat(player: w1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 1).save(flush: true)
+		def rc2 = new Stat(player: w2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 2).save(flush: true)     // our avg player
+		def rc3 = new Stat(player: w3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 3).save(flush: true)
+		def rc4 = new Stat(player: w4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 4).save(flush: true)
+
+		// Cannot figure out why re-querying the quarterbacks doesn't pull in stats.
+		w1.stats = new HashSet<Stat>([rcy1, rct1, rc1])
+		w2.stats = new HashSet<Stat>([rcy2, rct2, rc2])
+		w3.stats = new HashSet<Stat>([rcy3, rct3, rc3])
+		w4.stats = new HashSet<Stat>([rcy4, rct4, rc4])
+		r1.stats = new HashSet<Stat>([rcy5])
+
+
+		/*
+		 * Do projections
+		 *
+		 * WR 1
+		 *
+		 * 2013 reception yards =       (100 * 0.58) + (80 * 0.42) = 58 + 33.6 = 91.6 --> 91 / 10 = 9.1
+		 * 2013 reception touchdowns =  (8 * 0.38) + (8 * 0.62) = 3.04 + 4.96 = 8 --> 8 * 6 = 48
+		 * 2013 receptions =            (1 * 0.64) + (2 * 0.36) = 0.64 + 0.72 = 1.36 --> 1 * 0 = 0
+		 */
+		assert w1.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 57.1
+
+		/*
+		 * WR 2
+		 *
+		 * 2013 reception yards =       (90 * 0.58) + (80 * 0.42) = 52.2 + 33.6 = 85.8 --> 85 / 10 = 8.5
+		 * 2013 reception touchdowns =  (9 * 0.38) + (8 * 0.62) = 3.42 + 4.96 = 8.38 --> 8 * 6 = 48
+		 * 2013 receptions =            (2 * 0.64) + (2 * 0.36) = 1.28 + 0.72 = 2 --> 2 * 0 = 0
+		 */
+		assert w2.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 56.5
+
+		/*
+		 * WR 3
+		 *
+		 * 2013 reception yards =       (80 * 0.58) + (80 * 0.42) = 46.4 + 33.6 = 80 --> 80 / 10 = 8
+		 * 2013 reception touchdowns =  (10 * 0.38) + (8 * 0.62) = 3.8 + 4.96 = 8.76 --> 8 * 6 = 48
+		 * 2013 receptions =            (3 * 0.64) + (2 * 0.36) = 1.92 + 0.72 = 3.64 --> 3 * 0 = 0
+		 */
+		assert w3.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 56
+
+		/*
+		 * WR 4
+		 *
+		 * 2013 reception yards =       (70 * 0.58) + (80 * 0.42) = 40.6 + 33.6 = 74.2 --> 74 / 10 = 7.4
+		 * 2013 reception touchdowns =  (7 * 0.38) + (8 * 0.62) = 2.66 + 4.96 = 7.62 --> 7 * 6 = 42
+		 * 2013 receptions =            (4 * 0.64) + (2 * 0.36) = 2.56 + 0.72 = 3.28 --> 3 * 0 = 0
+		 */
+		assert w4.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 49.4
+	}
+
+	void testCalculateProjectedPointsTE_season_numStartable1_numOwners3() {
+		def numStartable = 1
+		def numOwners = 3
+
+		// Create three quarterbacks
+		def t1 = new Player(name: "Tight End 1", position: Player.POSITION_TE).save(flush: true)
+		def t2 = new Player(name: "Tight End 2", position: Player.POSITION_TE).save(flush: true)
+		def t3 = new Player(name: "Tight End 3", position: Player.POSITION_TE).save(flush: true)
+		def t4 = new Player(name: "Tight End 4", position: Player.POSITION_TE).save(flush: true)
+		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB).save(flush: true)
+
+		// Create stats for passing yards, passing touchdowns, interceptions, rushing yards, and rushing touchdowns
+		// for each quarterback for the previous season.
+		def rcy1 = new Stat(player: t1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 100).save(flush: true)
+		def rcy2 = new Stat(player: t2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 90).save(flush: true)
+		def rcy3 = new Stat(player: t3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 80).save(flush: true)         // our avg player
+		def rcy4 = new Stat(player: t4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 70).save(flush: true)
+		def rcy5 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: 170).save(flush: true)
+
+		def rct1 = new Stat(player: t1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 8).save(flush: true)     // our avg player
+		def rct2 = new Stat(player: t2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 9).save(flush: true)
+		def rct3 = new Stat(player: t3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 10).save(flush: true)
+		def rct4 = new Stat(player: t4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: 7).save(flush: true)
+
+		def rc1 = new Stat(player: t1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 1).save(flush: true)
+		def rc2 = new Stat(player: t2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 2).save(flush: true)     // our avg player
+		def rc3 = new Stat(player: t3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 3).save(flush: true)
+		def rc4 = new Stat(player: t4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: 4).save(flush: true)
+
+		// Cannot figure out why re-querying the quarterbacks doesn't pull in stats.
+		t1.stats = new HashSet<Stat>([rcy1, rct1, rc1])
+		t2.stats = new HashSet<Stat>([rcy2, rct2, rc2])
+		t3.stats = new HashSet<Stat>([rcy3, rct3, rc3])
+		t4.stats = new HashSet<Stat>([rcy4, rct4, rc4])
+		r1.stats = new HashSet<Stat>([rcy5])
+
+
+		/*
+		 * Do projections
+		 *
+		 * TE 1
+		 *
+		 * 2013 reception yards =       (100 * 0.74) + (80 * 0.26) = 74 + 20.8 = 94.8 --> 94 / 10 = 9.4
+		 * 2013 reception touchdowns =  (8 * 0.44) + (8 * 0.66) = 3.04 + 5.28 = 8.32 --> 8 * 6 = 48
+		 * 2013 receptions =            (1 * 0.65) + (2 * 0.35) = 0.65 + 0.70 = 1.35 --> 1 * 0 = 0
+		 */
+		assert t1.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 57.4
+
+		/*
+		 * TE 2
+		 *
+		 * 2013 reception yards =       (90 * 0.74) + (80 * 0.26) = 66.6 + 20.8 = 87.4 --> 87 / 10 = 8.7
+		 * 2013 reception touchdowns =  (9 * 0.44) + (8 * 0.56) = 3.96 + 4.48 = 8.44 --> 8 * 6 = 48
+		 * 2013 receptions =            (2 * 0.65) + (2 * 0.35) = 1.3 + 0.7 = 2 --> 2 * 0 = 0
+		 */
+		assert t2.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 56.7
+
+		/*
+		 * TE 3
+		 *
+		 * 2013 reception yards =       (80 * 0.74) + (80 * 0.26) = 59.2 + 20.8 = 80 --> 80 / 10 = 8
+		 * 2013 reception touchdowns =  (10 * 0.44) + (8 * 0.56) = 4.4 + 4.48 = 8.88 --> 8 * 6 = 48
+		 * 2013 receptions =            (3 * 0.65) + (2 * 0.35) = 1.95 + 0.7 = 2.65 --> 2 * 0 = 0
+		 */
+		assert t3.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 56
+
+		/*
+		 * TE 4
+		 *
+		 * 2013 reception yards =       (70 * 0.74) + (80 * 0.26) = 51.8 + 20.8 = 72.6 --> 72 / 10 = 7.2
+		 * 2013 reception touchdowns =  (7 * 0.44) + (8 * 0.56) = 3.08 + 4.48 = 7.56 --> 7 * 6 = 42
+		 * 2013 receptions =            (4 * 0.65) + (2 * 0.35) = 2.6 + 0.7 = 3.3 --> 3 * 0 = 0
+		 */
+		assert t4.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 49.2
+	}
 }

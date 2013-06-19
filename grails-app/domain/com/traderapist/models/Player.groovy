@@ -263,8 +263,6 @@ class Player {
 	 * @return                  The estimated number of fantasy points the player will score.
 	 */
 	def calculateProjectedPoints(year, numStartable, numOwners, system) {
-//		def statYears = Stat.findByPlayerAndSeasonAndWeek(this, new Integer(year-1), -1)
-//		def statYears = Stat.getStatYears()
 		def hasValidYear = false
 
 		/*
@@ -285,6 +283,8 @@ class Player {
 		def receptionYardsLastYear = 0
 		def receptionTouchdownsLastYear = 0
 		def receptionsLastYear = 0
+
+		def c = Stat.createCriteria()
 
 		if(position == Player.POSITION_QB) {
 			for(s in stats) {
@@ -319,64 +319,57 @@ class Player {
 				throw new Exception("Invalid year.")
 
 			def idx = numStartable*numOwners -1
-			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
+//			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
 
-//			def c = Stat.createCriteria()
-//			def passingYardsResult = c.listDistinct {
-//				eq("season", year-1)
-//				eq("statKey", FantasyConstants.STAT_PASSING_YARDS)
-//				player {
-//					eq("position", position)
-//				}
-//				maxResults numStartable*numOwners
-//				order "statValue", "desc"
-//			}
-//
-//			def passingTouchdownsResult = c.listDistinct {
-//				eq("season", year-1)
-//				eq("statKey", FantasyConstants.STAT_PASSING_TOUCHDOWNS)
-//				player {
-//					eq("position", position)
-//				}
-//				maxResults numStartable*numOwners
-//				order "statValue", "desc"
-//			}
-//
-//			def interceptionsResult = c.listDistinct {
-//				eq("season", year-1)
-//				eq("statKey", FantasyConstants.STAT_INTERCEPTIONS)
-//				player {
-//					eq("position", position)
-//				}
-//				maxResults numStartable*numOwners
-//				order "statValue", "desc"
-//			}
-//
-//			def rushingYardsResult = c.listDistinct {
-//				eq("season", year-1)
-//				eq("statKey", FantasyConstants.STAT_RUSHING_YARDS)
-//				player {
-//					eq("position", position)
-//				}
-//				maxResults numStartable*numOwners
-//				order "statValue", "desc"
-//			}
-//
-//			def rushingTouchdownsResult = c.listDistinct {
-//				eq("season", year-1)
-//				eq("statKey", FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
-//				player {
-//					eq("position", position)
-//				}
-//				maxResults numStartable*numOwners
-//				order "statValue", "desc"
-//			}
+			def passingYardsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_PASSING_YARDS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
 
-			def passingYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_PASSING_YARDS, position], [max: numStartable*numOwners])[idx]
-			def passingTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_PASSING_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
-			def interceptionsAvgPlayer = Player.findAll(query.replace("desc", "asc"), [year-1, FantasyConstants.STAT_INTERCEPTIONS, position], [max: numStartable*numOwners])[idx]
-			def rushingYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RUSHING_YARDS, position], [max: numStartable*numOwners])[idx]
-			def rushingTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RUSHING_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
+			def passingTouchdownsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_PASSING_TOUCHDOWNS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
+
+			def interceptionsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_INTERCEPTIONS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "asc"
+			}
+
+			def rushingYardsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RUSHING_YARDS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
+
+			def rushingTouchdownsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
 
 			def passingYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_PASSING_YARDS)
 			def passingTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_PASSING_TOUCHDOWNS)
@@ -384,17 +377,11 @@ class Player {
 			def rushingYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RUSHING_YARDS)
 			def rushingTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
 
-			def passingYardsProjected = (passingYardsCorrelation * passingYardsLastYear) + ( (1 - passingYardsCorrelation) * passingYardsAvgPlayer[1].statValue)
-			def passingTouchdownsProjected = (passingTouchdownsCorrelation * passingTouchdownsLastYear) + ( (1 - passingTouchdownsCorrelation) * passingTouchdownsAvgPlayer[1].statValue)
-			def interceptionsProjected = (interceptionsCorrelation * interceptionsLastYear) + ( (1 - interceptionsCorrelation) * interceptionsAvgPlayer[1].statValue)
-			def rushingYardsProjected = (rushingYardsCorrelation * rushingYardsLastYear) + ( (1 - rushingYardsCorrelation) * rushingYardsAvgPlayer[1].statValue)
-			def rushingTouchdownsProjected = (rushingTouchdownsCorrelation * rushingTouchdownsLastYear) + ( (1 - rushingTouchdownsCorrelation) * rushingTouchdownsAvgPlayer[1].statValue)
-
-//			def passingYardsProjected = (passingYardsCorrelation * passingYardsLastYear) + ( (1 - passingYardsCorrelation) * passingYardsResult[idx].statValue)
-//			def passingTouchdownsProjected = (passingTouchdownsCorrelation * passingTouchdownsLastYear) + ( (1 - passingTouchdownsCorrelation) * passingTouchdownsResult[idx].statValue)
-//			def interceptionsProjected = (interceptionsCorrelation * interceptionsLastYear) + ( (1 - interceptionsCorrelation) * interceptionsResult[idx].statValue)
-//			def rushingYardsProjected = (rushingYardsCorrelation * rushingYardsLastYear) + ( (1 - rushingYardsCorrelation) * rushingYardsResult[idx].statValue)
-//			def rushingTouchdownsProjected = (rushingTouchdownsCorrelation * rushingTouchdownsLastYear) + ( (1 - rushingTouchdownsCorrelation) * rushingTouchdownsResult[idx].statValue)
+			def passingYardsProjected = (passingYardsCorrelation * passingYardsLastYear) + ( (1 - passingYardsCorrelation) * passingYardsResult[idx].statValue)
+			def passingTouchdownsProjected = (passingTouchdownsCorrelation * passingTouchdownsLastYear) + ( (1 - passingTouchdownsCorrelation) * passingTouchdownsResult[idx].statValue)
+			def interceptionsProjected = (interceptionsCorrelation * interceptionsLastYear) + ( (1 - interceptionsCorrelation) * interceptionsResult[idx].statValue)
+			def rushingYardsProjected = (rushingYardsCorrelation * rushingYardsLastYear) + ( (1 - rushingYardsCorrelation) * rushingYardsResult[idx].statValue)
+			def rushingTouchdownsProjected = (rushingTouchdownsCorrelation * rushingTouchdownsLastYear) + ( (1 - rushingTouchdownsCorrelation) * rushingTouchdownsResult[idx].statValue)
 
 			return system.calculateScore(
 					[
@@ -438,13 +425,57 @@ class Player {
 				throw new Exception("Invalid year.")
 
 			def idx = numStartable*numOwners -1
-			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
+//			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
 
-			def receptionYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTION_YARDS, position], [max: numStartable*numOwners])[idx]
-			def receptionTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
-			def receptionsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTIONS, position], [max: numStartable*numOwners])[idx]
-			def rushingYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RUSHING_YARDS, position], [max: numStartable*numOwners])[idx]
-			def rushingTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RUSHING_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
+			def receptionYardsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RECEPTION_YARDS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
+
+			def receptionTouchdownsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RECEPTION_TOUCHDOWNS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
+
+			def receptionsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RECEPTIONS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "asc"
+			}
+
+			def rushingYardsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RUSHING_YARDS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
+
+			def rushingTouchdownsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
 
 			def receptionYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_YARDS)
 			def receptionTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS)
@@ -452,11 +483,11 @@ class Player {
 			def rushingYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RUSHING_YARDS)
 			def rushingTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
 
-			def receptionYardsProjected = (receptionYardsCorrelation * receptionYardsLastYear) + ( (1 - receptionYardsCorrelation) * receptionYardsAvgPlayer[1].statValue)
-			def receptionTouchdownsProjected = (receptionTouchdownsCorrelation * receptionTouchdownsLastYear) + ( (1 - receptionTouchdownsCorrelation) * receptionTouchdownsAvgPlayer[1].statValue)
-			def receptionsProjected = (receptionsCorrelation * receptionsLastYear) + ( (1 - receptionsCorrelation) * receptionsAvgPlayer[1].statValue)
-			def rushingYardsProjected = (rushingYardsCorrelation * rushingYardsLastYear) + ( (1 - rushingYardsCorrelation) * rushingYardsAvgPlayer[1].statValue)
-			def rushingTouchdownsProjected = (rushingTouchdownsCorrelation * rushingTouchdownsLastYear) + ( (1 - rushingTouchdownsCorrelation) * rushingTouchdownsAvgPlayer[1].statValue)
+			def receptionYardsProjected = (receptionYardsCorrelation * receptionYardsLastYear) + ( (1 - receptionYardsCorrelation) * receptionYardsResult[idx].statValue)
+			def receptionTouchdownsProjected = (receptionTouchdownsCorrelation * receptionTouchdownsLastYear) + ( (1 - receptionTouchdownsCorrelation) * receptionTouchdownsResult[idx].statValue)
+			def receptionsProjected = (receptionsCorrelation * receptionsLastYear) + ( (1 - receptionsCorrelation) * receptionsResult[idx].statValue)
+			def rushingYardsProjected = (rushingYardsCorrelation * rushingYardsLastYear) + ( (1 - rushingYardsCorrelation) * rushingYardsResult[idx].statValue)
+			def rushingTouchdownsProjected = (rushingTouchdownsCorrelation * rushingTouchdownsLastYear) + ( (1 - rushingTouchdownsCorrelation) * rushingTouchdownsResult[idx].statValue)
 
 			return system.calculateScore(
 					[
@@ -494,19 +525,44 @@ class Player {
 				throw new Exception("Invalid year.")
 
 			def idx = numStartable*numOwners -1
-			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
+//			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
+			def receptionYardsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RECEPTION_YARDS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
 
-			def receptionYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTION_YARDS, position], [max: numStartable*numOwners])[idx]
-			def receptionTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
-			def receptionsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTIONS, position], [max: numStartable*numOwners])[idx]
+			def receptionTouchdownsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RECEPTION_TOUCHDOWNS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "desc"
+			}
+
+			def receptionsResult = c.listDistinct {
+				eq("season", year-1)
+				eq("statKey", FantasyConstants.STAT_RECEPTIONS)
+				player {
+					eq("position", position)
+				}
+				maxResults numStartable*numOwners
+				order "statValue", "asc"
+			}
 
 			def receptionYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_YARDS)
 			def receptionTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS)
 			def receptionsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTIONS)
 
-			def receptionYardsProjected = (receptionYardsCorrelation * receptionYardsLastYear) + ( (1 - receptionYardsCorrelation) * receptionYardsAvgPlayer[1].statValue)
-			def receptionTouchdownsProjected = (receptionTouchdownsCorrelation * receptionTouchdownsLastYear) + ( (1 - receptionTouchdownsCorrelation) * receptionTouchdownsAvgPlayer[1].statValue)
-			def receptionsProjected = (receptionsCorrelation * receptionsLastYear) + ( (1 - receptionsCorrelation) * receptionsAvgPlayer[1].statValue)
+			def receptionYardsProjected = (receptionYardsCorrelation * receptionYardsLastYear) + ( (1 - receptionYardsCorrelation) * receptionYardsResult[idx].statValue)
+			def receptionTouchdownsProjected = (receptionTouchdownsCorrelation * receptionTouchdownsLastYear) + ( (1 - receptionTouchdownsCorrelation) * receptionTouchdownsResult[idx].statValue)
+			def receptionsProjected = (receptionsCorrelation * receptionsLastYear) + ( (1 - receptionsCorrelation) * receptionsResult[idx].statValue)
 
 			return system.calculateScore(
 					[

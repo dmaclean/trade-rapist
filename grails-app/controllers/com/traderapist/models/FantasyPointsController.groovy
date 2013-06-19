@@ -88,6 +88,18 @@ class FantasyPointsController {
 
 
 		for(p in players) {
+			// Check for duplicates
+			if(FantasyPoints.findByNumOwnersAndNumStartableAndPlayerAndProjectionAndSeasonAndSystem(
+					Integer.parseInt(params["num_owners"]),
+					Integer.parseInt(params["num_startable"]),
+					p,
+					true,
+					Integer.parseInt(params["season"]),
+					params["system"]
+			) != null) {
+				continue
+			}
+
 			def points = p.calculateProjectedPoints(
 					Integer.parseInt(params["season"]),
 					Integer.parseInt(params["num_startable"]),
@@ -95,6 +107,7 @@ class FantasyPointsController {
 					scoringSystem)
 
 			def playerFantasyProjection = new FantasyPoints(
+					player: p,
 					season: Integer.parseInt(params["season"]),
 					week: -1,
 					points: points,
@@ -103,6 +116,7 @@ class FantasyPointsController {
 					numOwners: Integer.parseInt(params["num_owners"]),
 					numStartable: Integer.parseInt(params["num_startable"])
 			).save()
+			log.info("saved ${ playerFantasyProjection }")
 		}
 
 		render "Point projection for ${params["season"]} completed"

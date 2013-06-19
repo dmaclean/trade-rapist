@@ -13,6 +13,8 @@ class FantasyPointsControllerTests {
 
     Player player
 
+	def sessionFactory
+
     @Before
     void setUp() {
         player = new Player(name: "Dan MacLean", position: "QB")
@@ -216,8 +218,6 @@ class FantasyPointsControllerTests {
 		Stat s4 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
 		Stat s5 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 2).save(flush: true)
 
-//		player.stats = new HashSet<Stat>([s1,s2,s3,s4,s5])
-
 		controller.projectPoints()
 
 		def fps = FantasyPoints.findAllBySeason(2002)
@@ -228,7 +228,7 @@ class FantasyPointsControllerTests {
 
 		assertTrue "Season is not 2002", fp.season == 2002
 		assertTrue "Week is not -1", fp.week == -1
-		assertTrue "Points is not 12", fp.points == -1
+		assertTrue "Points is not 20.2", fp.points == 20.2
 		assertTrue "Projection is not true", fp.projection
 	}
 
@@ -245,8 +245,6 @@ class FantasyPointsControllerTests {
 		Stat s4 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
 		Stat s5 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 2).save(flush: true)
 
-//		player.stats = new HashSet<Stat>([s1,s2,s3,s4,s5])
-
 		controller.projectPoints()
 
 		def fps = FantasyPoints.findAllBySeason(2002)
@@ -257,7 +255,7 @@ class FantasyPointsControllerTests {
 
 		assertTrue "Season is not 2002", fp.season == 2002
 		assertTrue "Week is not -1", fp.week == -1
-		assertTrue "Points is not 12", fp.points == -1
+		assertTrue "Points is not 20.2", fp.points == 20.2
 		assertTrue "Projection is not true", fp.projection
 
 		/*
@@ -271,7 +269,7 @@ class FantasyPointsControllerTests {
 
 		assertTrue "Season is not 2002", fps[0].season == 2002
 		assertTrue "Week is not -1", fps[0].week == -1
-		assertTrue "Points is not 12", fps[0].points == -1
+		assertTrue "Points is not 20.2", fps[0].points == 20.2
 		assertTrue "Projection is not true", fp.projection
 	}
 
@@ -288,8 +286,6 @@ class FantasyPointsControllerTests {
 		Stat s4 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
 		Stat s5 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 2).save(flush: true)
 
-//		player.stats = new HashSet<Stat>([s1,s2,s3,s4,s5])
-
 		controller.projectPoints()
 
 		def fps = FantasyPoints.findAllBySeason(2002)
@@ -300,7 +296,7 @@ class FantasyPointsControllerTests {
 
 		assertTrue "Season is not 2002", fp.season == 2002
 		assertTrue "Week is not -1", fp.week == -1
-		assertTrue "Points is not 12", fp.points == -1
+		assertTrue "Points is not 20.2", fp.points == 20.2
 		assertTrue "Projection is not true", fp.projection
 	}
 
@@ -313,8 +309,6 @@ class FantasyPointsControllerTests {
 		Stat s3 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 2).save(flush: true)
 		Stat s4 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
 		Stat s5 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 2).save(flush: true)
-
-//		player.stats = new HashSet<Stat>([s1,s2,s3,s4,s5])
 
 		controller.projectPoints()
 

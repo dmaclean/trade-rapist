@@ -1,7 +1,6 @@
 package com.traderapist.models
 
-
-
+import com.traderapist.scoringsystem.IFantasyScoringSystem
 import org.junit.*
 import grails.test.mixin.*
 
@@ -23,6 +22,7 @@ class PlayerControllerTests {
     }
 
     void testList() {
+	    Player.metaClass.static.getCorrelation = { position, stat, system, season1, season2 -> [] }
 
         def model = controller.list()
 
