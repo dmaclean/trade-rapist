@@ -1,5 +1,7 @@
 package com.traderapist.models
 
+import com.traderapist.constants.FantasyConstants
+import com.traderapist.scoringsystem.ESPNStandardScoringSystem
 import com.traderapist.scoringsystem.IFantasyScoringSystem
 
 class Player {
@@ -28,7 +30,6 @@ class Player {
 
     static mapping = {
         cache true
-        stats cache: 'read-only'
         table "players"
         version false
     }
@@ -251,6 +252,284 @@ class Player {
         return correlation*(points-positionAvg) + positionAvg
     }
 
+	/**
+	 * Estimates how many points a player will score in the specified season.  This
+	 * currently requires that the previous two season be available because we
+	 * calculate the point correlation for the player's position on the fly.
+	 *
+	 * @param year              The season we want to estimate points for.
+	 * @param numStartable      The number of players at this position that are startable on a roster.
+	 * @param numOwners         The number of owners in a league.
+	 * @return                  The estimated number of fantasy points the player will score.
+	 */
+	def calculateProjectedPoints(year, numStartable, numOwners, system) {
+//		def statYears = Stat.findByPlayerAndSeasonAndWeek(this, new Integer(year-1), -1)
+//		def statYears = Stat.getStatYears()
+		def hasValidYear = false
+
+		/*
+		Make sure the year we want to project is supported with stats from the previous year.
+
+		i.e. year = 2002, we need stats from 2001.
+		 */
+		if (hasValidYear)
+			throw new Exception("Invalid year.")
+
+		def passingYardsLastYear = 0
+		def passingTouchdownsLastYear = 0
+		def interceptionsLastYear = 0
+
+		def rushingYardsLastYear = 0
+		def rushingTouchdownsLastYear = 0
+
+		def receptionYardsLastYear = 0
+		def receptionTouchdownsLastYear = 0
+		def receptionsLastYear = 0
+
+		if(position == Player.POSITION_QB) {
+			for(s in stats) {
+				// Set flag for valid year
+				if(!hasValidYear && s.season == year-1) {
+					hasValidYear = true
+				}
+
+				if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_PASSING_YARDS) {
+					passingYardsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_PASSING_TOUCHDOWNS) {
+					passingTouchdownsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_INTERCEPTIONS) {
+					interceptionsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RUSHING_YARDS) {
+					rushingYardsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RUSHING_TOUCHDOWNS) {
+					rushingTouchdownsLastYear = s.statValue
+				}
+			}
+
+			/*
+			Make sure the year we want to project is supported with stats from the previous year.
+
+			i.e. year = 2002, we need stats from 2001.
+			 */
+			if (!hasValidYear)
+				throw new Exception("Invalid year.")
+
+			def idx = numStartable*numOwners -1
+			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
+
+//			def c = Stat.createCriteria()
+//			def passingYardsResult = c.listDistinct {
+//				eq("season", year-1)
+//				eq("statKey", FantasyConstants.STAT_PASSING_YARDS)
+//				player {
+//					eq("position", position)
+//				}
+//				maxResults numStartable*numOwners
+//				order "statValue", "desc"
+//			}
+//
+//			def passingTouchdownsResult = c.listDistinct {
+//				eq("season", year-1)
+//				eq("statKey", FantasyConstants.STAT_PASSING_TOUCHDOWNS)
+//				player {
+//					eq("position", position)
+//				}
+//				maxResults numStartable*numOwners
+//				order "statValue", "desc"
+//			}
+//
+//			def interceptionsResult = c.listDistinct {
+//				eq("season", year-1)
+//				eq("statKey", FantasyConstants.STAT_INTERCEPTIONS)
+//				player {
+//					eq("position", position)
+//				}
+//				maxResults numStartable*numOwners
+//				order "statValue", "desc"
+//			}
+//
+//			def rushingYardsResult = c.listDistinct {
+//				eq("season", year-1)
+//				eq("statKey", FantasyConstants.STAT_RUSHING_YARDS)
+//				player {
+//					eq("position", position)
+//				}
+//				maxResults numStartable*numOwners
+//				order "statValue", "desc"
+//			}
+//
+//			def rushingTouchdownsResult = c.listDistinct {
+//				eq("season", year-1)
+//				eq("statKey", FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
+//				player {
+//					eq("position", position)
+//				}
+//				maxResults numStartable*numOwners
+//				order "statValue", "desc"
+//			}
+
+			def passingYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_PASSING_YARDS, position], [max: numStartable*numOwners])[idx]
+			def passingTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_PASSING_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
+			def interceptionsAvgPlayer = Player.findAll(query.replace("desc", "asc"), [year-1, FantasyConstants.STAT_INTERCEPTIONS, position], [max: numStartable*numOwners])[idx]
+			def rushingYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RUSHING_YARDS, position], [max: numStartable*numOwners])[idx]
+			def rushingTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RUSHING_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
+
+			def passingYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_PASSING_YARDS)
+			def passingTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_PASSING_TOUCHDOWNS)
+			def interceptionsCorrelation = getCorrelation(position, FantasyConstants.STAT_INTERCEPTIONS)
+			def rushingYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RUSHING_YARDS)
+			def rushingTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
+
+			def passingYardsProjected = (passingYardsCorrelation * passingYardsLastYear) + ( (1 - passingYardsCorrelation) * passingYardsAvgPlayer[1].statValue)
+			def passingTouchdownsProjected = (passingTouchdownsCorrelation * passingTouchdownsLastYear) + ( (1 - passingTouchdownsCorrelation) * passingTouchdownsAvgPlayer[1].statValue)
+			def interceptionsProjected = (interceptionsCorrelation * interceptionsLastYear) + ( (1 - interceptionsCorrelation) * interceptionsAvgPlayer[1].statValue)
+			def rushingYardsProjected = (rushingYardsCorrelation * rushingYardsLastYear) + ( (1 - rushingYardsCorrelation) * rushingYardsAvgPlayer[1].statValue)
+			def rushingTouchdownsProjected = (rushingTouchdownsCorrelation * rushingTouchdownsLastYear) + ( (1 - rushingTouchdownsCorrelation) * rushingTouchdownsAvgPlayer[1].statValue)
+
+//			def passingYardsProjected = (passingYardsCorrelation * passingYardsLastYear) + ( (1 - passingYardsCorrelation) * passingYardsResult[idx].statValue)
+//			def passingTouchdownsProjected = (passingTouchdownsCorrelation * passingTouchdownsLastYear) + ( (1 - passingTouchdownsCorrelation) * passingTouchdownsResult[idx].statValue)
+//			def interceptionsProjected = (interceptionsCorrelation * interceptionsLastYear) + ( (1 - interceptionsCorrelation) * interceptionsResult[idx].statValue)
+//			def rushingYardsProjected = (rushingYardsCorrelation * rushingYardsLastYear) + ( (1 - rushingYardsCorrelation) * rushingYardsResult[idx].statValue)
+//			def rushingTouchdownsProjected = (rushingTouchdownsCorrelation * rushingTouchdownsLastYear) + ( (1 - rushingTouchdownsCorrelation) * rushingTouchdownsResult[idx].statValue)
+
+			return system.calculateScore(
+					[
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: passingYardsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: passingTouchdownsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: interceptionsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: rushingYardsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: rushingTouchdownsProjected),
+					])
+		}
+		else if(position == Player.POSITION_RB) {
+			for(s in stats) {
+				// Set flag for valid year
+				if(!hasValidYear && s.season == year-1) {
+					hasValidYear = true
+				}
+
+				if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RECEPTION_YARDS) {
+					receptionYardsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RECEPTION_TOUCHDOWNS) {
+					receptionTouchdownsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RECEPTIONS) {
+					receptionsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RUSHING_YARDS) {
+					rushingYardsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RUSHING_TOUCHDOWNS) {
+					rushingTouchdownsLastYear = s.statValue
+				}
+			}
+
+			/*
+			Make sure the year we want to project is supported with stats from the previous year.
+
+			i.e. year = 2002, we need stats from 2001.
+			 */
+			if (!hasValidYear)
+				throw new Exception("Invalid year.")
+
+			def idx = numStartable*numOwners -1
+			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
+
+			def receptionYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTION_YARDS, position], [max: numStartable*numOwners])[idx]
+			def receptionTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
+			def receptionsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTIONS, position], [max: numStartable*numOwners])[idx]
+			def rushingYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RUSHING_YARDS, position], [max: numStartable*numOwners])[idx]
+			def rushingTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RUSHING_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
+
+			def receptionYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_YARDS)
+			def receptionTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS)
+			def receptionsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTIONS)
+			def rushingYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RUSHING_YARDS)
+			def rushingTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
+
+			def receptionYardsProjected = (receptionYardsCorrelation * receptionYardsLastYear) + ( (1 - receptionYardsCorrelation) * receptionYardsAvgPlayer[1].statValue)
+			def receptionTouchdownsProjected = (receptionTouchdownsCorrelation * receptionTouchdownsLastYear) + ( (1 - receptionTouchdownsCorrelation) * receptionTouchdownsAvgPlayer[1].statValue)
+			def receptionsProjected = (receptionsCorrelation * receptionsLastYear) + ( (1 - receptionsCorrelation) * receptionsAvgPlayer[1].statValue)
+			def rushingYardsProjected = (rushingYardsCorrelation * rushingYardsLastYear) + ( (1 - rushingYardsCorrelation) * rushingYardsAvgPlayer[1].statValue)
+			def rushingTouchdownsProjected = (rushingTouchdownsCorrelation * rushingTouchdownsLastYear) + ( (1 - rushingTouchdownsCorrelation) * rushingTouchdownsAvgPlayer[1].statValue)
+
+			return system.calculateScore(
+					[
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: receptionYardsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: receptionTouchdownsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: receptionsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: rushingYardsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: rushingTouchdownsProjected),
+					])
+		}
+		else if(position == Player.POSITION_WR || position == Player.POSITION_TE) {
+			for(s in stats) {
+				// Set flag for valid year
+				if(!hasValidYear && s.season == year-1) {
+					hasValidYear = true
+				}
+
+				if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RECEPTION_YARDS) {
+					receptionYardsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RECEPTION_TOUCHDOWNS) {
+					receptionTouchdownsLastYear = s.statValue
+				}
+				else if(s.season == year-1 && s.week == -1 && s.statKey == FantasyConstants.STAT_RECEPTIONS) {
+					receptionsLastYear = s.statValue
+				}
+			}
+
+			/*
+			Make sure the year we want to project is supported with stats from the previous year.
+
+			i.e. year = 2002, we need stats from 2001.
+			 */
+			if (!hasValidYear)
+				throw new Exception("Invalid year.")
+
+			def idx = numStartable*numOwners -1
+			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
+
+			def receptionYardsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTION_YARDS, position], [max: numStartable*numOwners])[idx]
+			def receptionTouchdownsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, position], [max: numStartable*numOwners])[idx]
+			def receptionsAvgPlayer = Player.findAll(query, [year-1, FantasyConstants.STAT_RECEPTIONS, position], [max: numStartable*numOwners])[idx]
+
+			def receptionYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_YARDS)
+			def receptionTouchdownsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS)
+			def receptionsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTIONS)
+
+			def receptionYardsProjected = (receptionYardsCorrelation * receptionYardsLastYear) + ( (1 - receptionYardsCorrelation) * receptionYardsAvgPlayer[1].statValue)
+			def receptionTouchdownsProjected = (receptionTouchdownsCorrelation * receptionTouchdownsLastYear) + ( (1 - receptionTouchdownsCorrelation) * receptionTouchdownsAvgPlayer[1].statValue)
+			def receptionsProjected = (receptionsCorrelation * receptionsLastYear) + ( (1 - receptionsCorrelation) * receptionsAvgPlayer[1].statValue)
+
+			return system.calculateScore(
+					[
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RECEPTION_YARDS, statValue: receptionYardsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: receptionTouchdownsProjected),
+							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: receptionsProjected)
+					])
+		}
+
+		return 0
+
+//		def positionAvg = getScoringAverageForPositionForSeason(position, year-1)
+//		def points
+//		for(f in fantasyPoints) {
+//			if(f.season == year-1 && f.week == -1) {
+//				points = f.points
+//				break
+//			}
+//		}
+//
+//		return correlation*(points-positionAvg) + positionAvg
+	}
+
     /**
      * Calculates the correlation of points for a position between two seasons.  Optionally, a stat
      * can be specified to calculate the correlation exclusively of the points yielded by that stat.
@@ -309,6 +588,77 @@ class Player {
 
         return correlation
     }
+
+	/**
+	 * Simple method to return a static correlation that is consistent for all players
+	 * at the provided position.
+	 *
+	 * @param position
+	 */
+	static def getCorrelation(position, stat) {
+		if(position == POSITION_QB) {
+			if(stat == FantasyConstants.STAT_PASSING_YARDS) {
+				return 0.5
+			}
+			else if(stat == FantasyConstants.STAT_PASSING_TOUCHDOWNS) {
+				return 0.37
+			}
+			else if(stat == FantasyConstants.STAT_INTERCEPTIONS) {
+				return 0.08
+			}
+			else if(stat == FantasyConstants.STAT_RUSHING_YARDS) {
+				return 0.78
+			}
+			else if(stat == FantasyConstants.STAT_RUSHING_TOUCHDOWNS) {
+				return 0.5
+			}
+		}
+		else if(position == POSITION_RB) {
+			if(stat == FantasyConstants.STAT_RUSHING_YARDS) {
+				return 0.5
+			}
+			else if(stat == FantasyConstants.STAT_RUSHING_TOUCHDOWNS) {
+				return 0.5
+			}
+			else if(stat == FantasyConstants.STAT_RECEPTIONS) {
+				return 0.54
+			}
+			else if(stat == FantasyConstants.STAT_RECEPTION_YARDS) {
+				return 0.51
+			}
+			else if(stat == FantasyConstants.STAT_RECEPTION_TOUCHDOWNS) {
+				return 0.29
+			}
+		}
+		else if(position == POSITION_WR) {
+			if(stat == FantasyConstants.STAT_RECEPTION_YARDS) {
+				return 0.58
+			}
+			else if(stat == FantasyConstants.STAT_RECEPTION_TOUCHDOWNS) {
+				return 0.38
+			}
+			else if(stat == FantasyConstants.STAT_RECEPTIONS) {
+				return 0.64
+			}
+		}
+		else if(position == POSITION_TE) {
+			if(stat == FantasyConstants.STAT_RECEPTION_YARDS) {
+				return 0.74
+			}
+			else if(stat == FantasyConstants.STAT_RECEPTION_TOUCHDOWNS) {
+				return 0.44
+			}
+			else if(stat == FantasyConstants.STAT_RECEPTIONS) {
+				return 0.65
+			}
+		}
+		else if(position == POSITION_DEF) {
+			return 0.1
+		}
+		else if(position == POSITION_K) {
+			return 0.1
+		}
+	}
 
     /**
      * Calculates standard deviation for a list of numbers

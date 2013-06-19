@@ -48,6 +48,66 @@ class FantasyPointsController {
 	    print("Generated fantasy points for all players in ${ (end-start)/1000.0 } seconds")
     }
 
+	def projectPoints() {
+		/*
+		 * Make sure the provided scoring system is valid.
+		 */
+		def scoringSystem
+		try {
+			Class clazz = Class.forName("com.traderapist.scoringsystem.${params["system"]}", true, Thread.currentThread().contextClassLoader)
+			scoringSystem = clazz.newInstance()
+		}
+		catch(Exception e) {
+			render "Invalid scoring system - ${params["system"]}"
+			return
+		}
+
+		/*
+		 * Make sure season, num_startable, num_owners, and position are valid
+		 */
+		try { Integer.parseInt(params["season"]) } catch(Exception e) { render "season must be an integer"; return }
+		try { Integer.parseInt(params["num_startable"]) } catch(Exception e) { render "num_startable must be an integer"; return }
+		try { Integer.parseInt(params["num_owners"]) } catch(Exception e) { render "num_owners must be an integer"; return }
+		def positionRegex = "/${Player.POSITION_QB}|${Player.POSITION_RB}|${Player.POSITION_WR}|${Player.POSITION_TE}|${Player.POSITION_DEF}|${Player.POSITION_K}/"
+		if(params["position"] == null || !(params["position"] =~ positionRegex)) {
+			render "position must be one of ${Player.POSITION_QB}, ${Player.POSITION_RB}, ${Player.POSITION_WR}, ${Player.POSITION_TE}, ${Player.POSITION_DEF}, ${Player.POSITION_K}"
+		}
+
+		/*
+		 * Grab all players who had stats in the previous season.
+		 */
+		def previousSeason = Integer.parseInt(params["season"]) - 1
+		def positions = (params["position"]) ? params["position"] : [Player.POSITION_QB, Player.POSITION_RB, Player.POSITION_WR, Player.POSITION_TE]
+		def players = Player.createCriteria().listDistinct {
+			'in'("position", positions)
+			stats {
+				eq("season", previousSeason)
+				eq("week", -1)
+			}
+		}
+
+
+		for(p in players) {
+			def points = p.calculateProjectedPoints(
+					Integer.parseInt(params["season"]),
+					Integer.parseInt(params["num_startable"]),
+					Integer.parseInt(params["num_owners"]),
+					scoringSystem)
+
+			def playerFantasyProjection = new FantasyPoints(
+					season: Integer.parseInt(params["season"]),
+					week: -1,
+					points: points,
+					system: params["system"],
+					projection: true,
+					numOwners: Integer.parseInt(params["num_owners"]),
+					numStartable: Integer.parseInt(params["num_startable"])
+			).save()
+		}
+
+		render "Point projection for ${params["season"]} completed"
+	}
+
     def save() {
         def fantasyPointsInstance = new FantasyPoints(params)
         if (!fantasyPointsInstance.save(flush: true)) {

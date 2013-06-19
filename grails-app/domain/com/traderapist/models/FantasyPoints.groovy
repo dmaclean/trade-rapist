@@ -7,6 +7,8 @@ class FantasyPoints {
     Double points
     String system
 	Boolean projection
+	Integer numStartable
+	Integer numOwners
 
     static belongsTo = [player: Player]
 
@@ -17,6 +19,8 @@ class FantasyPoints {
         points nullable: false
         system blank: false
 	    projection nullable: true
+	    numStartable nullable: true
+	    numOwners nullable: true
     }
 
     static mapping = {

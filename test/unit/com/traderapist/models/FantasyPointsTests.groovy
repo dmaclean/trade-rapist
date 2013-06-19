@@ -83,4 +83,38 @@ class FantasyPointsTests {
 
 		assertTrue fp.validate()
 	}
+
+	void testNumStartableNullable() {
+		def player = new Player(id: 1, name: "Dan", position: "QB")
+		FantasyPoints fp = new FantasyPoints(
+				player: player,
+				season: 2013,
+				week: -1,
+				points: 100,
+				system: "ESPN",
+				projection: true,
+				numOwners: 10
+		)
+
+		mockForConstraintsTests(FantasyPoints, [fp])
+
+		assertTrue fp.validate()
+	}
+
+	void testNumOwnersNullable() {
+		def player = new Player(id: 1, name: "Dan", position: "QB")
+		FantasyPoints fp = new FantasyPoints(
+				player: player,
+				season: 2013,
+				week: -1,
+				points: 100,
+				system: "ESPN",
+				projection: true,
+				numStartable: 1
+		)
+
+		mockForConstraintsTests(FantasyPoints, [fp])
+
+		assertTrue fp.validate()
+	}
 }

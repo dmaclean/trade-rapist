@@ -125,4 +125,30 @@ class PlayerTests {
 		assert fantasyPoints[0].week == 1
 		assert fantasyPoints[0].points == 16
 	}
+
+	void testGetCorrelation_Position_Stat() {
+		assert Player.getCorrelation(Player.POSITION_QB, FantasyConstants.STAT_PASSING_YARDS) == 0.5
+		assert Player.getCorrelation(Player.POSITION_QB, FantasyConstants.STAT_PASSING_TOUCHDOWNS) == 0.37
+		assert Player.getCorrelation(Player.POSITION_QB, FantasyConstants.STAT_INTERCEPTIONS) == 0.08
+		assert Player.getCorrelation(Player.POSITION_QB, FantasyConstants.STAT_RUSHING_YARDS) == 0.78
+		assert Player.getCorrelation(Player.POSITION_QB, FantasyConstants.STAT_RUSHING_TOUCHDOWNS) == 0.5
+
+		assert Player.getCorrelation(Player.POSITION_RB, FantasyConstants.STAT_RUSHING_YARDS) == 0.5
+		assert Player.getCorrelation(Player.POSITION_RB, FantasyConstants.STAT_RUSHING_TOUCHDOWNS) == 0.5
+		assert Player.getCorrelation(Player.POSITION_RB, FantasyConstants.STAT_RECEPTIONS) == 0.54
+		assert Player.getCorrelation(Player.POSITION_RB, FantasyConstants.STAT_RECEPTION_YARDS) == 0.51
+		assert Player.getCorrelation(Player.POSITION_RB, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS) == 0.29
+
+		assert Player.getCorrelation(Player.POSITION_WR, FantasyConstants.STAT_RECEPTION_YARDS) == 0.58
+		assert Player.getCorrelation(Player.POSITION_WR, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS) == 0.38
+		assert Player.getCorrelation(Player.POSITION_WR, FantasyConstants.STAT_RECEPTIONS) == 0.64
+
+		assert Player.getCorrelation(Player.POSITION_TE, FantasyConstants.STAT_RECEPTION_YARDS) == 0.74
+		assert Player.getCorrelation(Player.POSITION_TE, FantasyConstants.STAT_RECEPTION_TOUCHDOWNS) == 0.44
+		assert Player.getCorrelation(Player.POSITION_TE, FantasyConstants.STAT_RECEPTIONS) == 0.65
+
+		assert Player.getCorrelation(Player.POSITION_DEF, null) == 0.1
+
+		assert Player.getCorrelation(Player.POSITION_K, null) == 0.1
+	}
 }

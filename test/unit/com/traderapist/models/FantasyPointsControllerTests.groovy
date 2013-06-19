@@ -33,6 +33,7 @@ class FantasyPointsControllerTests {
         params["points"] = 100
         params["system"] = 'ESPNStandardScoringSystem'
         params["player"] = player
+	    params["projection"] = false
     }
 
     void testIndex() {
@@ -147,6 +148,180 @@ class FantasyPointsControllerTests {
 		assertTrue "Should have found zero FantasyPoints object for 2001", fps.size() == 0
 	}
 
+	void testProjectPoints_BadSystem() {
+		params["system"] = "Nonsense"
+		params["num_startable"] = "1"
+		params["season"] = "2013"
+		params["num_owners"] = "3"
+
+		controller.projectPoints()
+		assert response.text == "Invalid scoring system - Nonsense"
+	}
+
+	void testProjectPoints_BadSeason() {
+		params["system"] = "ESPNStandardScoringSystem"
+		params["num_startable"] = "1"
+		params["num_owners"] = "3"
+
+		controller.projectPoints()
+		assert response.text == "season must be an integer"
+
+		response.reset()
+
+		params["season"] = "not an integer"
+		controller.projectPoints()
+		assert response.text == "season must be an integer"
+	}
+
+	void testProjectPoints_BadNumStartable() {
+		params["system"] = "ESPNStandardScoringSystem"
+		params["season"] = "2013"
+		params["num_owners"] = "3"
+
+		controller.projectPoints()
+		assert response.text == "num_startable must be an integer"
+
+		response.reset()
+
+		params["num_startable"] = "not an integer"
+		controller.projectPoints()
+		assert response.text == "num_startable must be an integer"
+	}
+
+	void testProjectPoints_BadNumOwners() {
+		params["system"] = "ESPNStandardScoringSystem"
+		params["num_startable"] = "1"
+		params["season"] = "2013"
+
+		controller.projectPoints()
+		assert response.text == "num_owners must be an integer"
+
+		response.reset()
+
+		params["num_owners"] = "not an integer"
+		controller.projectPoints()
+		assert response.text == "num_owners must be an integer"
+	}
+
+	void testProjectPoints_Season() {
+		params["system"] = "ESPNStandardScoringSystem"
+		params["season"] = "2002"
+		params["position"] = "QB"
+		params["num_startable"] = "1"
+		params["num_owners"] = "1"
+
+		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
+		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		Stat s3 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 2).save(flush: true)
+		Stat s4 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		Stat s5 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 2).save(flush: true)
+
+//		player.stats = new HashSet<Stat>([s1,s2,s3,s4,s5])
+
+		controller.projectPoints()
+
+		def fps = FantasyPoints.findAllBySeason(2002)
+
+		assertTrue "Should have found one FantasyPoints object for 2002", fps.size() == 1
+
+		def fp = fps[0]
+
+		assertTrue "Season is not 2002", fp.season == 2002
+		assertTrue "Week is not -1", fp.week == -1
+		assertTrue "Points is not 12", fp.points == -1
+		assertTrue "Projection is not true", fp.projection
+	}
+
+	void testProjectPoints_Season_Existing() {
+		params["system"] = "ESPNStandardScoringSystem"
+		params["season"] = "2002"
+		params["position"] = "QB"
+		params["num_startable"] = "1"
+		params["num_owners"] = "1"
+
+		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
+		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		Stat s3 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 2).save(flush: true)
+		Stat s4 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		Stat s5 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 2).save(flush: true)
+
+//		player.stats = new HashSet<Stat>([s1,s2,s3,s4,s5])
+
+		controller.projectPoints()
+
+		def fps = FantasyPoints.findAllBySeason(2002)
+
+		assertTrue "Should have found one FantasyPoints object for 2002", fps.size() == 1
+
+		def fp = fps[0]
+
+		assertTrue "Season is not 2002", fp.season == 2002
+		assertTrue "Week is not -1", fp.week == -1
+		assertTrue "Points is not 12", fp.points == -1
+		assertTrue "Projection is not true", fp.projection
+
+		/*
+		Make sure we didn't write a duplicate
+		 */
+		controller.projectPoints()
+
+		fps = FantasyPoints.findAllBySeason(2002)
+
+		assertTrue "Should have found one FantasyPoints object for 2002", fps.size() == 1
+
+		assertTrue "Season is not 2002", fps[0].season == 2002
+		assertTrue "Week is not -1", fps[0].week == -1
+		assertTrue "Points is not 12", fps[0].points == -1
+		assertTrue "Projection is not true", fp.projection
+	}
+
+	void testProjectPoints_PositionQB_Season() {
+		params["system"] = "ESPNStandardScoringSystem"
+		params["position"] = "QB"
+		params["season"] = "2002"
+		params["num_startable"] = "1"
+		params["num_owners"] = "1"
+
+		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
+		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		Stat s3 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 2).save(flush: true)
+		Stat s4 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		Stat s5 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 2).save(flush: true)
+
+//		player.stats = new HashSet<Stat>([s1,s2,s3,s4,s5])
+
+		controller.projectPoints()
+
+		def fps = FantasyPoints.findAllBySeason(2002)
+
+		assertTrue "Should have found one FantasyPoints object for 2002", fps.size() == 1
+
+		def fp = fps[0]
+
+		assertTrue "Season is not 2002", fp.season == 2002
+		assertTrue "Week is not -1", fp.week == -1
+		assertTrue "Points is not 12", fp.points == -1
+		assertTrue "Projection is not true", fp.projection
+	}
+
+	void testProjectPoints_PositionRB_Season() {
+		params["system"] = "ESPNStandardScoringSystem"
+		params["position"] = "RB"
+
+		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
+		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		Stat s3 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 2).save(flush: true)
+		Stat s4 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		Stat s5 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 2).save(flush: true)
+
+//		player.stats = new HashSet<Stat>([s1,s2,s3,s4,s5])
+
+		controller.projectPoints()
+
+		def fps = FantasyPoints.findAllBySeason(2002)
+
+		assertTrue "Should have found zero FantasyPoints object for 2002", fps.size() == 0
+	}
 
     void testSave() {
         controller.save()
