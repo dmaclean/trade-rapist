@@ -116,7 +116,8 @@ class FantasyPointsController {
 					numOwners: Integer.parseInt(params["num_owners"]),
 					numStartable: Integer.parseInt(params["num_startable"])
 			).save()
-			log.info("saved ${ playerFantasyProjection }")
+			render "saved ${ params["season"] } projection for ${ p.name }<br/>"
+			log.info("saved ${ params["season"] } projection for ${ p.name }")
 		}
 
 		render "Point projection for ${params["season"]} completed"
