@@ -284,8 +284,6 @@ class Player {
 		def receptionTouchdownsLastYear = 0
 		def receptionsLastYear = 0
 
-		def c = Stat.createCriteria()
-
 		if(position == Player.POSITION_QB) {
 			for(s in stats) {
 				// Set flag for valid year
@@ -319,9 +317,8 @@ class Player {
 				throw new Exception("Invalid year.")
 
 			def idx = numStartable*numOwners -1
-//			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
 
-			def passingYardsResult = c.listDistinct {
+			def passingYardsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_PASSING_YARDS)
 				player {
@@ -329,9 +326,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
-			def passingTouchdownsResult = c.listDistinct {
+			def passingTouchdownsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_PASSING_TOUCHDOWNS)
 				player {
@@ -339,9 +337,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
-			def interceptionsResult = c.listDistinct {
+			def interceptionsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_INTERCEPTIONS)
 				player {
@@ -349,9 +348,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "asc"
+				cache true
 			}
 
-			def rushingYardsResult = c.listDistinct {
+			def rushingYardsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RUSHING_YARDS)
 				player {
@@ -359,9 +359,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
-			def rushingTouchdownsResult = c.listDistinct {
+			def rushingTouchdownsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
 				player {
@@ -369,6 +370,7 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
 			def passingYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_PASSING_YARDS)
@@ -425,9 +427,8 @@ class Player {
 				throw new Exception("Invalid year.")
 
 			def idx = numStartable*numOwners -1
-//			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
 
-			def receptionYardsResult = c.listDistinct {
+			def receptionYardsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RECEPTION_YARDS)
 				player {
@@ -435,9 +436,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
-			def receptionTouchdownsResult = c.listDistinct {
+			def receptionTouchdownsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RECEPTION_TOUCHDOWNS)
 				player {
@@ -445,9 +447,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
-			def receptionsResult = c.listDistinct {
+			def receptionsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RECEPTIONS)
 				player {
@@ -455,9 +458,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "asc"
+				cache true
 			}
 
-			def rushingYardsResult = c.listDistinct {
+			def rushingYardsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RUSHING_YARDS)
 				player {
@@ -465,9 +469,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
-			def rushingTouchdownsResult = c.listDistinct {
+			def rushingTouchdownsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RUSHING_TOUCHDOWNS)
 				player {
@@ -475,6 +480,7 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
 			def receptionYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_YARDS)
@@ -525,8 +531,7 @@ class Player {
 				throw new Exception("Invalid year.")
 
 			def idx = numStartable*numOwners -1
-//			def query = "from Player p inner join p.stats s with s.season = ? and s.statKey = ? where p.position = ? order by s.statValue desc"
-			def receptionYardsResult = c.listDistinct {
+			def receptionYardsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RECEPTION_YARDS)
 				player {
@@ -534,9 +539,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
-			def receptionTouchdownsResult = c.listDistinct {
+			def receptionTouchdownsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RECEPTION_TOUCHDOWNS)
 				player {
@@ -544,9 +550,10 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "desc"
+				cache true
 			}
 
-			def receptionsResult = c.listDistinct {
+			def receptionsResult = Stat.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("statKey", FantasyConstants.STAT_RECEPTIONS)
 				player {
@@ -554,6 +561,7 @@ class Player {
 				}
 				maxResults numStartable*numOwners
 				order "statValue", "asc"
+				cache true
 			}
 
 			def receptionYardsCorrelation = getCorrelation(position, FantasyConstants.STAT_RECEPTION_YARDS)
@@ -572,18 +580,8 @@ class Player {
 					])
 		}
 
+		log.info("Position ${ position } doesn't match anything, so we'll just return 0.")
 		return 0
-
-//		def positionAvg = getScoringAverageForPositionForSeason(position, year-1)
-//		def points
-//		for(f in fantasyPoints) {
-//			if(f.season == year-1 && f.week == -1) {
-//				points = f.points
-//				break
-//			}
-//		}
-//
-//		return correlation*(points-positionAvg) + positionAvg
 	}
 
     /**
