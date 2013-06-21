@@ -493,4 +493,98 @@ class PlayerTests {
 		 */
 		assert t4.calculateProjectedPoints(2013, numStartable, numOwners, new ESPNStandardScoringSystem()) == 49.2
 	}
+
+	void testCalculateProjectedPointsDEF_season_numStartable1_numOwners3() {
+		def numStartable = 1
+		def numOwners = 3
+		def system = "ESPNStandardScoringSystem"
+
+		// Create four defenses
+		def d1 = new Player(name: "Defense 1", position: Player.POSITION_DEF).save(flush: true)
+		def d2 = new Player(name: "Defense 2", position: Player.POSITION_DEF).save(flush: true)
+		def d3 = new Player(name: "Defense 3", position: Player.POSITION_DEF).save(flush: true)
+		def d4 = new Player(name: "Defense 4", position: Player.POSITION_DEF).save(flush: true)
+
+		def fp2012_1 = new FantasyPoints(player: d1, season: 2012, week: -1, points: 100, system: system).save(flush: true)
+		def fp2012_2 = new FantasyPoints(player: d2, season: 2012, week: -1, points: 90, system: system).save(flush: true)
+		def fp2012_3 = new FantasyPoints(player: d3, season: 2012, week: -1, points: 80, system: system).save(flush: true)  // Average player
+		def fp2012_4 = new FantasyPoints(player: d4, season: 2012, week: -1, points: 70, system: system).save(flush: true)
+
+		/*
+		 * Do projections
+		 *
+		 * DEF 1
+		 *
+		 * 2013 points allowed 14-20 =       (100 * 0.1) + (80 * 0.9) = 10 + 72 = 82 --> 82 * 1 = 82
+		 */
+		assert d1.calculateProjectedPoints(2013, numStartable, numOwners, system) == 82
+
+		/*
+		 * DEF 2
+		 *
+		 * 2013 points allowed 14-20 =       (90 * 0.1) + (80 * 0.9) = 9 + 72 = 81 --> 81 * 1 = 81
+		 */
+		assert d2.calculateProjectedPoints(2013, numStartable, numOwners, system) == 81
+
+		/*
+		 * DEF 3
+		 *
+		 * 2013 points allowed 14-20 =       (80 * 0.1) + (80 * 0.9) = 8 + 72 = 80 --> 80 * 1 = 80
+		 */
+		assert d3.calculateProjectedPoints(2013, numStartable, numOwners, system) == 80
+
+		/*
+		 * DEF 4
+		 *
+		 * 2013 points allowed 14-20 =       (70 * 0.1) + (80 * 0.9) = 7 + 72 = 79 --> 79 * 1 = 79
+		 */
+		assert d4.calculateProjectedPoints(2013, numStartable, numOwners, system) == 79
+	}
+
+	void testCalculateProjectedPointsK_season_numStartable1_numOwners3() {
+		def numStartable = 1
+		def numOwners = 3
+		def system = "ESPNStandardScoringSystem"
+
+		// Create four kickers
+		def k1 = new Player(name: "Kicker 1", position: Player.POSITION_K).save(flush: true)
+		def k2 = new Player(name: "Kicker 2", position: Player.POSITION_K).save(flush: true)
+		def k3 = new Player(name: "Kicker 3", position: Player.POSITION_K).save(flush: true)
+		def k4 = new Player(name: "Kicker 4", position: Player.POSITION_K).save(flush: true)
+
+		def fp2012_1 = new FantasyPoints(player: k1, season: 2012, week: -1, points: 100, system: system).save(flush: true)
+		def fp2012_2 = new FantasyPoints(player: k2, season: 2012, week: -1, points: 90, system: system).save(flush: true)
+		def fp2012_3 = new FantasyPoints(player: k3, season: 2012, week: -1, points: 80, system: system).save(flush: true)  // Average player
+		def fp2012_4 = new FantasyPoints(player: k4, season: 2012, week: -1, points: 70, system: system).save(flush: true)
+
+		/*
+		 * Do projections
+		 *
+		 * K 1
+		 *
+		 * 2013 points =       (100 * 0.1) + (80 * 0.9) = 10 + 72 = 82 --> 82 * 1 = 82
+		 */
+		assert k1.calculateProjectedPoints(2013, numStartable, numOwners, system) == 82
+
+		/*
+		 * K 2
+		 *
+		 * 2013 points =       (90 * 0.1) + (80 * 0.9) = 9 + 72 = 81 --> 81 * 1 = 81
+		 */
+		assert k2.calculateProjectedPoints(2013, numStartable, numOwners, system) == 81
+
+		/*
+		 * K 3
+		 *
+		 * 2013 points =       (80 * 0.1) + (80 * 0.9) = 8 + 72 = 80 --> 80 * 1 = 80
+		 */
+		assert k3.calculateProjectedPoints(2013, numStartable, numOwners, system) == 80
+
+		/*
+		 * K 4
+		 *
+		 * 2013 points =       (70 * 0.1) + (80 * 0.9) = 7 + 72 = 79 --> 79 * 1 = 79
+		 */
+		assert k4.calculateProjectedPoints(2013, numStartable, numOwners, system) == 79
+	}
 }

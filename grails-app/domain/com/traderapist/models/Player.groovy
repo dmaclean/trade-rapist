@@ -265,14 +265,6 @@ class Player {
 	def calculateProjectedPoints(year, numStartable, numOwners, system) {
 		def hasValidYear = false
 
-		/*
-		Make sure the year we want to project is supported with stats from the previous year.
-
-		i.e. year = 2002, we need stats from 2001.
-		 */
-		if (hasValidYear)
-			throw new Exception("Invalid year.")
-
 		def passingYardsLastYear = 0
 		def passingTouchdownsLastYear = 0
 		def interceptionsLastYear = 0
@@ -578,6 +570,27 @@ class Player {
 							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RECEPTION_TOUCHDOWNS, statValue: receptionTouchdownsProjected),
 							new Stat(season: 2013, week: -1, statKey: FantasyConstants.STAT_RECEPTIONS, statValue: receptionsProjected)
 					])
+		}
+		else if(position == Player.POSITION_DEF || position == Player.POSITION_K) {
+			def fp = FantasyPoints.findByPlayerAndProjectionAndSeasonAndWeek(this, null, year-1, -1)
+
+			def avgPlayerResult = FantasyPoints.createCriteria().listDistinct {
+				eq("season", year-1)
+				eq("week", -1)
+				eq("projection", null)
+				eq("system", system)
+
+				player {
+					eq("position", position)
+				}
+
+				maxResults numOwners * numStartable
+				order "points", "desc"
+				cache true
+			}
+
+			def correlation = getCorrelation(position, null)
+			return (fp.points * correlation) + (avgPlayerResult[ (numOwners * numStartable) - 1 ].points * (1-correlation))
 		}
 
 		log.info("Position ${ position } doesn't match anything, so we'll just return 0.")
