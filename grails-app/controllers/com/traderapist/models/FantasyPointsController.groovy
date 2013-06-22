@@ -48,6 +48,18 @@ class FantasyPointsController {
 	    print("Generated fantasy points for all players in ${ (end-start)/1000.0 } seconds")
     }
 
+	/**
+	 * Creates projections for players of a particular position for the upcoming (or specified) season.  This expects URL parameters as
+	 * inputs:
+	 *
+	 * system - The class name for the scoring system to be used.
+	 * position - The position to project (QB/RB/WR/TE/DEF/K).
+	 * season - The season that we will be projecting for.
+	 * num_startable - The number of startable players at this position (Used to calculate average player).
+	 * num_owners - How many owners in the league (Also used to calculate average player).
+	 *
+	 * @return    A success message if everything works, or a failure message explaining the problem.
+	 */
 	def projectPoints() {
 		/*
 		 * Make sure the provided scoring system is valid.
@@ -68,9 +80,10 @@ class FantasyPointsController {
 		try { Integer.parseInt(params["season"]) } catch(Exception e) { render "season must be an integer"; return }
 		try { Integer.parseInt(params["num_startable"]) } catch(Exception e) { render "num_startable must be an integer"; return }
 		try { Integer.parseInt(params["num_owners"]) } catch(Exception e) { render "num_owners must be an integer"; return }
-		def positionRegex = "/${Player.POSITION_QB}|${Player.POSITION_RB}|${Player.POSITION_WR}|${Player.POSITION_TE}|${Player.POSITION_DEF}|${Player.POSITION_K}/"
-		if(params["position"] == null || !(params["position"] =~ positionRegex)) {
+		def positionRegex = "${Player.POSITION_QB}|${Player.POSITION_RB}|${Player.POSITION_WR}|${Player.POSITION_TE}|${Player.POSITION_DEF}|${Player.POSITION_K }"
+		if(params["position"] == null || !params["position"].matches(positionRegex)) {
 			render "position must be one of ${Player.POSITION_QB}, ${Player.POSITION_RB}, ${Player.POSITION_WR}, ${Player.POSITION_TE}, ${Player.POSITION_DEF}, ${Player.POSITION_K}"
+			return
 		}
 
 		/*
