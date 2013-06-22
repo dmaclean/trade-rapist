@@ -578,7 +578,7 @@ class Player {
 				eq("season", year-1)
 				eq("week", -1)
 				eq("projection", null)
-				eq("system", system)
+				eq("system", system.class.getSimpleName())
 
 				player {
 					eq("position", position)
