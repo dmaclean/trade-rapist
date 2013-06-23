@@ -572,13 +572,19 @@ class Player {
 					])
 		}
 		else if(position == Player.POSITION_DEF || position == Player.POSITION_K) {
-			def fp = FantasyPoints.findByPlayerAndProjectionAndSeasonAndWeek(this, null, year-1, -1)
+			// Figure out what this particular player had for fantasy points last season.
+			def query = FantasyPoints.where {
+				player == this && (projection == null || projection == false) && season == year-1 && week == -1
+			}
+			def fp = query.find()
 
+			// Grab the top (numOwners * numStartable) players.  The last one in the
+			// result set is our "average" player.
 			def avgPlayerResult = FantasyPoints.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("week", -1)
-				eq("projection", null)
-				eq("system", system.class.getSimpleName())
+				ne("projection", true)
+				eq("system", system.class.getName())
 
 				player {
 					eq("position", position)
@@ -589,7 +595,10 @@ class Player {
 				cache true
 			}
 
+			// Fetch the correlation factor.
 			def correlation = getCorrelation(position, null)
+
+			// Figure out projected points
 			return (fp.points * correlation) + (avgPlayerResult[ (numOwners * numStartable) - 1 ].points * (1-correlation))
 		}
 

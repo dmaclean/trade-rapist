@@ -505,10 +505,10 @@ class PlayerTests {
 		def d3 = new Player(name: "Defense 3", position: Player.POSITION_DEF).save(flush: true)
 		def d4 = new Player(name: "Defense 4", position: Player.POSITION_DEF).save(flush: true)
 
-		def fp2012_1 = new FantasyPoints(player: d1, season: 2012, week: -1, points: 100, system: system.class.getSimpleName()).save(flush: true)
-		def fp2012_2 = new FantasyPoints(player: d2, season: 2012, week: -1, points: 90, system: system.class.getSimpleName()).save(flush: true)
-		def fp2012_3 = new FantasyPoints(player: d3, season: 2012, week: -1, points: 80, system: system.class.getSimpleName()).save(flush: true)  // Average player
-		def fp2012_4 = new FantasyPoints(player: d4, season: 2012, week: -1, points: 70, system: system.class.getSimpleName()).save(flush: true)
+		def fp2012_1 = new FantasyPoints(player: d1, season: 2012, week: -1, points: 100, system: system.class.getName()).save(flush: true)
+		def fp2012_2 = new FantasyPoints(player: d2, season: 2012, week: -1, points: 90, system: system.class.getName()).save(flush: true)
+		def fp2012_3 = new FantasyPoints(player: d3, season: 2012, week: -1, points: 80, system: system.class.getName()).save(flush: true)  // Average player
+		def fp2012_4 = new FantasyPoints(player: d4, season: 2012, week: -1, points: 70, system: system.class.getName()).save(flush: true)
 
 		/*
 		 * Do projections
@@ -552,10 +552,10 @@ class PlayerTests {
 		def k3 = new Player(name: "Kicker 3", position: Player.POSITION_K).save(flush: true)
 		def k4 = new Player(name: "Kicker 4", position: Player.POSITION_K).save(flush: true)
 
-		def fp2012_1 = new FantasyPoints(player: k1, season: 2012, week: -1, points: 100, system: system.class.getSimpleName()).save(flush: true)
-		def fp2012_2 = new FantasyPoints(player: k2, season: 2012, week: -1, points: 90, system: system.class.getSimpleName()).save(flush: true)
-		def fp2012_3 = new FantasyPoints(player: k3, season: 2012, week: -1, points: 80, system: system.class.getSimpleName()).save(flush: true)  // Average player
-		def fp2012_4 = new FantasyPoints(player: k4, season: 2012, week: -1, points: 70, system: system.class.getSimpleName()).save(flush: true)
+		def fp2012_1 = new FantasyPoints(player: k1, season: 2012, week: -1, points: 100, system: system.class.getName()).save(flush: true)
+		def fp2012_2 = new FantasyPoints(player: k2, season: 2012, week: -1, points: 90, system: system.class.getName()).save(flush: true)
+		def fp2012_3 = new FantasyPoints(player: k3, season: 2012, week: -1, points: 80, system: system.class.getName()).save(flush: true)  // Average player
+		def fp2012_4 = new FantasyPoints(player: k4, season: 2012, week: -1, points: 70, system: system.class.getName()).save(flush: true)
 
 		/*
 		 * Do projections
