@@ -72,16 +72,15 @@ class Player {
 	 *
 	 * The method is used to quickly get a sorted list of players for the draft Minimax tree.
 	 *
-	 * TODO: Add scoring system.
-	 *
 	 * @param position      The position we're interested in
 	 * @param season        The season we're interested in
+	 * @param system        The fully-qualified class name of the scoring system we're using
 	 * @return              A list of Player objects, sorted in order of Fantasy Points scored.
 	 */
-	static def getPlayersInPointsOrder(position, season) {
+	static def getPlayersInPointsOrder(position, season, system) {
 		def results = Player.executeQuery("from Player p inner join p.fantasyPoints f inner join p.averageDraftPositions adp " +
-				"where p.position = ? and f.season = ? and f.week = -1 and adp.season = ? " +
-				"order by f.points desc", [position, season, season])
+				"where p.position = ? and f.season = ? and f.week = -1 and f.projection = ? and f.system = ? and adp.season = ? " +
+				"order by f.points desc", [position, season, true, system, season])
 
 		def players = []
 		for(int i=0; i<results.size(); i++) {
@@ -584,7 +583,7 @@ class Player {
 				eq("season", year-1)
 				eq("week", -1)
 				ne("projection", true)
-				eq("system", system.class.getName())
+				eq("system", system.class.getSimpleName())
 
 				player {
 					eq("position", position)
