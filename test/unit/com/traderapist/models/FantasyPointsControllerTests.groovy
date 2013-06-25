@@ -328,7 +328,7 @@ class FantasyPointsControllerTests {
 
 		def d1 = new Player(name: "Defense 1", position: Player.POSITION_DEF).save(flush: true)
 		def s1 = new Stat(player: d1, season: 2012, week: -1, statKey: FantasyConstants.STAT_POINTS_ALLOWED, statValue: 10).save(flush: true)
-		def f1 = new FantasyPoints(player: d1, season: 2012, week: -1, points: 100, system: ESPNStandardScoringSystem.class.getName()).save(flush: true)
+		def f1 = new FantasyPoints(player: d1, season: 2012, week: -1, points: 100, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
 
 		controller.projectPoints()
 
@@ -346,7 +346,7 @@ class FantasyPointsControllerTests {
 
 		def k1 = new Player(name: "Kicker 1", position: Player.POSITION_K).save(flush: true)
 		def s1 = new Stat(player: k1, season: 2012, week: -1, statKey: FantasyConstants.STAT_FIELD_GOALS_0_19_YARDS, statValue: 10).save(flush: true)
-		def f1 = new FantasyPoints(player: k1, season: 2012, week: -1, points: 100, system: ESPNStandardScoringSystem.class.getName()).save(flush: true)
+		def f1 = new FantasyPoints(player: k1, season: 2012, week: -1, points: 100, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
 
 		controller.projectPoints()
 
