@@ -1,6 +1,7 @@
 package com.traderapist.draft
 
 import com.traderapist.models.Player
+import com.traderapist.scoringsystem.ESPNStandardScoringSystem
 import org.springframework.web.servlet.ModelAndView
 
 class DraftController {
@@ -34,13 +35,14 @@ class DraftController {
 	 */
 	def players() {
 		def year = Integer.parseInt(params["year"])
+		def system = (params["system"]) ? params["system"] : ESPNStandardScoringSystem.class.getSimpleName()
 
-		def qb = Player.getPlayersInPointsOrder(Player.POSITION_QB, year)
-		def rb = Player.getPlayersInPointsOrder(Player.POSITION_RB, year)
-		def wr = Player.getPlayersInPointsOrder(Player.POSITION_WR, year)
-		def te = Player.getPlayersInPointsOrder(Player.POSITION_TE, year)
-		def dst = Player.getPlayersInPointsOrder(Player.POSITION_DEF, year)
-		def k = Player.getPlayersInPointsOrder(Player.POSITION_K, year)
+		def qb = Player.getPlayersInPointsOrder(Player.POSITION_QB, year, system)
+		def rb = Player.getPlayersInPointsOrder(Player.POSITION_RB, year, system)
+		def wr = Player.getPlayersInPointsOrder(Player.POSITION_WR, year, system)
+		def te = Player.getPlayersInPointsOrder(Player.POSITION_TE, year, system)
+		def dst = Player.getPlayersInPointsOrder(Player.POSITION_DEF, year, system)
+		def k = Player.getPlayersInPointsOrder(Player.POSITION_K, year, system)
 
 		// Construct a JSON string representing all the necessary data for drafting.
 		def json = "["
@@ -61,7 +63,9 @@ class DraftController {
 		json += "]"
 
 		// Strip out the last comma.  This comma corrupts the JSON.
-		json = json.substring(0, json.lastIndexOf(",")) + json.substring(json.lastIndexOf(",")+1)
+		if(json != "[]") {
+			json = json.substring(0, json.lastIndexOf(",")) + json.substring(json.lastIndexOf(",")+1)
+		}
 
 		render json
 	}
