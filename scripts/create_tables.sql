@@ -122,3 +122,55 @@ create table user_roles (
 	foreign key (user_id) references users(id),
 	foreign key (role_id) references roles(id)
 );
+
+/*
+ * Represents the various fantasy football service providers that exist.  We
+ * initially seed the database with the major ones - ESPN, Yahoo!, CBS, and NFL.com.
+ */
+drop table fantasy_league_types;
+create table fantasy_league_types (
+  id int auto_increment primary key,
+  code varchar(10) not null,
+  description varchar(100) not null,
+  version int
+);
+insert into fantasy_league_types(code, description) values('ESPN', 'ESPN Fantasy Football League');
+insert into fantasy_league_types(code, description) values('Yahoo!', 'Yahoo! Fantasy Football League');
+insert into fantasy_league_types(code, description) values('CBS', 'CBS Fantasy Football League');
+insert into fantasy_league_types(code, description) values('NFL.com', 'NFL.com Fantasy Football League');
+
+/*
+ * Model for a single user's fantasy football team.  A user can have multiple, so
+ * there would be an entry for their ESPN league and their Yahoo! league.  Each entry
+ * only represents a single season, hence the column for season.
+ *
+ * Lastly, I've added a league_id column to record in case the provider allows for
+ * API calls to be made.  This way, we'll be able to do cool things like pull all the
+ * league info from the provider's servers.
+ */
+drop table fantasy_teams;
+create table fantasy_teams (
+  id int auto_increment primary key,
+  user_id int not null,
+  league_id varchar(100),
+  name varchar(100) not null,
+  fantasy_league_type_id int not null,
+  season int not null,
+  version int,
+  foreign key (user_id) references users(id),
+  foreign key (fantasy_league_type_id) references fantasy_league_types(id)
+);
+
+/*
+ * Model for the individual players on a fantasy roster.  This is just a join
+ * table for the fantasy team entry and the player entry.
+ */
+drop table fantasy_team_players;
+create table fantasy_team_players (
+  id int auto_increment primary key,
+  player_id int not null,
+  fantasy_team_id int not null,
+  version int,
+  foreign key (player_id) references players(id),
+  foreign key (fantasy_team_id) references fantasy_teams(id)
+);
