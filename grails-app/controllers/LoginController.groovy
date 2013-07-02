@@ -131,4 +131,19 @@ class LoginController {
 	def ajaxDenied = {
 		render([error: 'access denied'] as JSON)
 	}
+
+	/**
+	 * Endpoint that helps determine the username of the logged-in user.  This is
+	 * helpful for Angular screens that don't have access to this.
+	 *
+	 * @return
+	 */
+	def whoami() {
+		if(springSecurityService.isLoggedIn()) {
+			render springSecurityService.getCurrentUser().username
+		}
+		else {
+			render "Not logged in."
+		}
+	}
 }
