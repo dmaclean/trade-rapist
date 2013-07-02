@@ -22,7 +22,7 @@ class FantasyTeamPlayerControllerTests {
 		user = new User(username: "Dan", password: "password").save(flush: true)
 		player = new Player(name: "dan", position: Player.POSITION_QB).save(flush: true)
 		fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
-		fantasyTeam = new FantasyTeam(user: user, name: "ESPN", type: fantasyLeagueType, season: 2013).save(flush: true)
+		fantasyTeam = new FantasyTeam(user: user, name: "ESPN", fantasyLeagueType: fantasyLeagueType, season: 2013).save(flush: true)
 	}
 
 	@After
