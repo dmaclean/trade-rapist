@@ -1,5 +1,7 @@
 package com.traderapist.models
 
+import com.traderapist.security.User
+import grails.converters.JSON
 import org.springframework.dao.DataIntegrityViolationException
 
 class FantasyTeamController {
@@ -12,7 +14,13 @@ class FantasyTeamController {
 
 	def list(Integer max) {
 		params.max = Math.min(max ?: 10, 100)
-		[fantasyTeamInstanceList: FantasyTeam.list(params), fantasyTeamInstanceTotal: FantasyTeam.count()]
+		if(params.username) {
+			def user = User.findByUsername(params.username)
+			render FantasyTeam.findAllByUser(user) as JSON
+		}
+		else {
+			[fantasyTeamInstanceList: FantasyTeam.list(params), fantasyTeamInstanceTotal: FantasyTeam.count()]
+		}
 	}
 
 	def create() {
