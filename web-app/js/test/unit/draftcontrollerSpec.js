@@ -10,6 +10,10 @@ describe('DraftController spec', function() {
     var scope, ctrl, $httpBackend;
 
     beforeEach(inject(function(_$httpBackend_, $rootScope, $controller) {
+        $httpBackend = _$httpBackend_;
+        $httpBackend.whenGET('login/whoami').respond("dmaclean");
+        $httpBackend.whenGET('fantasyTeam/list?username=dmaclean').respond("[" +
+            "{\"class\":\"com.traderapist.models.FantasyTeam\",\"id\":1,\"fantasyLeagueType\":{\"class\":\"FantasyLeagueType\",\"id\":1},\"leagueId\":\"106647\",\"name\":\"Team Dan Mac\",\"season\":2013,\"user\":{\"class\":\"User\",\"id\":3}}]");
         scope = $rootScope.$new();
         ctrl = $controller(DraftController, {$scope: scope});
     }));
@@ -58,10 +62,20 @@ describe('DraftController spec', function() {
         expect(scope.replacements).toEqual({});
     });
 
+    it('should default username to empty hash', function() {
+        expect(scope.username).toEqual(undefined);
+    });
+
+    it('should default leagues list to "Select one" and "ESPN"', function() {
+        expect(scope.leagues).toEqual(undefined);
+//        expect(scope.leagues).toEqual([ { "id":-1, "name": "Select one" },
+//            {"class":"com.traderapist.models.FantasyTeam","id":1,"fantasyLeagueType":{"class":"FantasyLeagueType","id":1},"leagueId":"106647","name":"Team Dan Mac","season":2013,"user":{"class":"User","id":3}}]);
+    });
+
     describe('Loading players from HTTP request', function() {
         beforeEach(inject(function(_$httpBackend_, $rootScope, $controller) {
             $httpBackend = _$httpBackend_;
-            $httpBackend.expectGET('draft/players?year=' + new Date().getFullYear()).
+            $httpBackend.whenGET('draft/players?year=' + new Date().getFullYear()).
                 respond([{id: 1, name: 'QB 1', position: 'QUARTERBACK', points: 300.0, adp: 2.5, vorp: 20.0},
                     {id: 2, name: 'QB 2', position: 'QUARTERBACK', points: 280.0, adp: 5.0, vorp: 0},
                     {id: 3, name: 'RB 1', position: 'RUNNING_BACK', points: 250.0, adp: 2.5, vorp: 30.0},
@@ -115,7 +129,7 @@ describe('DraftController spec', function() {
             $httpBackend = _$httpBackend_;
 
             // Use this to test with 10 players at each position.
-            $httpBackend.expectGET('draft/players?year=2001').
+            $httpBackend.whenGET('draft/players?year=2001').
                 respond([{id: 1, name: 'QB 1', position: 'QUARTERBACK', points: 300.0, adp: 2.5, vorp: 0},
                     {id: 2, name: 'QB 2', position: 'QUARTERBACK', points: 280.0, adp: 5.0, vorp: 0},
                     {id: 3, name: 'QB 3', position: 'QUARTERBACK', points: 270.0, adp: 5.0, vorp: 0},
@@ -520,7 +534,7 @@ describe('DraftController spec', function() {
             $httpBackend = _$httpBackend_;
 
             // Use this to test with 10 players at each position.
-            $httpBackend.expectGET('draft/players?year=2001').
+            $httpBackend.whenGET('draft/players?year=2001').
                 respond([{id: 1, name: 'QB 1', position: 'QUARTERBACK', points: 300.0, adp: 2.5, vorp: 0},
                     {id: 2, name: 'QB 2', position: 'QUARTERBACK', points: 280.0, adp: 5.0, vorp: 0},
                     {id: 3, name: 'QB 3', position: 'QUARTERBACK', points: 270.0, adp: 5.0, vorp: 0},
@@ -706,7 +720,7 @@ describe('DraftController spec', function() {
             $httpBackend = _$httpBackend_;
 
             // Use this to test with 10 players at each position.
-            $httpBackend.expectGET('draft/players?year=2001').
+            $httpBackend.whenGET('draft/players?year=2001').
                 respond([{id: 1, name: 'QB 1', position: 'QUARTERBACK', points: 300.0, adp: 2.5, vorp: 0},
                     {id: 2, name: 'QB 2', position: 'QUARTERBACK', points: 280.0, adp: 5.0, vorp: 0},
                     {id: 3, name: 'QB 3', position: 'QUARTERBACK', points: 270.0, adp: 5.0, vorp: 0},
@@ -1106,6 +1120,7 @@ describe('DraftController spec', function() {
     describe('Available players lists', function() {
         beforeEach(inject(function(_$httpBackend_, $rootScope, $controller) {
             $httpBackend = _$httpBackend_;
+
             $httpBackend.expectGET('draft/players?year=' + new Date().getFullYear()).
                 respond([{id: 1, name: 'QB 1', position: 'QUARTERBACK', points: 300.0, adp: 2.5, vorp: 20.0},
                     {id: 2, name: 'QB 2', position: 'QUARTERBACK', points: 280.0, adp: 5.0, vorp: 0},
@@ -1211,6 +1226,7 @@ describe('DraftController spec', function() {
     describe('Player value calculations', function(){
         beforeEach(inject(function(_$httpBackend_, $rootScope, $controller) {
             $httpBackend = _$httpBackend_;
+
             $httpBackend.expectGET('draft/players').
                 respond([{name: 'Dan MacLean', position: 'QUARTERBACK', points: 300.0, adp: 2.5, vorp: 20.0},
                     {name: 'Bill Smith', position: 'QUARTERBACK', points: 280.0, adp: 5.0, vorp: 0}]);
@@ -1560,6 +1576,7 @@ describe('DraftController spec', function() {
             scope.startablePositions[scope.KICKER] = 1;
 
             $httpBackend = _$httpBackend_;
+//            $httpBackend.expectGET('login/whoami').respond("dmaclean");
 
             // Use this to test with 10 players at each position.
             $httpBackend.expectGET('draft/players?year=2001').
@@ -2419,6 +2436,7 @@ describe('DraftController spec', function() {
             scope.draftPlayer(scope.KICKER, 62);
 
             expect(scope.calculateStarterPoints(0)).toEqual(1884);
+
         });
     });
 });

@@ -5,6 +5,16 @@
     <div id="draft_init" class="row-fluid" ng-hide="initialized">
         <div class="span4 offset4" id="screen1" ng-hide="initNumOwners">
             <form class="form-horizontal">
+                <!-- Hide the leagues field if nothing came over from the server -->
+                <div class="control-group" ng-hide="!leagues">
+                    <label class="control-label" for="league">Fantasy League</label>
+                    <div class="controls">
+                        <select id="league">
+                            <option value="">Select one</option>
+                            <option ng-repeat="league in leagues" value="{{ league.id }}">{{ league.name }}</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="control-group">
                     <label class="control-label" for="draftYear">Draft Year</label>
                     <div class="controls">

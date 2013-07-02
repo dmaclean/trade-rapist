@@ -185,6 +185,38 @@ function DraftController($scope, $http) {
      */
     $scope.simulation = false;
 
+    /**
+     * Keeps track of our username.
+     *
+     * @type {string}
+     */
+    $scope.username = undefined;
+
+    /**
+     * The list of leagues that the logged-in user belongs to.
+     *
+     * @type {Array}
+     */
+    $scope.leagues = undefined;
+
+    $scope.fetchFantasyTeams = function() {
+        $http.get("login/whoami").success(function(data) {
+            if(data != "Not logged in.") {
+                $scope.username = data;
+
+                $http.get("fantasyTeam/list?username=" + $scope.username).success(function(data) {
+                    $scope.leagues = data;
+                    console.log("Successfully retrieved fantasy teams for " + $scope.username);
+                })
+                    .error(function() {
+                        console.log("Unable to retrieve fantasy teams for " + $scope.username);
+                    });
+            }
+        });
+    }
+
+    $scope.fetchFantasyTeams();
+
     $scope.fetchPlayers = function() {
         for(var i=0; i<$scope.numOwners; i++) {
             $scope.owners[i] = new Array();

@@ -14,6 +14,13 @@ describe('Trade Rapist Draft Setup', function() {
     });
 
     describe('First init screen', function() {
+        it('should see league choices', function() {
+            expect(element('#league').css('display')).not().toBe('none');
+            expect(element('#league option[value=""]').text()).toBe('Select one');
+            expect(element('#league option[value=1]').text()).toBe('Team Dan Mac');
+            expect(element('#league option[value=2]').text()).toBe('Terror Squid');
+        });
+
         it('should default numOwners to 0', function() {
             expect(element('#numOwners').val()).toMatch("0");
         });
