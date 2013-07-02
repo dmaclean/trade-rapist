@@ -1,7 +1,6 @@
 package com.traderapist.models
 
-
-
+import grails.converters.JSON
 import org.junit.*
 import grails.test.mixin.*
 
@@ -33,7 +32,7 @@ class FantasyTeamControllerTests {
 		params["name"] = "ESPN"
 		params["season"] = 2013
 		params["user"] = user
-		params["type"] = flt
+		params["fantasyLeagueType"] = flt
 	}
 
 	void testIndex() {
@@ -42,7 +41,6 @@ class FantasyTeamControllerTests {
 	}
 
 	void testList() {
-
 		def model = controller.list()
 
 		assert model.fantasyTeamInstanceList.size() == 0
