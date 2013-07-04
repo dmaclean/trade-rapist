@@ -199,6 +199,13 @@ function DraftController($scope, $http) {
      */
     $scope.leagues = undefined;
 
+    /**
+     * The league that the user has determined they are drafting for.
+     *
+     * @type {string}
+     */
+    $scope.selectedLeague = undefined;
+
     $scope.fetchFantasyTeams = function() {
         $http.get("login/whoami").success(function(data) {
             if(data != "Not logged in.") {
@@ -1021,5 +1028,13 @@ function DraftController($scope, $http) {
         }
 
         return player;
+    }
+
+    $scope.saveRoster = function() {
+        var data = { "team" : $scope.selectedLeague, "players" : $scope.owners[$scope.myPick-1] };
+
+        $http.post("fantasyTeamPlayer/saveAllFromDraft", data).success(function(data) {
+
+        });
     }
 }

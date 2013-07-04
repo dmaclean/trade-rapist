@@ -351,4 +351,21 @@ describe('Trade Rapist Draft Setup', function() {
             expect(element('#owner1_points').text()).toEqual("Total Projected Points: 280");
         });
     });
+
+    describe('"Save roster" button', function() {
+        it('should not be visible until draft is ready', function() {
+            expect(element('#save_roster').css('display').toBe('none'));
+
+            input('numOwners').enter("2");
+            input('myPick').enter("1");
+            element('#draft_init button').click();
+
+            expect(element('#save_roster').css('display').toBe('none'));
+            element('#draft_init button').click();
+
+            expect(element('#save_roster').css('display').not().toBe('none'));
+        });
+
+        it('should be visible ')
+    });
 });

@@ -66,10 +66,12 @@ describe('DraftController spec', function() {
         expect(scope.username).toEqual(undefined);
     });
 
-    it('should default leagues list to "Select one" and "ESPN"', function() {
+    it('should default leagues list to undefined', function() {
         expect(scope.leagues).toEqual(undefined);
-//        expect(scope.leagues).toEqual([ { "id":-1, "name": "Select one" },
-//            {"class":"com.traderapist.models.FantasyTeam","id":1,"fantasyLeagueType":{"class":"FantasyLeagueType","id":1},"leagueId":"106647","name":"Team Dan Mac","season":2013,"user":{"class":"User","id":3}}]);
+    });
+
+    it('should default selectedLeague to undefined', function() {
+        expect(scope.selectedLeague).toEqual(undefined);
     });
 
     describe('Loading players from HTTP request', function() {

@@ -9,7 +9,7 @@
                 <div class="control-group" ng-hide="!leagues">
                     <label class="control-label" for="league">Fantasy League</label>
                     <div class="controls">
-                        <select id="league">
+                        <select id="league" ng-model="selectedLeague">
                             <option value="">Select one</option>
                             <option ng-repeat="league in leagues" value="{{ league.id }}">{{ league.name }}</option>
                         </select>
@@ -167,6 +167,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div id="save_roster" class="row-fluid" ng-hide="!initialized">
+        <button class="btn btn-primary" id="save_roster_button" ng-click="saveRoster()">Save roster</button>
     </div>
     <div id="owners" owners class="row-fluid" ng-hide="!initialized"></div>
     <div id="available_players" class="row-fluid" ng-hide="!initialized">
