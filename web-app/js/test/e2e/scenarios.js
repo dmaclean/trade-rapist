@@ -15,10 +15,10 @@ describe('Trade Rapist Draft Setup', function() {
 
     describe('First init screen', function() {
         it('should see league choices', function() {
-            expect(element('#league').css('display')).not().toBe('none');
-            expect(element('#league option[value=""]').text()).toBe('Select one');
-            expect(element('#league option[value=1]').text()).toBe('Team Dan Mac');
-            expect(element('#league option[value=2]').text()).toBe('Terror Squid');
+            expect(element('#selectedLeague').css('display')).not().toBe('none');
+            expect(element('#selectedLeague option[value=""]').text()).toBe('Select one');
+            expect(element('#selectedLeague option[value=1]').text()).toBe('Team Dan Mac');
+            expect(element('#selectedLeague option[value=2]').text()).toBe('Terror Squid');
         });
 
         it('should default numOwners to 0', function() {
@@ -354,18 +354,45 @@ describe('Trade Rapist Draft Setup', function() {
 
     describe('"Save roster" button', function() {
         it('should not be visible until draft is ready', function() {
-            expect(element('#save_roster').css('display').toBe('none'));
+            expect(element('#save_roster').css('display')).toBe('none');
 
+            select('selectedLeague').option("1");
             input('numOwners').enter("2");
             input('myPick').enter("1");
-            element('#draft_init button').click();
+            element('#screen1button').click();
 
-            expect(element('#save_roster').css('display').toBe('none'));
-            element('#draft_init button').click();
+            expect(element('#save_roster').css('display')).toBe('none');
+            element('#screen2button').click();
 
-            expect(element('#save_roster').css('display').not().toBe('none'));
+            expect(element('#save_roster').css('display')).not().toBe('none');
         });
 
-        it('should be visible ')
+        it('should be visible if user selects fantasy team', function() {
+            expect(element('#save_roster').css('display')).toBe('none');
+
+            select('selectedLeague').option("1");
+            input('numOwners').enter("2");
+            input('myPick').enter("1");
+            element('#screen1button').click();
+
+            expect(element('#save_roster').css('display')).toBe('none');
+            element('#screen2button').click();
+
+            expect(element('#save_roster').css('display')).not().toBe('none');
+        });
+
+        it('should not be visible if user does not select fantasy team', function() {
+            expect(element('#save_roster').css('display')).toBe('none');
+
+            select('selectedLeague').option("");
+            input('numOwners').enter("2");
+            input('myPick').enter("1");
+            element('#screen1button').click();
+
+            expect(element('#save_roster').css('display')).toBe('none');
+            element('#screen2button').click();
+
+            expect(element('#save_roster').css('display')).toBe('none');
+        });
     });
 });

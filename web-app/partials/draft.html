@@ -7,9 +7,9 @@
             <form class="form-horizontal">
                 <!-- Hide the leagues field if nothing came over from the server -->
                 <div class="control-group" ng-hide="!leagues">
-                    <label class="control-label" for="league">Fantasy League</label>
+                    <label class="control-label" for="selectedLeague">Fantasy League</label>
                     <div class="controls">
-                        <select id="league" ng-model="selectedLeague">
+                        <select id="selectedLeague" ng-model="selectedLeague">
                             <option value="">Select one</option>
                             <option ng-repeat="league in leagues" value="{{ league.id }}">{{ league.name }}</option>
                         </select>
@@ -50,7 +50,7 @@
                             are configured.  Specifically, we need to know how many starters as well as the total number of
                             players you're allowed at each position.
                         </span>
-                        <button class="btn btn-primary" ng-click="initNumOwners = true;">Go to roster settings...</button>
+                        <button id="screen1button" class="btn btn-primary" ng-click="initNumOwners = true;">Go to roster settings...</button>
                     </div>
                 </div>
             </form>
@@ -161,14 +161,14 @@
                             <label class="checkbox" ng-hide="isNumOwnersValid(numOwners) == false">
                                 <input type="checkbox" id="simulation" ng-model="simulation"/>Simulation?
                             </label>
-                            <button class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="initialized = true; fetchPlayers();">Start Draft!</button>
+                            <button id="screen2button" class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="initialized = true; fetchPlayers();">Start Draft!</button>
                         </fieldset>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div id="save_roster" class="row-fluid" ng-hide="!initialized">
+    <div id="save_roster" class="row-fluid" ng-hide="!initialized || !selectedLeague">
         <button class="btn btn-primary" id="save_roster_button" ng-click="saveRoster()">Save roster</button>
     </div>
     <div id="owners" owners class="row-fluid" ng-hide="!initialized"></div>
