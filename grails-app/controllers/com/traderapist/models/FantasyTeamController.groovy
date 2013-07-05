@@ -8,15 +8,21 @@ class FantasyTeamController {
 
 	static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
+	def springSecurityService
+
 	def index() {
 		redirect(action: "list", params: params)
 	}
 
 	def list(Integer max) {
 		params.max = Math.min(max ?: 10, 100)
-		if(params.username) {
-			def user = User.findByUsername(params.username)
-			render FantasyTeam.findAllByUser(user) as JSON
+		if(params.json) {
+			if(!springSecurityService.isLoggedIn()) {
+				render ""
+			}
+			else {
+				render FantasyTeam.findAllByUser(springSecurityService.getCurrentUser()) as JSON
+			}
 		}
 		else {
 			[fantasyTeamInstanceList: FantasyTeam.list(params), fantasyTeamInstanceTotal: FantasyTeam.count()]

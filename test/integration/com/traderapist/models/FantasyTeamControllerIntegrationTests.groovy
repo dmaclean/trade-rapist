@@ -30,15 +30,40 @@ class FantasyTeamControllerIntegrationTests {
 	}
 
 	@Test
-	void testListWithUsername() {
+	void testListWithJSON_LoggedIn() {
 
 		def user = new User(username: "newuser", password: "password").save(flush: true)
 		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac").save(flush: true)
 
-		controller.request.addParameter("username", "newuser")
+		controller.springSecurityService = [
+				encodePassword : "password",
+				isLoggedIn : { -> true},
+				getCurrentUser : { -> user }
+		]
+
+		controller.request.addParameter("json", "true")
 		controller.list()
 
 		assert controller.response.text == "[${(fantasyTeam as JSON)}]"
+	}
+
+	@Test
+	void testListWithJSON_NotLoggedIn() {
+
+		def user = new User(username: "newuser", password: "password").save(flush: true)
+		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
+		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac").save(flush: true)
+
+		controller.springSecurityService = [
+				encodePassword : "password",
+				isLoggedIn : { -> false},
+				getCurrentUser : { -> user }
+		]
+
+		controller.request.addParameter("json", "true")
+		controller.list()
+
+		assert controller.response.text == ""
 	}
 }
