@@ -57,7 +57,7 @@ angular.module('TradeRapistE2E', ['TradeRapist', 'ngMockE2E'])
 
         $httpBackend.whenGET('login/whoami').respond("dmaclean");
 
-        $httpBackend.whenGET('fantasyTeam/list?username=dmaclean').respond("[" +
+        $httpBackend.whenGET('fantasyTeam/list?json=true').respond("[" +
             "{\"class\":\"com.traderapist.models.FantasyTeam\",\"id\":1,\"fantasyLeagueType\":{\"class\":\"FantasyLeagueType\",\"id\":1},\"leagueId\":\"106647\",\"name\":\"Team Dan Mac\",\"season\":2013,\"user\":{\"class\":\"User\",\"id\":3}}," +
             "{\"class\":\"com.traderapist.models.FantasyTeam\",\"id\":2,\"fantasyLeagueType\":{\"class\":\"FantasyLeagueType\",\"id\":2},\"leagueId\":\"1111\",\"name\":\"Terror Squid\",\"season\":2013,\"user\":{\"class\":\"User\",\"id\":3}}" +
         "]");

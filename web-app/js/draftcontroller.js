@@ -207,18 +207,11 @@ function DraftController($scope, $http) {
     $scope.selectedLeague = undefined;
 
     $scope.fetchFantasyTeams = function() {
-        $http.get("login/whoami").success(function(data) {
-            if(data != "Not logged in.") {
-                $scope.username = data;
-
-                $http.get("fantasyTeam/list?username=" + $scope.username).success(function(data) {
-                    $scope.leagues = data;
-                    console.log("Successfully retrieved fantasy teams for " + $scope.username);
-                })
-                    .error(function() {
-                        console.log("Unable to retrieve fantasy teams for " + $scope.username);
-                    });
-            }
+        $http.get("fantasyTeam/list?json=true").success(function(data) {
+            $scope.leagues = data;
+        })
+        .error(function() {
+            console.log("Unable to retrieve fantasy teams.");
         });
     }
 

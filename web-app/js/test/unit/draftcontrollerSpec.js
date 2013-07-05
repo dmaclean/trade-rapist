@@ -12,7 +12,7 @@ describe('DraftController spec', function() {
     beforeEach(inject(function(_$httpBackend_, $rootScope, $controller) {
         $httpBackend = _$httpBackend_;
         $httpBackend.whenGET('login/whoami').respond("dmaclean");
-        $httpBackend.whenGET('fantasyTeam/list?username=dmaclean').respond("[" +
+        $httpBackend.whenGET('fantasyTeam/list?json=true').respond("[" +
             "{\"class\":\"com.traderapist.models.FantasyTeam\",\"id\":1,\"fantasyLeagueType\":{\"class\":\"FantasyLeagueType\",\"id\":1},\"leagueId\":\"106647\",\"name\":\"Team Dan Mac\",\"season\":2013,\"user\":{\"class\":\"User\",\"id\":3}}]");
         scope = $rootScope.$new();
         ctrl = $controller(DraftController, {$scope: scope});
