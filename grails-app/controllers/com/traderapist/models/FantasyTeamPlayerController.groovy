@@ -1,5 +1,6 @@
 package com.traderapist.models
 
+import grails.converters.JSON
 import org.springframework.dao.DataIntegrityViolationException
 
 class FantasyTeamPlayerController {
@@ -28,6 +29,45 @@ class FantasyTeamPlayerController {
 
 		flash.message = message(code: 'default.created.message', args: [message(code: 'fantasyTeamPlayer.label', default: 'FantasyTeamPlayer'), fantasyTeamPlayerInstance.id])
 		redirect(action: "show", id: fantasyTeamPlayerInstance.id)
+	}
+
+	/**
+	 * Takes in a JSON structure containing the fantasy team and list of player ids and creates a FantasyTeamPlayer instance.  This
+	 * will get invoked when a user clicks "Save Roster" on the draft page.
+	 *
+	 * JSON should look like:
+	 *
+	 * {
+	 *      "team" : <team id>,
+	 *      "players" : [   { "id":1, <other stuff> },
+	 *                      { "id":2, <other stuff> },
+	 *                      ...,
+	 *                      { "id":n-1, <other stuff> },
+	 *                      { "id":n, <other stuff> }
+	 *                  ]
+	 * }
+	 */
+	def saveAllFromDraft() {
+		// Grab the JSON out of the request, parse it into objects that we can use, and grab those objects.
+		def data = JSON.parse(request)
+		def fantasyTeam = FantasyTeam.get(data.team)
+
+		// Create a list of player ids so we can query for the actual objects in a single query.
+		def ids = []
+		for(p in data.players) {
+			ids << new Long(p.id)
+		}
+		def players = Player.findAllByIdInList(ids)
+
+		// Wipe out our existing players for this fantasy team
+		FantasyTeamPlayer.deleteAll(FantasyTeamPlayer.findAllByFantasyTeam(fantasyTeam))
+
+		// Create a FantasyTeamPlayer entry for each of the players we've drafted.
+		for(p in players) {
+			new FantasyTeamPlayer(player: p, fantasyTeam: fantasyTeam).save()
+		}
+
+		render "success"
 	}
 
 	def show(Long id) {
