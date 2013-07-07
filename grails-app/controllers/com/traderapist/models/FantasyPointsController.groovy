@@ -2,8 +2,9 @@ package com.traderapist.models
 
 import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.security.access.annotation.Secured
 
-@Secured(["hasRole('admin')"])
+@Secured(['ROLE_ADMIN'])
 class FantasyPointsController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]

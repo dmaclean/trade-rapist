@@ -1,7 +1,9 @@
 package com.traderapist.models
 
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.security.access.annotation.Secured
 
+@Secured(['ROLE_ADMIN'])
 class FantasyLeagueTypeController {
 
 	static allowedMethods = [save: "POST", update: "POST", delete: "POST"]

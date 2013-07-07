@@ -4,8 +4,8 @@ class Role {
 
 	String authority
 
-	static final String ROLE_ADMIN = "admin"
-	static final String ROLE_USER = "user"
+	static final String ROLE_ADMIN = "ROLE_ADMIN"
+	static final String ROLE_USER = "ROLE_USER"
 
 	static mapping = {
 		table "roles"

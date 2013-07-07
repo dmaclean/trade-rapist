@@ -2,7 +2,9 @@ package com.traderapist.models
 
 import grails.converters.JSON
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.security.access.annotation.Secured
 
+@Secured(['ROLE_ADMIN', 'ROLE_USER'])
 class FantasyTeamPlayerController {
 
 	static allowedMethods = [save: "POST", update: "POST", delete: "POST"]

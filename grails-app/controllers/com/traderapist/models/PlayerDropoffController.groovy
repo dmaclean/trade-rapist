@@ -1,8 +1,9 @@
 package com.traderapist.models
 
 import grails.plugins.springsecurity.Secured
+import org.springframework.security.access.annotation.Secured
 
-@Secured(["hasRole('admin')"])
+@Secured(['ROLE_ADMIN', 'ROLE_USER'])
 class PlayerDropoffController {
 
     def index() {
