@@ -40,12 +40,15 @@ class FantasyTeamControllerTests {
 		assert "/fantasyTeam/list" == response.redirectedUrl
 	}
 
-	void testList() {
-		def model = controller.list()
-
-		assert model.fantasyTeamInstanceList.size() == 0
-		assert model.fantasyTeamInstanceTotal == 0
-	}
+	/**
+	 * The list() method uses Spring Security, so the tests for it are in integration.
+	 */
+//	void testList() {
+//		def model = controller.list()
+//
+//		assert model.fantasyTeamInstanceList.size() == 0
+//		assert model.fantasyTeamInstanceTotal == 0
+//	}
 
 	void testCreate() {
 		def model = controller.create()

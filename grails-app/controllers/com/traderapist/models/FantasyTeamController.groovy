@@ -1,9 +1,12 @@
 package com.traderapist.models
 
+import com.traderapist.security.Role
 import com.traderapist.security.User
 import grails.converters.JSON
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.security.access.annotation.Secured
 
+@Secured(['ROLE_ADMIN', 'ROLE_USER'])
 class FantasyTeamController {
 
 	static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
@@ -15,17 +18,29 @@ class FantasyTeamController {
 	}
 
 	def list(Integer max) {
+		User user = springSecurityService.getCurrentUser()
+
 		params.max = Math.min(max ?: 10, 100)
 		if(params.json) {
 			if(!springSecurityService.isLoggedIn()) {
 				render ""
 			}
 			else {
-				render FantasyTeam.findAllByUser(springSecurityService.getCurrentUser()) as JSON
+				render FantasyTeam.findAllByUser(user) as JSON
 			}
 		}
 		else {
-			[fantasyTeamInstanceList: FantasyTeam.list(params), fantasyTeamInstanceTotal: FantasyTeam.count()]
+			def fantasyTeams
+
+			// For regular users, just grab their teams.  For admins, get every team.
+			if(user.getAuthorities().contains(Role.findByAuthority(Role.ROLE_USER))) {
+				fantasyTeams = FantasyTeam.findAllByUser(user)
+			}
+			else {
+				fantasyTeams = FantasyTeam.list(params)
+			}
+
+			[fantasyTeamInstanceList: fantasyTeams, fantasyTeamInstanceTotal: fantasyTeams.size()]
 		}
 	}
 
