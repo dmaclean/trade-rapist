@@ -47,6 +47,14 @@ class FantasyTeamTests {
 		assert "nullable" == ft.errors["name"]
 	}
 
+	void testNameNotBlank() {
+		FantasyTeam ft = new FantasyTeam(user: user, name: "", fantasyLeagueType: flt, season: 2013)
+
+		assertFalse "Should have failed validation.", ft.validate()
+
+		assert "blank" == ft.errors["name"]
+	}
+
 	void testSeasonNotNullable() {
 		FantasyTeam ft = new FantasyTeam(user: user, fantasyLeagueType: flt, name: "Dan Mac")
 
