@@ -193,7 +193,7 @@ public class FantasyConstants {
 		statTranslation.put(STAT_BLOCK_KICK_PLAYER, "Blocked Kicks (Def. Player)");
 		statTranslation.put(STAT_RETURN_YARDS_TEAM, "Return Yards (Team)");
 		statTranslation.put(STAT_KICKOFF_AND_PUNT_RETURN_TOUCHDOWNS, "Kickoff and Punt Return Touchdowns (Team)");
-		statTranslation.put(STAT_POINTS_ALLOWED_0, "Points Allowed");
+		statTranslation.put(STAT_POINTS_ALLOWED_0, "Points Allowed 0");
 		statTranslation.put(STAT_POINTS_ALLOWED_1_6, "Points Allowed 1-6");
 		statTranslation.put(STAT_POINTS_ALLOWED_7_13, "Points Allowed 7-13");
 		statTranslation.put(STAT_POINTS_ALLOWED_14_20, "Points Allowed 14-20");
