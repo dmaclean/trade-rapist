@@ -5,5 +5,15 @@ if (typeof jQuery !== 'undefined') {
 		}).ajaxStop(function() {
 			$(this).fadeOut();
 		});
+
+        function createScoringSystem() {
+            $(':input[name^="stat_multiplier"]').each(function(index) {
+                console.log($(this).val());
+            });
+        }
+
+        $('#ss_submit').click(function() {
+            createScoringSystem();
+        });
 	})(jQuery);
 }
