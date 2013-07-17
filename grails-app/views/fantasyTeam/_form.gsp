@@ -1,6 +1,4 @@
-<%@ page import="com.traderapist.models.FantasyTeam" %>
-
-
+<%@ page import="com.traderapist.constants.FantasyConstants; com.traderapist.models.FantasyTeam" %>
 
 <div class="fieldcontain ${hasErrors(bean: fantasyTeamInstance, field: 'leagueId', 'error')} ">
 	<label for="leagueId">
