@@ -156,9 +156,11 @@ create table fantasy_teams (
   name varchar(100) not null,
   fantasy_league_type_id int not null,
   season int not null,
+  scoring_system_id int not null,
   version int,
   foreign key (user_id) references users(id),
-  foreign key (fantasy_league_type_id) references fantasy_league_types(id)
+  foreign key (fantasy_league_type_id) references fantasy_league_types(id),
+  foreign key (scoring_system_id) references scoring_systems(id)
 );
 
 /*
@@ -173,4 +175,35 @@ create table fantasy_team_players (
   version int,
   foreign key (player_id) references players(id),
   foreign key (fantasy_team_id) references fantasy_teams(id)
+);
+
+/*
+ * Structure for storing scoring rules in the database.  For reusability, we put
+ * rules in their own table and associate them with 0..n scoring systems through
+ * the scoring_system_rules join table.
+ */
+drop table scoring_rules;
+create table scoring_rules (
+  id int auto_increment primary key,
+  stat_key int not null,
+  multiplier double not null,
+  version int
+);
+create index stat_key_idx on scoring_rules(stat_key);
+
+drop table scoring_systems;
+create table scoring_systems (
+  id int auto_increment primary key,
+  name varchar (100) not null,
+  version int
+);
+
+drop table scoring_system_rules;
+create table scoring_system_rules (
+  id int auto_increment primary key,
+  scoring_rule_id int not null,
+  scoring_system_id int not null,
+  version int,
+  foreign key (scoring_rule_id) references scoring_rules(id),
+  foreign key (scoring_system_id) references scoring_systems(id)
 );
