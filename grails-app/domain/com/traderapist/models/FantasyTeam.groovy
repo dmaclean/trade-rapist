@@ -12,7 +12,7 @@ class FantasyTeam {
 
 	static constraints = {
 		leagueId nullable: true
-		name nullable: false
+		name nullable: false, blank: false
 		season nullable: false
 	}
 

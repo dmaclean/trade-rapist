@@ -1,4 +1,5 @@
 <%@ page import="com.traderapist.constants.FantasyConstants; com.traderapist.models.FantasyTeam" %>
+<g:set var="user" value="${sec.username()}" />
 
 <div class="fieldcontain ${hasErrors(bean: fantasyTeamInstance, field: 'leagueId', 'error')} ">
 	<label for="leagueId">
@@ -8,12 +9,12 @@
 	<g:textField name="leagueId" value="${fantasyTeamInstance?.leagueId}"/>
 </div>
 
-<div class="fieldcontain ${hasErrors(bean: fantasyTeamInstance, field: 'name', 'error')} ">
+<div class="fieldcontain ${hasErrors(bean: fantasyTeamInstance, field: 'name', 'error')} required">
 	<label for="name">
 		<g:message code="fantasyTeam.name.label" default="Name" />
-		
+        <span class="required-indicator">*</span>
 	</label>
-	<g:textField name="name" value="${fantasyTeamInstance?.name}"/>
+	<g:textField name="name" value="${fantasyTeamInstance?.name}" required=""/>
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: fantasyTeamInstance, field: 'season', 'error')} required">
@@ -21,7 +22,13 @@
 		<g:message code="fantasyTeam.season.label" default="Season" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:field name="season" type="number" value="${fantasyTeamInstance.season}" required=""/>
+    <g:if test="${fantasyTeamInstance}">
+        <g:set var="season" value="${Calendar.getInstance().get(Calendar.YEAR)}"/>
+    </g:if>
+    <g:else>
+        <g:set var="season" value="${fantasyTeamInstance.season}"/>
+    </g:else>
+	<g:field name="season" type="number" value="${season}" required=""/>
 </div>
 
 <div class="fieldcontain ${hasErrors(bean: fantasyTeamInstance, field: 'fantasyLeagueType', 'error')} required">
@@ -32,11 +39,13 @@
 	<g:select id="fantasyLeagueType" name="fantasyLeagueType.id" from="${com.traderapist.models.FantasyLeagueType.list()}" optionKey="id" optionValue="code" value="${fantasyTeamInstance.fantasyLeagueType}" required=""/>
 </div>
 
-<div class="fieldcontain ${hasErrors(bean: fantasyTeamInstance, field: 'user', 'error')} required">
-	<label for="user">
-		<g:message code="fantasyTeam.user.label" default="User" />
-		<span class="required-indicator">*</span>
-	</label>
-	<g:select id="user" name="user.id" from="${com.traderapist.security.User.list()}" optionKey="id" optionValue="username" required="" value="${fantasyTeamInstance?.user?.id}" class="many-to-one"/>
-</div>
+<g:if test="${user == "admin"}">
+    <div class="fieldcontain ${hasErrors(bean: fantasyTeamInstance, field: 'user', 'error')} required">
+        <label for="user">
+            <g:message code="fantasyTeam.user.label" default="User" />
+            <span class="required-indicator">*</span>
+        </label>
+        <g:select id="user" name="user.id" from="${com.traderapist.security.User.list()}" optionKey="id" optionValue="username" required="" value="${fantasyTeamInstance?.user?.id}" class="many-to-one"/>
+    </div>
+</g:if>
 
