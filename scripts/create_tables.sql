@@ -195,6 +195,7 @@ drop table scoring_systems;
 create table scoring_systems (
   id int auto_increment primary key,
   name varchar (100) not null,
+  fantasy_team_id int not null,
   version int
 );
 
