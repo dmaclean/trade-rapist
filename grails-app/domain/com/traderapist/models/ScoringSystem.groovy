@@ -4,10 +4,13 @@ class ScoringSystem {
 
 	String name
 
+	static belongsTo = [fantasyTeam : FantasyTeam]
+
 	static hasMany = [scoringRules : ScoringRule]
 
 	static constraints = {
 		name nullable: false
+		fantasyTeam nullable: true
 	}
 
 	static mapping = {

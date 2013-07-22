@@ -1,18 +1,40 @@
 package com.traderapist.models
 
-
-
+import com.traderapist.constants.FantasyConstants
+import com.traderapist.security.User
 import org.junit.*
 import grails.test.mixin.*
 
 @TestFor(ScoringSystemController)
-@Mock(ScoringSystem)
+@Mock([FantasyTeam, ScoringSystem, ScoringRule, User, FantasyLeagueType])
 class ScoringSystemControllerTests {
+
+	def fantasyTeam
+	def user
+	def fantasyLeagueType
+
+	@Before
+	void setUp() {
+		User.metaClass.encodePassword = { -> "password" }
+
+		user = new User(username: "Dan", password: "password").save(flush: true)
+		fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
+		fantasyTeam = new FantasyTeam(name: "MyFantasyTeam", leagueId: "111", season: 2013, user: user, fantasyLeagueType: fantasyLeagueType)
+		fantasyTeam.validate()
+		fantasyTeam.save(flush: true)
+	}
+
+	@After
+	void tearDown() {
+		fantasyTeam = null
+		user = null
+	}
 
 	def populateValidParams(params) {
 		assert params != null
 		// TODO: Populate valid properties like...
 		params["name"] = 'someValidName'
+		params["fantasyTeam"] = fantasyTeam
 	}
 
 	void testIndex() {
@@ -32,6 +54,55 @@ class ScoringSystemControllerTests {
 		def model = controller.create()
 
 		assert model.scoringSystemInstance != null
+	}
+
+	void testCreateSystemAndRules_NewSystemAndRules() {
+		controller.params.ss_name = "Test System"
+		controller.params.stat_multiplier_1 = "1"
+		controller.params.stat_multiplier_2 = "2"
+		controller.params.stat_multiplier_3 = "3"
+
+		controller.createSystemAndRules()
+
+		assert response.text == "success"
+		assert ScoringRule.list().size() == 3
+		assert ScoringSystem.list().size() == 1
+	}
+
+	void testCreateSystemAndRules_NewSystemExistingRules() {
+		def rule1 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, multiplier: 6).save(flush: true)
+		def rule2 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_YARDS, multiplier: 0.4).save(flush: true)
+
+		controller.params.ss_name = "Test System"
+		controller.params.stat_multiplier_5 = "6"     // passing touchdowns
+		controller.params.stat_multiplier_4 = "0.4"   // passing yards
+
+		controller.createSystemAndRules()
+
+		assert response.text == "success"
+		assert ScoringRule.list().size() == 2
+		assert ScoringSystem.list().size() == 1
+	}
+
+	void testCreateSystemAndRules_NewSystemSomeExistingRules() {
+		def rule1 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, multiplier: 4).save(flush: true)
+		def rule2 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_YARDS, multiplier: 0.4).save(flush: true)
+
+		controller.params.ss_name = "Test System"
+		controller.params.stat_multiplier_1 = "1"
+		controller.params.stat_multiplier_4 = "0.4"   // passing yards
+
+		controller.createSystemAndRules()
+
+		assert response.text == "success"
+		assert ScoringRule.list().size() == 3
+		assert ScoringSystem.list().size() == 1
+	}
+
+	void testCreateSystemAndRules_ErrorCreatingScoringSystem() {
+		controller.createSystemAndRules()
+
+		assert response.text == "error: Unable to save scoring system."
 	}
 
 	void testSave() {

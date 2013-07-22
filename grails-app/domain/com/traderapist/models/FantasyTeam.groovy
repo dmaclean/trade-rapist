@@ -4,6 +4,8 @@ import com.traderapist.security.User
 
 class FantasyTeam {
 
+	static hasOne = [scoringSystem : ScoringSystem]
+
 	static belongsTo = [user:User, fantasyLeagueType:FantasyLeagueType]
 
 	String leagueId
@@ -14,6 +16,7 @@ class FantasyTeam {
 		leagueId nullable: true
 		name nullable: false, blank: false
 		season nullable: false
+		scoringSystem nullable: true
 	}
 
 	static mapping = {

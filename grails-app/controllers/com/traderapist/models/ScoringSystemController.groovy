@@ -19,6 +19,43 @@ class ScoringSystemController {
 		[scoringSystemInstance: new ScoringSystem(params)]
 	}
 
+	/**
+	 * This gets hit when a user creates a new fantasy team, and, as a result, a scoring
+	 * system to go along with that team.
+	 *
+	 * Here we create the scoring system and check if any of the scoring rules already
+	 * exist.  If not, we create a new one.  Either way, the rules get added to the scoring
+	 * system.
+	 *
+	 * @return
+	 */
+	def createSystemAndRules() {
+		def scoringSystem = new ScoringSystem(name: params["ss_name"], scoringRules: new HashSet<ScoringRule>())
+
+		if(!scoringSystem.save()) {
+			render "error: Unable to save scoring system."
+			return
+		}
+
+		for(p in params) {
+			if(p.key.contains("stat_multiplier_")) {
+				def statKey = Integer.parseInt(p.key.split("_")[2])
+				def multiplier = Double.parseDouble(p.value)
+				def sr = ScoringRule.findByStatKeyAndMultiplier(statKey, multiplier)
+
+				if(sr == null) {
+					sr = new ScoringRule(statKey: statKey, multiplier: multiplier).save()
+				}
+
+				scoringSystem.scoringRules.add(sr)
+			}
+		}
+
+		scoringSystem.save()
+
+		render "success"
+	}
+
 	def save() {
 		def scoringSystemInstance = new ScoringSystem(params)
 		if (!scoringSystemInstance.save(flush: true)) {
