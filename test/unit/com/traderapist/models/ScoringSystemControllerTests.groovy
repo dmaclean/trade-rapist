@@ -67,6 +67,8 @@ class ScoringSystemControllerTests {
 		assert response.text == "success"
 		assert ScoringRule.list().size() == 3
 		assert ScoringSystem.list().size() == 1
+
+		assert flash.info == "Scoring system ${ controller.params.ss_name } successfully created!"
 	}
 
 	void testCreateSystemAndRules_NewSystemExistingRules() {
