@@ -22,12 +22,14 @@
         </style>
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'bootstrap.min.css')}" type="text/css">
         <link rel="stylesheet" href="${resource(dir: 'css', file: 'bootstrap-responsive.min.css')}" type="text/css">
-        <g:javascript library="jquery" plugin="jquery"/>
+        <g:javascript src="jquery.min.js"/>
+        <g:javascript src="bootstrap.js"/>
 		<g:layoutHead/>
 		<r:layoutResources />
 	</head>
 	<body>
         <g:set var="user" value="${sec.username()}" />
+        <span id="context_root" style="display: none">${ applicationContext.servletContext.contextPath }</span>
 
 		<!--<div id="grailsLogo" role="banner"><a href="http://grails.org"><img src="${resource(dir: 'images', file: 'grails_logo.png')}" alt="Grails"/></a></div>-->
         <div class="navbar navbar-inverse navbar-fixed-top">
@@ -42,9 +44,9 @@
                     <div class="nav-collapse collapse">
                         <ul class="nav">
                             <li class="active"><a href="${ application.contextPath }/home">Home</a></li>
-                            <li><a href="index.html">Draft Central</a></li>
+                            <li><a href="${ application.contextPath }/index.html">Draft Central</a></li>
                             <g:if test="${ user }">
-                                <li><a href="fantasyTeam">My Fantasy Teams</a></li>
+                                <li><a href="${ application.contextPath }/fantasyTeam">My Fantasy Teams</a></li>
                             </g:if>
                             <!--<li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
@@ -60,7 +62,7 @@
                             </li>-->
                         </ul>
                         <g:if test="${ !user }">
-                            <form class="navbar-form pull-right" method="post" action="j_spring_security_check">
+                            <form class="navbar-form pull-right" method="post" action="${request.contextPath}/j_spring_security_check">
                                 <input class="span2" type="text" name="j_username" placeholder="Email">
                                 <input class="span2" type="password" name="j_password" placeholder="Password">
                                 <button type="submit" class="btn">Sign in</button>
