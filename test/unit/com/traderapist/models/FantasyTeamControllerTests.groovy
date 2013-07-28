@@ -72,6 +72,20 @@ class FantasyTeamControllerTests {
 		assert FantasyTeam.count() == 1
 	}
 
+	void testSaveAjax() {
+		controller.saveAjax()
+
+		assert response.text == "error"
+
+		response.reset()
+
+		populateValidParams(params)
+		controller.saveAjax()
+
+		assert response.text =~ /\d+/
+		assert FantasyTeam.count() == 1
+	}
+
 	void testShow() {
 		controller.show()
 

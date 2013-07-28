@@ -59,6 +59,16 @@ class FantasyTeamController {
 		redirect(action: "show", id: fantasyTeamInstance.id)
 	}
 
+	def saveAjax() {
+		def fantasyTeamInstance = new FantasyTeam(params)
+		if (!fantasyTeamInstance.save(flush: true)) {
+			render text: "error", status: 500
+			return
+		}
+
+		render fantasyTeamInstance.id
+	}
+
 	def show(Long id) {
 		def fantasyTeamInstance = FantasyTeam.get(id)
 		if (!fantasyTeamInstance) {
