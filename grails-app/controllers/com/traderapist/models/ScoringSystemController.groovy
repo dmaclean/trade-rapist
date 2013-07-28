@@ -30,7 +30,7 @@ class ScoringSystemController {
 	 * @return
 	 */
 	def createSystemAndRules() {
-		def scoringSystem = new ScoringSystem(name: params["ss_name"], scoringRules: new HashSet<ScoringRule>())
+		def scoringSystem = new ScoringSystem(name: params["ss_name"], fantasyTeam: FantasyTeam.get(params.fantasy_team_id), scoringRules: new HashSet<ScoringRule>())
 
 		if(!scoringSystem.save()) {
 			render "error: Unable to save scoring system."
@@ -52,6 +52,8 @@ class ScoringSystemController {
 		}
 
 		scoringSystem.save()
+
+		flash.info = "Scoring system ${ params.ss_name } successfully created!"
 
 		render "success"
 	}
