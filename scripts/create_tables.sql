@@ -196,7 +196,8 @@ create table scoring_systems (
   id int auto_increment primary key,
   name varchar (100) not null,
   fantasy_team_id int not null,
-  version int
+  version int,
+  foreign key (fantasy_team_id) references fantasy_teams(id)
 );
 
 drop table scoring_system_rules;
