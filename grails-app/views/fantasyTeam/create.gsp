@@ -22,7 +22,7 @@
             </g:eachError>
         </ul>
         </g:hasErrors>
-        <g:form action="saveAjax" >
+        <g:form name="fantasy_team_form" action="saveAjax" >
             <fieldset>
                 <g:render template="form"/>
             </fieldset>

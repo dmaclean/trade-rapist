@@ -35,7 +35,7 @@ if (typeof jQuery !== 'undefined') {
             });
         }
 
-        var fantasyTeamForm = $($('form')[0]);
+        var fantasyTeamForm = $($('form[name="fantasy_team_form"]')[0]);
         fantasyTeamForm.submit(function() {
             $.ajax({
                 type: fantasyTeamForm.attr('method'),
