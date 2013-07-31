@@ -36,7 +36,7 @@ class FantasyTeamControllerIntegrationTests {
 
 		def user = new User(username: "newuser", password: "password").save(flush: true)
 		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
-		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac").save(flush: true)
+		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac", numOwners: 10).save(flush: true)
 
 		controller.springSecurityService = [
 				encodePassword : "password",
@@ -79,8 +79,8 @@ class FantasyTeamControllerIntegrationTests {
 		def adminrole = new UserRole(user: admin, role: roleAdmin).save(flush: true)
 		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def flt2 = new FantasyLeagueType(code: "Yahoo", description: "Yahoo").save(flush: true)
-		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac").save(flush: true)
-		def fantasyTeam2 = new FantasyTeam(user: admin, fantasyLeagueType: flt2, season: 2013, leagueId: "1111", name: "Terror Squid").save(flush: true)
+		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac", numOwners: 10).save(flush: true)
+		def fantasyTeam2 = new FantasyTeam(user: admin, fantasyLeagueType: flt2, season: 2013, leagueId: "1111", name: "Terror Squid", numOwners: 10).save(flush: true)
 
 		controller.springSecurityService = [
 				encodePassword : "password",
@@ -125,8 +125,8 @@ class FantasyTeamControllerIntegrationTests {
 		def adminrole = new UserRole(user: admin, role: roleAdmin).save(flush: true)
 		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def flt2 = new FantasyLeagueType(code: "Yahoo", description: "Yahoo").save(flush: true)
-		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac").save(flush: true)
-		def fantasyTeam2 = new FantasyTeam(user: admin, fantasyLeagueType: flt2, season: 2013, leagueId: "1111", name: "Terror Squid").save(flush: true)
+		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac", numOwners: 10).save(flush: true)
+		def fantasyTeam2 = new FantasyTeam(user: admin, fantasyLeagueType: flt2, season: 2013, leagueId: "1111", name: "Terror Squid", numOwners: 10).save(flush: true)
 
 		controller.springSecurityService = [
 				encodePassword : "password",

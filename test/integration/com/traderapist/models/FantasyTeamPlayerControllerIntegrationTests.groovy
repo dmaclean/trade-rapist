@@ -36,7 +36,7 @@ class FantasyTeamPlayerControllerIntegrationTests {
 		def fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def player = new Player(name: "Dan MacLean", position: Player.POSITION_QB).save(flush: true)
 		def player2 = new Player(name: "Mike MacLean", position: Player.POSITION_RB).save(flush: true)
-		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: fantasyLeagueType, season: 2013, leagueId: "1111", name: "abc").save(flush: true)
+		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: fantasyLeagueType, season: 2013, leagueId: "1111", name: "abc", numOwners: 10).save(flush: true)
 
 		def data = "{" +
 				"\"team\" : ${ fantasyTeam.id }," +
@@ -67,7 +67,7 @@ class FantasyTeamPlayerControllerIntegrationTests {
 		def fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def player = new Player(name: "Dan MacLean", position: Player.POSITION_QB).save(flush: true)
 		def player2 = new Player(name: "Mike MacLean", position: Player.POSITION_RB).save(flush: true)
-		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: fantasyLeagueType, season: 2013, leagueId: "1111", name: "abc").save(flush: true)
+		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: fantasyLeagueType, season: 2013, leagueId: "1111", name: "abc", numOwners: 10).save(flush: true)
 
 		/*
 		 * Create a FantasyTeamPlayer that should be deleted when we rerun the save
