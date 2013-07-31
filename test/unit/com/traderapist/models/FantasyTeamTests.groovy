@@ -11,7 +11,7 @@ import com.traderapist.security.User
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(FantasyTeam)
-@Mock([FantasyLeagueType, User])
+@Mock([FantasyLeagueType, FantasyTeamStarter, User])
 class FantasyTeamTests {
 	User user
 	FantasyLeagueType flt
@@ -32,7 +32,7 @@ class FantasyTeamTests {
 	}
 
 	void testGoodFantasyTeam() {
-		def ft = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, name: "ESPN")
+		def ft = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, name: "ESPN", numOwners: 10)
 
 		assertTrue ft.validate()
 
@@ -61,5 +61,21 @@ class FantasyTeamTests {
 		assertFalse "Should have failed validation.", ft.validate()
 
 		assert "nullable" == ft.errors["season"]
+	}
+
+	void testNumOwnersNotNullable() {
+		FantasyTeam ft = new FantasyTeam(user: user, fantasyLeagueType: flt, name: "Dan Mac", season: 2013)
+
+		assertFalse "Should have failed validation.", ft.validate()
+
+		assert "nullable" == ft.errors["numOwners"]
+	}
+
+	void testNumOwnersMin1() {
+		FantasyTeam ft = new FantasyTeam(user: user, fantasyLeagueType: flt, name: "Dan Mac", season: 2013, numOwners: 0)
+
+		assertFalse "Should have failed validation.", ft.validate()
+
+		assert "min" == ft.errors["numOwners"]
 	}
 }

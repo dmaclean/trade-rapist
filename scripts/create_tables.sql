@@ -157,6 +157,7 @@ create table fantasy_teams (
   fantasy_league_type_id int not null,
   season int not null,
   scoring_system_id int not null,
+  num_owners int not null,
   version int,
   foreign key (user_id) references users(id),
   foreign key (fantasy_league_type_id) references fantasy_league_types(id),
@@ -174,6 +175,16 @@ create table fantasy_team_players (
   fantasy_team_id int not null,
   version int,
   foreign key (player_id) references players(id),
+  foreign key (fantasy_team_id) references fantasy_teams(id)
+);
+
+drop table if exists fantasy_team_starters;
+create table fantasy_team_starters (
+  id int auto_increment primary key,
+  fantasy_team_id int not null,
+  position varchar(5) not null,
+  num_starters int not null,
+  version int,
   foreign key (fantasy_team_id) references fantasy_teams(id)
 );
 

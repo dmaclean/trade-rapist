@@ -28,7 +28,7 @@ class FantasyTeamPlayerTests {
 		user = new User(username: "dmaclean", password: "password").save(flush: true)
 		player = new Player(name: "Dan MacLean", position: Player.POSITION_QB).save(flush: true)
 		fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
-		fantasyTeam = new FantasyTeam(user: user, name: "ESPN", fantasyLeagueType: fantasyLeagueType, season: 2013).save(flush: true)
+		fantasyTeam = new FantasyTeam(user: user, name: "ESPN", fantasyLeagueType: fantasyLeagueType, season: 2013, numOwners: 10).save(flush: true)
 	}
 
 	@After
