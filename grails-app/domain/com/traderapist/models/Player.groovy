@@ -98,14 +98,14 @@ class Player {
      *
      * @param scoringSystem     The scoring system that will translate stats into points.
      */
-    def computeFantasyPoints(IFantasyScoringSystem scoringSystem) {
+    def computeFantasyPoints(ScoringSystem scoringSystem) {
         def points = [:]
 
         long start = System.currentTimeMillis();
         for(s in stats) {
 	        boolean exists = false;
 	        for(fp in fantasyPoints) {
-		        if(fp.player == this && fp.season == s.season && fp.week == s.week) {
+		        if(fp.scoringSystem == scoringSystem && fp.season == s.season && fp.week == s.week) {
 			        exists = true
 			        break
 		        }
@@ -128,13 +128,18 @@ class Player {
         long end = System.currentTimeMillis();
         println("Distributed stats to season and week for ${name} in ${(end-start)/1000.0}")
 
+	    def fantasyPointsList = []
         for(p in points) {
             String[] keyPieces = p.key.split("__")
             FantasyPoints fp = new FantasyPoints(player: this, season: keyPieces[0], week: keyPieces[1], system: scoringSystem.class.getName(), points:  p.value)
             fp.save()
+
+	        fantasyPointsList << fp
         }
 	    end = System.currentTimeMillis();
 	    println("Created FantasyPoint entries for ${name} in ${(end-start)/1000.0}")
+
+	    return fantasyPointsList
     }
 
     /**
@@ -583,7 +588,7 @@ class Player {
 				eq("season", year-1)
 				eq("week", -1)
 				ne("projection", true)
-				eq("system", system.class.getSimpleName())
+				eq("scoringSystem", system)
 
 				player {
 					eq("position", position)

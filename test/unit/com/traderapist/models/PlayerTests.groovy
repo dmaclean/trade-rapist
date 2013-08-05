@@ -1,7 +1,6 @@
 package com.traderapist.models
 
-
-
+import com.traderapist.security.User
 import grails.test.mixin.*
 import org.junit.*
 
@@ -13,8 +12,37 @@ import com.traderapist.scoringsystem.ESPNStandardScoringSystem
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(Player)
-@Mock([Stat,FantasyPoints])
+@Mock([FantasyLeagueType,FantasyTeam,ScoringSystem,ScoringRule,Stat,FantasyPoints,User])
 class PlayerTests {
+
+	User user
+	FantasyLeagueType flt
+	FantasyTeam fantasyTeam
+	ScoringSystem scoringSystem
+	def passingYardsRule
+	def passingTouchdownRule
+
+	@Before
+	void setUp() {
+		User.metaClass.encodePassword = { -> "password"}
+		user = new User(username: "dmaclean", password: "password").save(flush: true)
+		flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
+		fantasyTeam = new FantasyTeam(name: "Test team", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: new HashSet<FantasyTeamStarter>()).save(flush: true)
+
+		scoringSystem = new ScoringSystem(name: "Test SS", fantasyTeam: fantasyTeam, scoringRules: new HashSet<ScoringRule>()).save(flush: true)
+		passingYardsRule = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_YARDS, multiplier: 0.04).save(flush: true)
+		passingTouchdownRule = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, multiplier: 4).save(flush: true)
+
+		scoringSystem.scoringRules.add(passingYardsRule)
+		scoringSystem.scoringRules.add(passingTouchdownRule)
+	}
+
+	@After
+	void tearDown() {
+		scoringSystem = null
+		passingYardsRule = null
+		passingTouchdownRule = null
+	}
 
    void testNameNotBlank() {
         def player = new Player(name:"")
@@ -36,20 +64,14 @@ class PlayerTests {
         assert "blank" == player.errors["position"]
     }
 
-    void testCalculatePoints_SeasonStats_ESPNStandardScoring() {
+    void testCalculatePoints_SeasonStats() {
         Player player = new Player(name: "Dan", position: "QB")
         Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
         Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
-        Set stats = new HashSet()
-        stats.add(s1)
-        stats.add(s2)
+        Set stats = new HashSet([s1,s2])
         player.setStats(stats)
 
-
-        IFantasyScoringSystem system = new ESPNStandardScoringSystem()
-        player.computeFantasyPoints(system)
-
-        def fantasyPoints = FantasyPoints.list()
+		def fantasyPoints = player.computeFantasyPoints(scoringSystem)
         assertTrue "Expecting 1 entry for FantasyPoints", fantasyPoints.size() == 1
 
         assert fantasyPoints[0].season == 2001
@@ -71,9 +93,7 @@ class PlayerTests {
 		// Create existing FantasyPoints entry for 2001 season
 		FantasyPoints fp2001 = new FantasyPoints(player: player, points: 16, season: 2001, week: -1, system: system).save(flush: true)
 
-		player.computeFantasyPoints(system)
-
-		def fantasyPoints = FantasyPoints.list()
+		def fantasyPoints = player.computeFantasyPoints(scoringSystem)
 		assertTrue "Expecting 1 entry for FantasyPoints", fantasyPoints.size() == 1
 
 		assert fantasyPoints[0].season == 2001
@@ -90,10 +110,7 @@ class PlayerTests {
         stats.add(s2)
         player.setStats(stats)
 
-        IFantasyScoringSystem system = new ESPNStandardScoringSystem()
-        player.computeFantasyPoints(system)
-
-        def fantasyPoints = FantasyPoints.list()
+        def fantasyPoints = player.computeFantasyPoints(scoringSystem)
         assertTrue "Expecting 1 entry for FantasyPoints", fantasyPoints.size() == 1
 
         assert fantasyPoints[0].season == 2001
@@ -110,15 +127,10 @@ class PlayerTests {
 		stats.add(s2)
 		player.setStats(stats)
 
-		IFantasyScoringSystem system = new ESPNStandardScoringSystem()
-
 		// Create existing FantasyPoints entry for 2001 season
-		FantasyPoints fp2001 = new FantasyPoints(player: player, points: 16, season: 2001, week: 1, system: system).save(flush: true)
+		FantasyPoints fp2001 = new FantasyPoints(player: player, points: 16, season: 2001, week: 1, scoringSystem: scoringSystem).save(flush: true)
 
-
-		player.computeFantasyPoints(system)
-
-		def fantasyPoints = FantasyPoints.list()
+		def fantasyPoints = player.computeFantasyPoints(scoringSystem)
 		assertTrue "Expecting 1 entry for FantasyPoints", fantasyPoints.size() == 1
 
 		assert fantasyPoints[0].season == 2001
@@ -497,7 +509,6 @@ class PlayerTests {
 	void testCalculateProjectedPointsDEF_season_numStartable1_numOwners3() {
 		def numStartable = 1
 		def numOwners = 3
-		def system = new ESPNStandardScoringSystem()
 
 		// Create four defenses
 		def d1 = new Player(name: "Defense 1", position: Player.POSITION_DEF).save(flush: true)
@@ -505,10 +516,10 @@ class PlayerTests {
 		def d3 = new Player(name: "Defense 3", position: Player.POSITION_DEF).save(flush: true)
 		def d4 = new Player(name: "Defense 4", position: Player.POSITION_DEF).save(flush: true)
 
-		def fp2012_1 = new FantasyPoints(player: d1, season: 2012, week: -1, points: 100, system: system.class.getSimpleName()).save(flush: true)
-		def fp2012_2 = new FantasyPoints(player: d2, season: 2012, week: -1, points: 90, system: system.class.getSimpleName()).save(flush: true)
-		def fp2012_3 = new FantasyPoints(player: d3, season: 2012, week: -1, points: 80, system: system.class.getSimpleName()).save(flush: true)  // Average player
-		def fp2012_4 = new FantasyPoints(player: d4, season: 2012, week: -1, points: 70, system: system.class.getSimpleName()).save(flush: true)
+		def fp2012_1 = new FantasyPoints(player: d1, season: 2012, week: -1, points: 100, scoringSystem: scoringSystem).save(flush: true)
+		def fp2012_2 = new FantasyPoints(player: d2, season: 2012, week: -1, points: 90, scoringSystem: scoringSystem).save(flush: true)
+		def fp2012_3 = new FantasyPoints(player: d3, season: 2012, week: -1, points: 80, scoringSystem: scoringSystem).save(flush: true)  // Average player
+		def fp2012_4 = new FantasyPoints(player: d4, season: 2012, week: -1, points: 70, scoringSystem: scoringSystem).save(flush: true)
 
 		/*
 		 * Do projections
@@ -517,34 +528,33 @@ class PlayerTests {
 		 *
 		 * 2013 points allowed 14-20 =       (100 * 0.1) + (80 * 0.9) = 10 + 72 = 82 --> 82 * 1 = 82
 		 */
-		assert d1.calculateProjectedPoints(2013, numStartable, numOwners, system) == 82
+		assert d1.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 82
 
 		/*
 		 * DEF 2
 		 *
 		 * 2013 points allowed 14-20 =       (90 * 0.1) + (80 * 0.9) = 9 + 72 = 81 --> 81 * 1 = 81
 		 */
-		assert d2.calculateProjectedPoints(2013, numStartable, numOwners, system) == 81
+		assert d2.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 81
 
 		/*
 		 * DEF 3
 		 *
 		 * 2013 points allowed 14-20 =       (80 * 0.1) + (80 * 0.9) = 8 + 72 = 80 --> 80 * 1 = 80
 		 */
-		assert d3.calculateProjectedPoints(2013, numStartable, numOwners, system) == 80
+		assert d3.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 80
 
 		/*
 		 * DEF 4
 		 *
 		 * 2013 points allowed 14-20 =       (70 * 0.1) + (80 * 0.9) = 7 + 72 = 79 --> 79 * 1 = 79
 		 */
-		assert d4.calculateProjectedPoints(2013, numStartable, numOwners, system) == 79
+		assert d4.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 79
 	}
 
 	void testCalculateProjectedPointsK_season_numStartable1_numOwners3() {
 		def numStartable = 1
 		def numOwners = 3
-		def system = new ESPNStandardScoringSystem()
 
 		// Create four kickers
 		def k1 = new Player(name: "Kicker 1", position: Player.POSITION_K).save(flush: true)
@@ -552,10 +562,10 @@ class PlayerTests {
 		def k3 = new Player(name: "Kicker 3", position: Player.POSITION_K).save(flush: true)
 		def k4 = new Player(name: "Kicker 4", position: Player.POSITION_K).save(flush: true)
 
-		def fp2012_1 = new FantasyPoints(player: k1, season: 2012, week: -1, points: 100, system: system.class.getSimpleName()).save(flush: true)
-		def fp2012_2 = new FantasyPoints(player: k2, season: 2012, week: -1, points: 90, system: system.class.getSimpleName()).save(flush: true)
-		def fp2012_3 = new FantasyPoints(player: k3, season: 2012, week: -1, points: 80, system: system.class.getSimpleName()).save(flush: true)  // Average player
-		def fp2012_4 = new FantasyPoints(player: k4, season: 2012, week: -1, points: 70, system: system.class.getSimpleName()).save(flush: true)
+		def fp2012_1 = new FantasyPoints(player: k1, season: 2012, week: -1, points: 100, scoringSystem: scoringSystem).save(flush: true)
+		def fp2012_2 = new FantasyPoints(player: k2, season: 2012, week: -1, points: 90, scoringSystem: scoringSystem).save(flush: true)
+		def fp2012_3 = new FantasyPoints(player: k3, season: 2012, week: -1, points: 80, scoringSystem: scoringSystem).save(flush: true)  // Average player
+		def fp2012_4 = new FantasyPoints(player: k4, season: 2012, week: -1, points: 70, scoringSystem: scoringSystem).save(flush: true)
 
 		/*
 		 * Do projections
@@ -564,27 +574,69 @@ class PlayerTests {
 		 *
 		 * 2013 points =       (100 * 0.1) + (80 * 0.9) = 10 + 72 = 82 --> 82 * 1 = 82
 		 */
-		assert k1.calculateProjectedPoints(2013, numStartable, numOwners, system) == 82
+		assert k1.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 82
 
 		/*
 		 * K 2
 		 *
 		 * 2013 points =       (90 * 0.1) + (80 * 0.9) = 9 + 72 = 81 --> 81 * 1 = 81
 		 */
-		assert k2.calculateProjectedPoints(2013, numStartable, numOwners, system) == 81
+		assert k2.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 81
 
 		/*
 		 * K 3
 		 *
 		 * 2013 points =       (80 * 0.1) + (80 * 0.9) = 8 + 72 = 80 --> 80 * 1 = 80
 		 */
-		assert k3.calculateProjectedPoints(2013, numStartable, numOwners, system) == 80
+		assert k3.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 80
 
 		/*
 		 * K 4
 		 *
 		 * 2013 points =       (70 * 0.1) + (80 * 0.9) = 7 + 72 = 79 --> 79 * 1 = 79
 		 */
-		assert k4.calculateProjectedPoints(2013, numStartable, numOwners, system) == 79
+		assert k4.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 79
+	}
+
+	void testComputeFantasyPoints_Season() {
+		def player = new Player(name: "Dan", position: Player.POSITION_QB).save(flush: true)
+
+		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
+		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+		Set stats = new HashSet([s1,s2])
+		player.setStats(stats)
+
+		def fantasyPoints = player.computeFantasyPoints(scoringSystem)
+		assert fantasyPoints.size() == 1
+		assert fantasyPoints[0].season == 2001
+		assert fantasyPoints[0].week == -1
+		assert fantasyPoints[0].points == 16
+	}
+
+	void testComputeFantasyPoints_Season_Duplicates() {
+		def player = new Player(name: "Dan", position: Player.POSITION_QB).save(flush: true)
+
+		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
+		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+		Set stats = new HashSet([s1,s2])
+		player.setStats(stats)
+
+		// Create existing FantasyPoints
+		def fp = new FantasyPoints(
+				season: 2001,
+				week: -1,
+				points: 100,
+				projection: false,
+				numOwners: 10,
+				numStartable: 1,
+				player: player,
+				scoringSystem: scoringSystem
+		).save(flush: true)
+
+		assert FantasyPoints.list().size() == 1
+
+		def fantasyPointsList = player.computeFantasyPoints(scoringSystem)
+
+		assert fantasyPointsList.size() == 0
 	}
 }
