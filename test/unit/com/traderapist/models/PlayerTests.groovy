@@ -259,7 +259,8 @@ class PlayerTests {
 		 * 2013 rushing yards =         (10 * 0.78) + (9 * 0.22) = 7.8 + 1.98 = 9.78 --> 9 /10 = .9
 		 * 2013 rushing touchdowns =    (1 * 0.5) + (1 * 0.5) = 0.5 + 0.5 = 1 --> 1 * 6 = 6
 		 */
-		assert q3.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 36.1
+		def q3Result = q3.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem)
+		assert q3Result > 36.01 && q3Result < 36.2
 
 		/*
 		 * Quarterback 4

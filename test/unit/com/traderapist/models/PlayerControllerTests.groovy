@@ -1,7 +1,5 @@
 package com.traderapist.models
 
-import com.traderapist.scoringsystem.IFantasyScoringSystem
-import org.junit.*
 import grails.test.mixin.*
 
 @TestFor(PlayerController)
