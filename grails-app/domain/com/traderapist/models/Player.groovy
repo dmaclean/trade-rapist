@@ -1,8 +1,6 @@
 package com.traderapist.models
 
 import com.traderapist.constants.FantasyConstants
-import com.traderapist.scoringsystem.ESPNStandardScoringSystem
-import com.traderapist.scoringsystem.IFantasyScoringSystem
 
 class Player {
     static hasMany = [stats: Stat, fantasyPoints: FantasyPoints,
@@ -79,7 +77,7 @@ class Player {
 	 */
 	static def getPlayersInPointsOrder(position, season, system) {
 		def results = Player.executeQuery("from Player p inner join p.fantasyPoints f inner join p.averageDraftPositions adp " +
-				"where p.position = ? and f.season = ? and f.week = -1 and f.projection = ? and f.system = ? and adp.season = ? " +
+				"where p.position = ? and f.season = ? and f.week = -1 and f.projection = ? and f.scoringSystem = ? and adp.season = ? " +
 				"order by f.points desc", [position, season, true, system, season])
 
 		def players = []
@@ -98,14 +96,14 @@ class Player {
      *
      * @param scoringSystem     The scoring system that will translate stats into points.
      */
-    def computeFantasyPoints(ScoringSystem scoringSystem) {
+    def computeFantasyPoints(FantasyTeam fantasyTeam) {
         def points = [:]
 
         long start = System.currentTimeMillis();
         for(s in stats) {
 	        boolean exists = false;
 	        for(fp in fantasyPoints) {
-		        if(fp.scoringSystem == scoringSystem && fp.season == s.season && fp.week == s.week) {
+		        if(fp.scoringSystem == fantasyTeam.scoringSystem && fp.season == s.season && fp.week == s.week) {
 			        exists = true
 			        break
 		        }
@@ -123,23 +121,29 @@ class Player {
             if(!points[key]) {
                 points[key] = 0.0
             }
-            points[key] += scoringSystem.calculateScore([s])
+            points[key] += fantasyTeam.scoringSystem.calculateScore([s])
         }
         long end = System.currentTimeMillis();
         println("Distributed stats to season and week for ${name} in ${(end-start)/1000.0}")
 
-	    def fantasyPointsList = []
-        for(p in points) {
-            String[] keyPieces = p.key.split("__")
-            FantasyPoints fp = new FantasyPoints(player: this, season: keyPieces[0], week: keyPieces[1], system: scoringSystem.class.getName(), points:  p.value)
-            fp.save()
+	    def starters = [:]
+	    fantasyTeam.fantasyTeamStarters.each {      starter ->
+		    starters[starter.position] = starter.numStarters
+	    }
 
-	        fantasyPointsList << fp
+	    for(p in points) {
+            String[] keyPieces = p.key.split("__")
+            FantasyPoints fp = new FantasyPoints(
+		            player: this,
+		            season: keyPieces[0],
+		            week: keyPieces[1],
+		            scoringSystem: fantasyTeam.scoringSystem,
+		            numOwners: fantasyTeam.numOwners,
+		            numStartable: starters[this.position],
+		            points: p.value).save()
         }
 	    end = System.currentTimeMillis();
 	    println("Created FantasyPoint entries for ${name} in ${(end-start)/1000.0}")
-
-	    return fantasyPointsList
     }
 
     /**
@@ -229,21 +233,22 @@ class Player {
      * currently requires that the previous two season be available because we
      * calculate the point correlation for the player's position on the fly.
      *
-     * @param year      The season we want to estimate points for.
-     * @return          The estimated number of fantasy points the player will score.
+     * @param year              The season we want to estimate points for.
+     * @param scoringSystem     The scoring system to use for calculating correlation.
+     * @return                  The estimated number of fantasy points the player will score.
      */
-    def calculateProjectedPoints(year) {
+    def calculateProjectedPoints(year, scoringSystem) {
         def statYears = Stat.getStatYears()
 
         /*
-        Make sure the year we want to project is supported with stats from the previous year.
-
-        i.e. year = 2002, we need stats from 2001.
+         * Make sure the year we want to project is supported with stats from the previous year.
+         *
+         * i.e. year = 2002, we need stats from 2001.
          */
         if (!statYears.contains(year-1))
             throw new Exception("Invalid year.")
 
-        def correlation = getCorrelation(position, null, null, year-2, year-1)
+        def correlation = getCorrelation(position, null, scoringSystem, year-2, year-1)
         def positionAvg = getScoringAverageForPositionForSeason(position, year-1)
         def points
         for(f in fantasyPoints) {
@@ -617,17 +622,24 @@ class Player {
      *
      * @param position      The position to determine correlation for.
      * @param stat          (optional) A stat for the specified position to calculate correlation for.
-     * @param system        (optional) A scoring system that can translate the stat value to fantasy points.
+     * @param system        A scoring system that can translate the stat value to fantasy points.
      * @param season1       The first season of the correlation.
      * @param season2       The second season of the correlation.
      * @return              A correlation value.
      */
-    static def getCorrelation(position, stat, IFantasyScoringSystem system, season1, season2) {
+    static def getCorrelation(position, stat, ScoringSystem scoringSystem, season1, season2) {
         // Returns all players at a position that have FantasyPoint records for both seasons.
         def results
         if (stat == null) {
-            results = Player.executeQuery("from Player p inner join p.fantasyPoints f1 with f1.season = ? and f1.week = -1 " +
-                    "inner join p.fantasyPoints f2 with f2.season = ? and f2.week = -1 where p.position = ?", [season1, season2, position])
+            results = Player.executeQuery("from Player p inner join p.fantasyPoints f1 " +
+                    "inner join p.fantasyPoints f2 where " +
+		            "f1.scoringSystem = ? and " +
+		            "f1.season = ? and " +
+		            "f1.week = -1 and " +
+		            "f2.season = ? and " +
+		            "f2.scoringSystem = ? and " +
+		            "f2.week = -1 and " +
+		            "p.position = ?", [scoringSystem, season1, season2, scoringSystem, position])
         }
         else {
             results = Player.executeQuery("from Player p inner join p.stats s1 with s1.season = ? and s1.week = -1 and s1.statKey = ? " +
@@ -652,8 +664,8 @@ class Player {
                 points2 = r[2].points
             }
             else {
-                points1 = system.calculateScore([r[1]])
-                points2 = system.calculateScore([r[2]])
+                points1 = scoringSystem.calculateScore([r[1]])
+                points2 = scoringSystem.calculateScore([r[2]])
             }
 
             x += points1

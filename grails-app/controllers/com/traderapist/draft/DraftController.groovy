@@ -1,8 +1,7 @@
 package com.traderapist.draft
 
 import com.traderapist.models.Player
-import com.traderapist.scoringsystem.ESPNStandardScoringSystem
-import org.springframework.web.servlet.ModelAndView
+import com.traderapist.models.ScoringSystem
 
 class DraftController {
 
@@ -35,7 +34,7 @@ class DraftController {
 	 */
 	def players() {
 		def year = Integer.parseInt(params["year"])
-		def system = (params["system"]) ? params["system"] : ESPNStandardScoringSystem.class.getSimpleName()
+		def system = ScoringSystem.get(params.scoring_system_id)
 
 		def qb = Player.getPlayersInPointsOrder(Player.POSITION_QB, year, system)
 		def rb = Player.getPlayersInPointsOrder(Player.POSITION_RB, year, system)

@@ -1,11 +1,14 @@
 package com.traderapist.draft
 
 import com.traderapist.models.AverageDraftPosition
+import com.traderapist.models.FantasyLeagueType
 import com.traderapist.models.FantasyPoints
+import com.traderapist.models.FantasyTeam
+import com.traderapist.models.FantasyTeamStarter
 import com.traderapist.models.Player
-import com.traderapist.scoringsystem.ESPNStandardScoringSystem
-import com.traderapist.testing.DifferentScoringSystem
-import grails.test.mixin.TestFor
+import com.traderapist.models.ScoringRule
+import com.traderapist.models.ScoringSystem
+import com.traderapist.security.User
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -20,15 +23,46 @@ import org.junit.Test
 class DraftControllerIntegrationTests {
 
 	def controller
+	def startable
+
+	User user
+	FantasyLeagueType flt
+	FantasyTeam fantasyTeam
+	ScoringSystem scoringSystem
 
 	@Before
 	void setUp() {
 		controller = new DraftController()
+		new FantasyTeamStarter(position: Player.POSITION_QB, numStarters: 1)
+		User.metaClass.encodePassword = { -> "password"}
+		user = new User(username: "test user", password: "password").save(flush: true)
+		flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
+		fantasyTeam = new FantasyTeam(name: "Test team", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
+		scoringSystem = new ScoringSystem(name: "Test SS", fantasyTeam: fantasyTeam, scoringRules: []).save(flush: true)
+
+		fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(position: Player.POSITION_QB, numStarters: 1, fantasyTeam: fantasyTeam).save(flush: true))
+		fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(position: Player.POSITION_RB, numStarters: 1, fantasyTeam: fantasyTeam).save(flush: true))
+		fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(position: Player.POSITION_WR, numStarters: 1, fantasyTeam: fantasyTeam).save(flush: true))
+		fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(position: Player.POSITION_TE, numStarters: 1, fantasyTeam: fantasyTeam).save(flush: true))
+		fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(position: Player.POSITION_DEF, numStarters: 1, fantasyTeam: fantasyTeam).save(flush: true))
+		fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(position: Player.POSITION_K, numStarters: 1, fantasyTeam: fantasyTeam).save(flush: true))
+
+		startable = [:]
+		fantasyTeam.fantasyTeamStarters.each {  starter ->
+			startable[starter.position] = starter.numStarters
+		}
 	}
 
 	@After
 	void tearDown() {
 		controller = null
+
+		user = null
+		flt = null
+		fantasyTeam = null
+		scoringSystem = null
+
+		startable = null
 	}
 
 	@Test
@@ -36,44 +70,44 @@ class DraftControllerIntegrationTests {
 		/*
 		 * Define players
 		 */
-		def q1 = new Player(name: "Quarterback 1", position: Player.POSITION_QB).save(flush: true)
-		def q2 = new Player(name: "Quarterback 2", position: Player.POSITION_QB).save(flush: true)
+		def q1 = new Player(name: "Quarterback 1", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		def q2 = new Player(name: "Quarterback 2", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB).save(flush: true)
-		def r2 = new Player(name: "Running back 2", position: Player.POSITION_RB).save(flush: true)
+		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB, stats: [], averageDraftPositions: []).save(flush: true)
+		def r2 = new Player(name: "Running back 2", position: Player.POSITION_RB, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def w1 = new Player(name: "Wide receiver 1", position: Player.POSITION_WR).save(flush: true)
-		def w2 = new Player(name: "Wide receiver 2", position: Player.POSITION_WR).save(flush: true)
+		def w1 = new Player(name: "Wide receiver 1", position: Player.POSITION_WR, stats: [], averageDraftPositions: []).save(flush: true)
+		def w2 = new Player(name: "Wide receiver 2", position: Player.POSITION_WR, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def t1 = new Player(name: "Tight end 1", position: Player.POSITION_TE).save(flush: true)
-		def t2 = new Player(name: "Tight end 2", position: Player.POSITION_TE).save(flush: true)
+		def t1 = new Player(name: "Tight end 1", position: Player.POSITION_TE, stats: [], averageDraftPositions: []).save(flush: true)
+		def t2 = new Player(name: "Tight end 2", position: Player.POSITION_TE, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def d1 = new Player(name: "Defense 1", position: Player.POSITION_DEF).save(flush: true)
-		def d2 = new Player(name: "Defense 2", position: Player.POSITION_DEF).save(flush: true)
+		def d1 = new Player(name: "Defense 1", position: Player.POSITION_DEF, stats: [], averageDraftPositions: []).save(flush: true)
+		def d2 = new Player(name: "Defense 2", position: Player.POSITION_DEF, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def k1 = new Player(name: "Kicker 1", position: Player.POSITION_K).save(flush: true)
-		def k2 = new Player(name: "Kicker 2", position: Player.POSITION_K).save(flush: true)
+		def k1 = new Player(name: "Kicker 1", position: Player.POSITION_K, stats: [], averageDraftPositions: []).save(flush: true)
+		def k2 = new Player(name: "Kicker 2", position: Player.POSITION_K, stats: [], averageDraftPositions: []).save(flush: true)
 
 		/*
 		 * Define fantasy points
 		 */
-		def q1_points = new FantasyPoints(player: q1, points: 300, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
-		def q2_points = new FantasyPoints(player: q2, points: 295, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
+		def q1_points = new FantasyPoints(player: q1, points: 300, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q1.position], projection: true).save(flush: true)
+		def q2_points = new FantasyPoints(player: q2, points: 295, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q2.position], projection: true).save(flush: true)
 
-		def r1_points = new FantasyPoints(player: r1, points: 250, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
-		def r2_points = new FantasyPoints(player: r2, points: 275, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
+		def r1_points = new FantasyPoints(player: r1, points: 250, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r1.position], projection: true).save(flush: true)
+		def r2_points = new FantasyPoints(player: r2, points: 275, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r2.position], projection: true).save(flush: true)
 
-		def w1_points = new FantasyPoints(player: w1, points: 200, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
-		def w2_points = new FantasyPoints(player: w2, points: 180, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
+		def w1_points = new FantasyPoints(player: w1, points: 200, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[w1.position], projection: true).save(flush: true)
+		def w2_points = new FantasyPoints(player: w2, points: 180, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[w2.position], projection: true).save(flush: true)
 
-		def t1_points = new FantasyPoints(player: t1, points: 150, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
-		def t2_points = new FantasyPoints(player: t2, points: 165, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
+		def t1_points = new FantasyPoints(player: t1, points: 150, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position], projection: true).save(flush: true)
+		def t2_points = new FantasyPoints(player: t2, points: 165, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t2.position], projection: true).save(flush: true)
 
-		def d1_points = new FantasyPoints(player: d1, points: 100, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
-		def d2_points = new FantasyPoints(player: d2, points: 95, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
+		def d1_points = new FantasyPoints(player: d1, points: 100, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[d1.position], projection: true).save(flush: true)
+		def d2_points = new FantasyPoints(player: d2, points: 95, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[d2.position], projection: true).save(flush: true)
 
-		def k1_points = new FantasyPoints(player: k1, points: 125, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
-		def k2_points = new FantasyPoints(player: k2, points: 100, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName(), projection: true).save(flush: true)
+		def k1_points = new FantasyPoints(player: k1, points: 125, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[k1.position], projection: true).save(flush: true)
+		def k2_points = new FantasyPoints(player: k2, points: 100, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[k2.position], projection: true).save(flush: true)
 
 		/*
 		 * Define ADP
@@ -97,7 +131,7 @@ class DraftControllerIntegrationTests {
 		def k2_adp = new AverageDraftPosition(player: k2, season: 2002, adp: 33).save(flush: true)
 
 		controller.request.addParameter("year", "2002")
-		controller.request.addParameter("system", ESPNStandardScoringSystem.class.getSimpleName())
+		controller.request.addParameter("scoring_system_id", scoringSystem.id.toString())
 
 		controller.players()
 
@@ -119,47 +153,50 @@ class DraftControllerIntegrationTests {
 
 	@Test
 	void testGetPlayers_NoResultsForScoringSystem() {
+		def differentFantasyTeam = new FantasyTeam(name: "Different Team", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
+		def differentScoringSystem = new ScoringSystem(fantasyTeam: differentFantasyTeam, name: "Different SS", scoringRules: []).save(flush: true)
+
 		/*
 		 * Define players
 		 */
-		def q1 = new Player(name: "Quarterback 1", position: Player.POSITION_QB).save(flush: true)
-		def q2 = new Player(name: "Quarterback 2", position: Player.POSITION_QB).save(flush: true)
+		def q1 = new Player(name: "Quarterback 1", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		def q2 = new Player(name: "Quarterback 2", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB).save(flush: true)
-		def r2 = new Player(name: "Running back 2", position: Player.POSITION_RB).save(flush: true)
+		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB, stats: [], averageDraftPositions: []).save(flush: true)
+		def r2 = new Player(name: "Running back 2", position: Player.POSITION_RB, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def w1 = new Player(name: "Wide receiver 1", position: Player.POSITION_WR).save(flush: true)
-		def w2 = new Player(name: "Wide receiver 2", position: Player.POSITION_WR).save(flush: true)
+		def w1 = new Player(name: "Wide receiver 1", position: Player.POSITION_WR, stats: [], averageDraftPositions: []).save(flush: true)
+		def w2 = new Player(name: "Wide receiver 2", position: Player.POSITION_WR, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def t1 = new Player(name: "Tight end 1", position: Player.POSITION_TE).save(flush: true)
-		def t2 = new Player(name: "Tight end 2", position: Player.POSITION_TE).save(flush: true)
+		def t1 = new Player(name: "Tight end 1", position: Player.POSITION_TE, stats: [], averageDraftPositions: []).save(flush: true)
+		def t2 = new Player(name: "Tight end 2", position: Player.POSITION_TE, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def d1 = new Player(name: "Defense 1", position: Player.POSITION_DEF).save(flush: true)
-		def d2 = new Player(name: "Defense 2", position: Player.POSITION_DEF).save(flush: true)
+		def d1 = new Player(name: "Defense 1", position: Player.POSITION_DEF, stats: [], averageDraftPositions: []).save(flush: true)
+		def d2 = new Player(name: "Defense 2", position: Player.POSITION_DEF, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def k1 = new Player(name: "Kicker 1", position: Player.POSITION_K).save(flush: true)
-		def k2 = new Player(name: "Kicker 2", position: Player.POSITION_K).save(flush: true)
+		def k1 = new Player(name: "Kicker 1", position: Player.POSITION_K, stats: [], averageDraftPositions: []).save(flush: true)
+		def k2 = new Player(name: "Kicker 2", position: Player.POSITION_K, stats: [], averageDraftPositions: []).save(flush: true)
 
 		/*
 		 * Define fantasy points
 		 */
-		def q1_points = new FantasyPoints(player: q1, points: 300, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
-		def q2_points = new FantasyPoints(player: q2, points: 295, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
+		def q1_points = new FantasyPoints(player: q1, points: 300, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
+		def q2_points = new FantasyPoints(player: q2, points: 295, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
 
-		def r1_points = new FantasyPoints(player: r1, points: 250, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
-		def r2_points = new FantasyPoints(player: r2, points: 275, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
+		def r1_points = new FantasyPoints(player: r1, points: 250, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
+		def r2_points = new FantasyPoints(player: r2, points: 275, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
 
-		def w1_points = new FantasyPoints(player: w1, points: 200, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
-		def w2_points = new FantasyPoints(player: w2, points: 180, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
+		def w1_points = new FantasyPoints(player: w1, points: 200, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
+		def w2_points = new FantasyPoints(player: w2, points: 180, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
 
-		def t1_points = new FantasyPoints(player: t1, points: 150, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
-		def t2_points = new FantasyPoints(player: t2, points: 165, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
+		def t1_points = new FantasyPoints(player: t1, points: 150, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
+		def t2_points = new FantasyPoints(player: t2, points: 165, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
 
-		def d1_points = new FantasyPoints(player: d1, points: 100, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
-		def d2_points = new FantasyPoints(player: d2, points: 95, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
+		def d1_points = new FantasyPoints(player: d1, points: 100, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
+		def d2_points = new FantasyPoints(player: d2, points: 95, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
 
-		def k1_points = new FantasyPoints(player: k1, points: 125, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
-		def k2_points = new FantasyPoints(player: k2, points: 100, season: 2002, week: -1, system: ESPNStandardScoringSystem.class.getSimpleName()).save(flush: true)
+		def k1_points = new FantasyPoints(player: k1, points: 125, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
+		def k2_points = new FantasyPoints(player: k2, points: 100, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[t1.position]).save(flush: true)
 
 		/*
 		 * Define ADP
@@ -183,7 +220,7 @@ class DraftControllerIntegrationTests {
 		def k2_adp = new AverageDraftPosition(player: k2, season: 2002, adp: 33).save(flush: true)
 
 		controller.request.addParameter("year", "2002")
-		controller.request.addParameter("system", DifferentScoringSystem.class.getSimpleName())
+		controller.request.addParameter("scoring_system_id", differentScoringSystem.id.toString())
 
 		controller.players()
 

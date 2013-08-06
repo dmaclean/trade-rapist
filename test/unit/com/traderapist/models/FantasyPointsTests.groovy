@@ -8,21 +8,24 @@ import org.junit.*
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(FantasyPoints)
-@Mock(Player)
+@Mock([Player, ScoringSystem])
 class FantasyPointsTests {
 
     Player player
+	ScoringSystem scoringSystem
 
     @Before
     void setUp() {
         player = new Player(name: "Dan", position: "QB")
         player.save(flush: true)
+
+	    scoringSystem = new ScoringSystem(name: "My Scoring System", scoringRules: new HashSet<ScoringRule>()).save(flush: true)
+
+	    mockForConstraintsTests(FantasyPoints)
     }
 
     void testSeasonNotNull() {
-        FantasyPoints fp = new FantasyPoints(week: 1, points: 1)
-
-        mockForConstraintsTests(FantasyPoints, [fp])
+        FantasyPoints fp = new FantasyPoints(week: 1, points: 1, scoringSystem: scoringSystem)
 
         assertFalse "The FantasyPoints validation should have failed", fp.validate()
 
@@ -30,9 +33,7 @@ class FantasyPointsTests {
     }
 
     void testWeekNotNull() {
-        FantasyPoints fp = new FantasyPoints(season: 2001, points: 1)
-
-        mockForConstraintsTests(FantasyPoints, [fp])
+        FantasyPoints fp = new FantasyPoints(season: 2001, points: 1, scoringSystem: scoringSystem)
 
         assertFalse "The FantasyPoints validation should have failed", fp.validate()
 
@@ -40,9 +41,7 @@ class FantasyPointsTests {
     }
 
     void testWeekInRange() {
-        FantasyPoints fp = new FantasyPoints(season: 2001, week: -2, points: 1)
-
-        mockForConstraintsTests(FantasyPoints, [fp])
+        FantasyPoints fp = new FantasyPoints(season: 2001, week: -2, points: 1, scoringSystem: scoringSystem)
 
         assertFalse "The FantasyPoints validation should have failed", fp.validate()
 
@@ -56,30 +55,24 @@ class FantasyPointsTests {
     }
 
     void testPointsNotNull() {
-        FantasyPoints fp = new FantasyPoints(week: 1, season: 2001)
-
-        mockForConstraintsTests(FantasyPoints, [fp])
+        FantasyPoints fp = new FantasyPoints(week: 1, season: 2001, scoringSystem: scoringSystem)
 
         assertFalse "The FantasyPoints validation should have failed", fp.validate()
 
         assert "nullable" == fp.errors["points"]
     }
 
-    void testSystemNotNull() {
-        FantasyPoints fp = new FantasyPoints(system: null)
-
-        mockForConstraintsTests(FantasyPoints, [fp])
+    void testScoringSystemNotNull() {
+        FantasyPoints fp = new FantasyPoints(week: 1, season: 2001, points: 10)
 
         assertFalse "The FantasyPoints validation should have failed", fp.validate()
 
-        assert "nullable" == fp.errors["system"]
+        assert "nullable" == fp.errors["scoringSystem"]
     }
 
 	void testProjectionDefaultFalse() {
 		def player = new Player(id: 1, name: "Dan", position: "QB")
-		FantasyPoints fp = new FantasyPoints(player: player, season: 2013, week: -1, system: ESPNStandardScoringSystem.class.getName(), points: 100)
-
-		mockForConstraintsTests(FantasyPoints, [fp])
+		FantasyPoints fp = new FantasyPoints(player: player, season: 2013, week: -1, scoringSystem: scoringSystem, points: 100)
 
 		assertTrue fp.validate()
 	}
@@ -91,12 +84,10 @@ class FantasyPointsTests {
 				season: 2013,
 				week: -1,
 				points: 100,
-				system: "ESPN",
+				scoringSystem: scoringSystem,
 				projection: true,
 				numOwners: 10
 		)
-
-		mockForConstraintsTests(FantasyPoints, [fp])
 
 		assertTrue fp.validate()
 	}
@@ -108,12 +99,10 @@ class FantasyPointsTests {
 				season: 2013,
 				week: -1,
 				points: 100,
-				system: "ESPN",
+				scoringSystem: scoringSystem,
 				projection: true,
 				numStartable: 1
 		)
-
-		mockForConstraintsTests(FantasyPoints, [fp])
 
 		assertTrue fp.validate()
 	}

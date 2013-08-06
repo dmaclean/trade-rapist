@@ -22,14 +22,19 @@ drop table fantasy_points;
 create table fantasy_points (
 	id int auto_increment primary key,
 	player_id int not null,
-	system varchar(100) not null,
+	scoring_system_id int not null,
 	season int not null,
 	week int not null,
 	points int not null,
 	projection boolean default false,
   num_startable int,
-  num_owners int
+  num_owners int,
+  version int,
+  foreign key (player_id) references players(id),
+  foreign key (scoring_system_id) references scoring_systems(id)
 );
+create index fp_season_idx on fantasy_points(season);
+create index fp_week_idx on fantasy_points(week);
 
 drop table teams;
 create table teams(
@@ -219,4 +224,13 @@ create table scoring_system_rules (
   version int,
   foreign key (scoring_rule_id) references scoring_rules(id),
   foreign key (scoring_system_id) references scoring_systems(id)
+);
+
+
+drop table if exists fantasy_points_jobs;
+create table fantasy_points_jobs (
+  id int auto_increment primary key ,
+  fantasy_team_id int not null,
+  version int,
+  foreign key (fantasy_team_id) references fantasy_teams(id)
 );
