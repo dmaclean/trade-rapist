@@ -1,6 +1,5 @@
 package com.traderapist.models
 
-import com.traderapist.scoringsystem.ESPNStandardScoringSystem
 import com.traderapist.security.User
 import org.junit.*
 import grails.test.mixin.*
