@@ -232,7 +232,12 @@ function DraftController($scope, $http) {
             $scope.ownerNeed[i][$scope.KICKER] = $scope.ownerMaxNeed[$scope.KICKER];
         }
 
-        $http.get("draft/players?year=" + $scope.draftYear).success(function(data) {
+        var playersUrl = "draft/players?year=" + $scope.draftYear;
+        if($scope.selectedLeague) {
+            playersUrl += "&fantasy_team_id=" + $scope.selectedLeague;
+        }
+
+        $http.get(playersUrl).success(function(data) {
             $scope.players = data;
 
             var index = [0,0,0,0,0,0];

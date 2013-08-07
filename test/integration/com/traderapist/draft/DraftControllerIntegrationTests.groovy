@@ -131,7 +131,7 @@ class DraftControllerIntegrationTests {
 		def k2_adp = new AverageDraftPosition(player: k2, season: 2002, adp: 33).save(flush: true)
 
 		controller.request.addParameter("year", "2002")
-		controller.request.addParameter("scoring_system_id", scoringSystem.id.toString())
+		controller.request.addParameter("fantasy_team_id", fantasyTeam.id.toString())
 
 		controller.players()
 
@@ -220,7 +220,7 @@ class DraftControllerIntegrationTests {
 		def k2_adp = new AverageDraftPosition(player: k2, season: 2002, adp: 33).save(flush: true)
 
 		controller.request.addParameter("year", "2002")
-		controller.request.addParameter("scoring_system_id", differentScoringSystem.id.toString())
+		controller.request.addParameter("fantasy_team_id", differentFantasyTeam.id.toString())
 
 		controller.players()
 
