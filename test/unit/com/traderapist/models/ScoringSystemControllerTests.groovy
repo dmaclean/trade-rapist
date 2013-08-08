@@ -99,6 +99,7 @@ class ScoringSystemControllerTests {
 		def rule2 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_YARDS, multiplier: 0.4).save(flush: true)
 
 		controller.params.ss_name = "Test System"
+        controller.params.fantasy_team_id = fantasyTeam.id.toString()
 		controller.params.stat_multiplier_5 = "6"     // passing touchdowns
 		controller.params.stat_multiplier_4 = "0.4"   // passing yards
 
@@ -116,6 +117,7 @@ class ScoringSystemControllerTests {
 		def rule2 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_YARDS, multiplier: 0.4).save(flush: true)
 
 		controller.params.ss_name = "Test System"
+        controller.params.fantasy_team_id = fantasyTeam.id.toString()
 		controller.params.stat_multiplier_1 = "1"
 		controller.params.stat_multiplier_4 = "0.4"   // passing yards
 
