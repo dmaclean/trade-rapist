@@ -231,6 +231,10 @@ drop table if exists fantasy_points_jobs;
 create table fantasy_points_jobs (
   id int auto_increment primary key ,
   fantasy_team_id int not null,
+  completed boolean not null default false,
+  year int not null,
+  week int not null,
+  projection boolean not null,
   version int,
   foreign key (fantasy_team_id) references fantasy_teams(id)
 );

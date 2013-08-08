@@ -33,7 +33,7 @@ class FantasyPointsJobTests {
 	}
 
 	void testGoodJob() {
-		def job = new FantasyPointsJob(fantasyTeam: fantasyTeam)
+		def job = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, season: 2013, week: -1, projection: true)
 
 		assertTrue "Validation should not have failed", job.validate()
 
@@ -46,5 +46,37 @@ class FantasyPointsJobTests {
 		assertFalse "Validation should have failed.", job.validate()
 
 		assert job.errors["fantasyTeam"] == "nullable"
+	}
+
+	void testCompletedNotNullable() {
+		def job = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: null)
+
+		assertFalse "Validation should have failed.", job.validate()
+
+		assert job.errors["completed"] == "nullable"
+	}
+
+	void testSeasonNotNullable() {
+		def job = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, week: -1, projection: true)
+
+		assertFalse "Validation should have failed.", job.validate()
+
+		assert job.errors["season"] == "nullable"
+	}
+
+	void testWeekNotNullable() {
+		def job = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, season: 2013, projection: true)
+
+		assertFalse "Validation should have failed.", job.validate()
+
+		assert job.errors["week"] == "nullable"
+	}
+
+	void testProjectionNotNullable() {
+		def job = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, season: 2013, week: -1, projection: null)
+
+		assertFalse "Validation should have failed.", job.validate()
+
+		assert job.errors["projection"] == "nullable"
 	}
 }
