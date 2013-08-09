@@ -113,6 +113,27 @@ class FantasyPointsControllerTests {
         assertTrue "Points is not 12, ${ fp.points }", fp.points == 12
     }
 
+    void testGeneratePoints_SeasonWeekParams_Season() {
+        Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
+        Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+
+        params.fantasy_team_id = fantasyTeam.id.toString()
+        params.season = "2001"
+        params.week = "-1"
+
+        controller.generatePoints()
+
+        def fps = FantasyPoints.findAllBySeason(2001)
+
+        assertTrue "Should have found one FantasyPoints object for 2001, found ${ fps.size() }", fps.size() == 1
+
+        def fp = fps[0]
+
+        assertTrue "Season is not 2001, is ${ fp.season }", fp.season == 2001
+        assertTrue "Week is not -1, is ${ fp.week }", fp.week == -1
+        assertTrue "Points is not 12, ${ fp.points }", fp.points == 12
+    }
+
     void testGeneratePoints_Season_Existing() {
         Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
         Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
@@ -145,9 +166,43 @@ class FantasyPointsControllerTests {
         assertTrue "Points is not 12", fps[0].points == 12
     }
 
+    void testGeneratePoints_SeasonWeekParams_Season_Existing() {
+        Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
+        Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+
+        params.fantasy_team_id = fantasyTeam.id.toString()
+        params.season = "2001"
+        params.week = "-1"
+
+        controller.generatePoints()
+
+        def fps = FantasyPoints.findAllBySeason(2001)
+
+        assertTrue "Should have found one FantasyPoints object for 2001", fps.size() == 1
+
+        def fp = fps[0]
+
+        assertTrue "Season is not 2001", fp.season == 2001
+        assertTrue "Week is not -1", fp.week == -1
+        assertTrue "Points is not 12", fp.points == 12
+
+        /*
+        Make sure we didn't write a duplicate
+         */
+        controller.generatePoints()
+
+        fps = FantasyPoints.findAllBySeason(2001)
+
+        assertTrue "Should have found one FantasyPoints object for 2001", fps.size() == 1
+
+        assertTrue "Season is not 2001", fps[0].season == 2001
+        assertTrue "Week is not -1", fps[0].week == -1
+        assertTrue "Points is not 12", fps[0].points == 12
+    }
+
 	void testGeneratePoints_PositionQB_Season() {
 		params["fantasy_team_id"] = fantasyTeam.id.toString()
-		params["position"] = "QB"
+		params["position"] = Player.POSITION_QB
 
 		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
 		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
@@ -165,9 +220,31 @@ class FantasyPointsControllerTests {
 		assertTrue "Points is not 12", fp.points == 12
 	}
 
+    void testGeneratePoints_SeasonWeekParams_PositionQB_Season() {
+        params.fantasy_team_id = fantasyTeam.id.toString()
+        params.season = "2001"
+        params.week = "-1"
+        params.position = Player.POSITION_QB
+
+        Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
+        Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+
+        controller.generatePoints()
+
+        def fps = FantasyPoints.findAllBySeason(2001)
+
+        assertTrue "Should have found one FantasyPoints object for 2001", fps.size() == 1
+
+        def fp = fps[0]
+
+        assertTrue "Season is not 2001", fp.season == 2001
+        assertTrue "Week is not -1", fp.week == -1
+        assertTrue "Points is not 12", fp.points == 12
+    }
+
 	void testGeneratePoints_PositionRB_Season() {
-		params["system"] = "ESPNStandardScoringSystem"
-		params["position"] = "RB"
+        params.fantasy_team_id = fantasyTeam.id.toString()
+		params.position = Player.POSITION_RB
 
 		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100)
 		s1.save(flush: true)
@@ -180,6 +257,24 @@ class FantasyPointsControllerTests {
 
 		assertTrue "Should have found zero FantasyPoints object for 2001", fps.size() == 0
 	}
+
+    void testGeneratePoints_SeasonWeekParams_PositionRB_Season() {
+        params.fantasy_team_id = fantasyTeam.id.toString()
+        params.position = Player.POSITION_RB
+        params.season = "2001"
+        params.week = "-1"
+
+        Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100)
+        s1.save(flush: true)
+        Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+        s2.save(flush: true)
+
+        controller.generatePoints()
+
+        def fps = FantasyPoints.findAllBySeason(2001)
+
+        assertTrue "Should have found zero FantasyPoints object for 2001", fps.size() == 0
+    }
 
 //	void testProjectPoints_BadSystem() {
 //		params["fantasy_team_id"] = fantasyTeam.id.toString()

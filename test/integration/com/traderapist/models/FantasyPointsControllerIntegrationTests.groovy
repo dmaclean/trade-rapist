@@ -113,29 +113,4 @@ class FantasyPointsControllerIntegrationTests {
 		assert "Points is not 20.2, instead got ${ fp.points }", fp.points == 20.2
 		assert "Projection is not true", fp.projection
 	}
-
-	@Test
-	void testGeneratePoints_Season() {
-		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
-		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
-		player.stats = new HashSet<>([s1,s2])
-		player.save(flush: true)
-
-		controller.request.setParameter("fantasy_team_id", fantasyTeam.id.toString())
-
-		controller.generatePoints()
-
-		sessionFactory.currentSession.flush()
-		sessionFactory.currentSession.clear()
-
-		def fps = FantasyPoints.findAllBySeason(2001)
-
-		assertTrue "Should have found one FantasyPoints object for 2001, found ${ fps.size() }", fps.size() == 1
-
-		def fp = fps[0]
-
-		assertTrue "Season is not 2001, is ${ fp.season }", fp.season == 2001
-		assertTrue "Week is not -1, is ${ fp.week }", fp.week == -1
-		assertTrue "Points is not 12, ${ fp.points }", fp.points == 12
-	}
 }

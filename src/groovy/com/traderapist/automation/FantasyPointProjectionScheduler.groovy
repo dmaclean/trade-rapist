@@ -1,10 +1,8 @@
 package com.traderapist.automation
 
-import com.traderapist.models.FantasyPointsJob
-import com.traderapist.models.Player
-import grails.converters.JSON
-import groovyx.net.http.HTTPBuilder
-import groovyx.net.http.Method
+import com.traderapist.models.FantasyPoints
+import com.traderapist.models.FantasyPointsJobController
+import grails.plugins.rest.client.RestBuilder
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,60 +13,17 @@ import groovyx.net.http.Method
  */
 class FantasyPointProjectionScheduler implements Runnable {
 	void run() {
-		def httpGenerate = new HTTPBuilder("http://localhost:8080/FantasyAnalysisGrails")
-		def httpProject = new HTTPBuilder("http://localhost:8080/FantasyAnalysisGrails")
-
-		def positions = [
-				Player.POSITION_QB,
-				Player.POSITION_RB,
-				Player.POSITION_WR,
-				Player.POSITION_TE,
-				Player.POSITION_DEF,
-				Player.POSITION_K
-		]
+        def rest = new RestBuilder()
 
 		while(true) {
-			def jobs = FantasyPointsJob.findAllByComplete(false)
+			if(!FantasyPointsJobController.processing) {
 
-			jobs.each {     job ->
-				/*
-				 * Get all the necessary attributes
-				 *
-				 * Generate Points
-				 * - Fantasy Team Id
-				 * - Position
-				 *
-				 * Project Points
-				 *- Fantasy Team Id
-				 */
+                def resp = rest.get("http://localhost:8080/FantasyAnalysisGrails/fantasyPointsJob/process")
+                print resp.toString()
+            }
+//            FantasyPoints.process()
 
-				positions.each {    position ->
-					print "Generating fantasy points for ${ job.fantasyTeam.name } for ${ position }"
-
-					// Do HTTP GETs to /fantasyPointsController/generatePoints
-					httpGenerate.request(Method.GET, JSON) {
-						url.path = "/fantasyPointsController/generatePoints?fantasy_team_id=${ job.fantasyTeam.id }&position=${ position }"
-						response.success = {    resp, json ->
-							print "Successful - ${ json }"
-						}
-					}
-				}
-
-				print "Projecting fantasy points for ${ job.fantasyTeam.name }"
-
-				// Do HTTP GET to /fantasyPointsController/projectPoints
-				httpProject.request(Method.GET, JSON) {
-					url.path = "/fantasyPointsController/projectPoints?fantasy_team_id=${ job.fantasyTeam.id }"
-					response.success = {    resp, json ->
-						print "Successful - ${ json }"
-					}
-				}
-
-				job.complete = true
-				job.save(flush: true)
-			}
-
-			Thread.sleep(1000 * 60 * 5)
+            Thread.sleep(1000*60*5)
 		}
 	}
 }
