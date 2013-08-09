@@ -603,6 +603,20 @@ class PlayerTests {
 		assert fantasyPoints[0].points == 16
 	}
 
+    void testComputeFantasyPoints_Week() {
+        def player = new Player(name: "Dan", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+
+        Stat s1 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200).save(flush: true)
+        Stat s2 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+
+        player.computeFantasyPoints(fantasyTeam)
+        def fantasyPoints = FantasyPoints.findAllBySeason(2001)
+        assert fantasyPoints.size() == 1
+        assert fantasyPoints[0].season == 2001
+        assert fantasyPoints[0].week == 1
+        assert fantasyPoints[0].points == 16
+    }
+
 	void testComputeFantasyPoints_Season_Duplicates() {
 		def player = new Player(name: "Dan", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
 
@@ -627,4 +641,107 @@ class PlayerTests {
 
 		assert FantasyPoints.list().size() == 1
 	}
+
+    void testComputeFantasyPoints_Week_Duplicates() {
+        def player = new Player(name: "Dan", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+
+        Stat s1 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
+        Stat s2 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+
+        // Create existing FantasyPoints
+        def fp = new FantasyPoints(
+                season: 2001,
+                week: 1,
+                points: 100,
+                projection: false,
+                numOwners: 10,
+                numStartable: 1,
+                player: player,
+                scoringSystem: scoringSystem
+        ).save(flush: true)
+
+        assert FantasyPoints.list().size() == 1
+
+        player.computeFantasyPoints(fantasyTeam)
+
+        assert FantasyPoints.list().size() == 1
+    }
+
+    void testComputeFantasyPoints_ExtraParams_Season() {
+        def player = new Player(name: "Dan", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+
+        Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200).save(flush: true)
+        Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+
+        player.computeFantasyPoints(fantasyTeam, 2001, -1)
+        def fantasyPoints = FantasyPoints.findAllBySeason(2001)
+        assert fantasyPoints.size() == 1
+        assert fantasyPoints[0].season == 2001
+        assert fantasyPoints[0].week == -1
+        assert fantasyPoints[0].points == 16
+    }
+
+    void testComputeFantasyPoints_ExtraParams_Week() {
+        def player = new Player(name: "Dan", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+
+        Stat s1 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200).save(flush: true)
+        Stat s2 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
+
+        player.computeFantasyPoints(fantasyTeam, 2001, 1)
+        def fantasyPoints = FantasyPoints.findAllBySeason(2001)
+        assert fantasyPoints.size() == 1
+        assert fantasyPoints[0].season == 2001
+        assert fantasyPoints[0].week == 1
+        assert fantasyPoints[0].points == 16
+    }
+
+    void testComputeFantasyPoints_ExtraParams_Season_Duplicates() {
+        def player = new Player(name: "Dan", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+
+        Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
+        Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+
+        // Create existing FantasyPoints
+        def fp = new FantasyPoints(
+                season: 2001,
+                week: -1,
+                points: 100,
+                projection: false,
+                numOwners: 10,
+                numStartable: 1,
+                player: player,
+                scoringSystem: scoringSystem
+        ).save(flush: true)
+
+        assert FantasyPoints.list().size() == 1
+
+        player.computeFantasyPoints(fantasyTeam, 2001, -1)
+
+        assert FantasyPoints.list().size() == 1
+    }
+
+    void testComputeFantasyPoints_ExtraParams_Week_Duplicates() {
+        def player = new Player(name: "Dan", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+
+        Stat s1 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200)
+        Stat s2 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2)
+
+        // Create existing FantasyPoints
+        def fp = new FantasyPoints(
+                season: 2001,
+                week: 1,
+                points: 100,
+                projection: false,
+                numOwners: 10,
+                numStartable: 1,
+                player: player,
+                scoringSystem: scoringSystem
+        ).save(flush: true)
+
+        assert FantasyPoints.list().size() == 1
+
+        player.computeFantasyPoints(fantasyTeam, 2001, 1)
+
+        assert FantasyPoints.list().size() == 1
+    }
 }

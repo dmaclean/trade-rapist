@@ -97,22 +97,35 @@ class Player {
      * @param scoringSystem     The scoring system that will translate stats into points.
      */
     def computeFantasyPoints(FantasyTeam fantasyTeam) {
+        computeFantasyPoints(fantasyTeam, null, null)
+    }
+
+    def computeFantasyPoints(FantasyTeam fantasyTeam, season, week) {
         def points = [:]
+        def statSet
+
+        // Which stats should we use?
+        if(!season || !week) {
+            statSet = stats
+        }
+        else {
+            statSet = Stat.findAllByPlayerAndSeasonAndWeek(this, season, week)
+        }
 
         long start = System.currentTimeMillis();
-        for(s in stats) {
-	        boolean exists = false;
-	        for(fp in fantasyPoints) {
-		        if(fp.scoringSystem == fantasyTeam.scoringSystem && fp.season == s.season && fp.week == s.week) {
-			        exists = true
-			        break
-		        }
-	        }
+        for(s in statSet) {
+            boolean exists = false;
+            for(fp in fantasyPoints) {
+                if(fp.scoringSystem == fantasyTeam.scoringSystem && fp.season == s.season && fp.week == s.week) {
+                    exists = true
+                    break
+                }
+            }
 
-	        if(exists) {
-		        print("Fantasy points for ${name} for ${s.season}/${s.week} already exists.  Skipping...")
-		        continue
-	        }
+            if(exists) {
+                print("Fantasy points for ${name} for ${s.season}/${s.week} already exists.  Skipping...")
+                continue
+            }
 
             def seasonStr = String.valueOf(s.season)
             def weekStr = String.valueOf(s.week)
@@ -126,24 +139,24 @@ class Player {
         long end = System.currentTimeMillis();
         println("Distributed stats to season and week for ${name} in ${(end-start)/1000.0}")
 
-	    def starters = [:]
-	    fantasyTeam.fantasyTeamStarters.each {      starter ->
-		    starters[starter.position] = starter.numStarters
-	    }
+        def starters = [:]
+        fantasyTeam.fantasyTeamStarters.each {      starter ->
+            starters[starter.position] = starter.numStarters
+        }
 
-	    for(p in points) {
+        for(p in points) {
             String[] keyPieces = p.key.split("__")
             FantasyPoints fp = new FantasyPoints(
-		            player: this,
-		            season: keyPieces[0],
-		            week: keyPieces[1],
-		            scoringSystem: fantasyTeam.scoringSystem,
-		            numOwners: fantasyTeam.numOwners,
-		            numStartable: starters[this.position],
-		            points: p.value).save()
+                    player: this,
+                    season: keyPieces[0],
+                    week: keyPieces[1],
+                    scoringSystem: fantasyTeam.scoringSystem,
+                    numOwners: fantasyTeam.numOwners,
+                    numStartable: starters[this.position],
+                    points: p.value).save()
         }
-	    end = System.currentTimeMillis();
-	    println("Created FantasyPoint entries for ${name} in ${(end-start)/1000.0}")
+        end = System.currentTimeMillis();
+        println("Created FantasyPoint entries for ${name} in ${(end-start)/1000.0}")
     }
 
     /**
