@@ -89,8 +89,7 @@ log4j = {
            'org.hibernate',
            'net.sf.ehcache.hibernate'
 
-	info   'com.traderapist.models',
-		   'com.traderapist.draft'
+	info   'com.traderapist'
 }
 
 // Added by the Spring Security Core plugin:
