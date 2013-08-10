@@ -41,54 +41,6 @@ class FantasyPoints {
             Player.POSITION_K
     ]
 
-    static def process() {
-        def session = ApplicationContext.sessionFactory.currentSession
-
-        def jobs = FantasyPointsJob.findAllByCompleted(false)
-
-        jobs.each {     job ->
-            /*
-             * Get all the necessary attributes
-             *
-             * Generate Points
-             * - Fantasy Team Id
-             * - Position
-             *
-             * Project Points
-             *- Fantasy Team Id
-             */
-
-            positions.each {    position ->
-                log.info "Generating fantasy points for ${ job.fantasyTeam.name } for ${ position }"
-
-                FantasyPoints.generatePoints(job.fantasyTeam, position, job.season, job.week)
-
-//                // Do HTTP GETs to /fantasyPointsController/generatePoints
-//                httpGenerate.request(Method.GET, JSON) {
-//                    url.path = "/fantasyPointsController/generatePoints?fantasy_team_id=${ job.fantasyTeam.id }&position=${ position }&season=${ job.season }&week=${ job.week }"
-//                    response.success = {    resp, json ->
-//                        print "Successful - ${ json }"
-//                    }
-//                }
-            }
-
-            log.info "Projecting fantasy points for ${ job.fantasyTeam.name }"
-
-            FantasyPoints.projectPoints(job.fantasyTeam)
-
-            // Do HTTP GET to /fantasyPointsController/projectPoints
-//            httpProject.request(Method.GET, JSON) {
-//                url.path = "/fantasyPointsController/projectPoints?fantasy_team_id=${ job.fantasyTeam.id }"
-//                response.success = {    resp, json ->
-//                    print "Successful - ${ json }"
-//                }
-//            }
-
-            job.completed = true
-            job.save(flush: true)
-        }
-    }
-
     /**
      * Iterates through ALL players and calculates their fantasy points for each week and season for
      * the specified FantasyTeam (and their scoring system).  These points are written to the database
@@ -99,20 +51,39 @@ class FantasyPoints {
     static def generatePoints(fantasyTeam, position, season, week) {
         // Grab all the players - either all or at a certain position
         def players
-        if(position) {
+        if(position && season && week) {
+            players = Player.createCriteria().listDistinct {
+                eq "position", position
+                stats {
+                    eq "season", season
+                    eq "week", week
+                }
+            }
+        }
+        else if(position && (!season || !week)) {
             players = Player.findAllByPosition(position)
+        }
+        else if(!position && season && week) {
+            players = Player.createCriteria().list {
+                stats {
+                    eq "season", season
+                    eq "week", week
+                }
+            }
         }
         else {
             players = Player.findAll()
         }
 
         long start = System.currentTimeMillis()
+        long end
         for(player in players) {
-            print("Calculating fantasy points for ${player.name}")
             player.computeFantasyPoints(fantasyTeam, season, week)
+            end = System.currentTimeMillis()
+            println("Calculated fantasy points for ${player.name} in ${ (end-start)/1000.0 }")
         }
-        long end = System.currentTimeMillis()
-        print("Generated fantasy points for all players in ${ (end-start)/1000.0 } seconds")
+        end = System.currentTimeMillis()
+        println("Generated fantasy points for all players in ${ (end-start)/1000.0 } seconds")
 
         return true
     }
