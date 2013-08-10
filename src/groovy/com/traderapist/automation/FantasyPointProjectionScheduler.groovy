@@ -1,6 +1,7 @@
 package com.traderapist.automation
 
 import com.traderapist.models.FantasyPoints
+import com.traderapist.models.FantasyPointsJob
 import com.traderapist.models.FantasyPointsJobController
 import grails.plugins.rest.client.RestBuilder
 
@@ -17,11 +18,13 @@ class FantasyPointProjectionScheduler implements Runnable {
 
 		while(true) {
 			if(!FantasyPointsJobController.processing) {
+                def jobs = FantasyPointsJob.findAllByCompletedAndProjection(false, false)
 
-                def resp = rest.get("http://localhost:8080/FantasyAnalysisGrails/fantasyPointsJob/process")
-                print resp.toString()
+                jobs.each {     job ->
+                    def resp = rest.get("http://localhost:8080/FantasyAnalysisGrails/fantasyPointsJob/process?fantasy_points_job_id=${ job.id }")
+                    print resp.toString()
+                }
             }
-//            FantasyPoints.process()
 
             Thread.sleep(1000*60*5)
 		}
