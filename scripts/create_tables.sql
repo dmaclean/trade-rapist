@@ -4,6 +4,7 @@ create table players (
 	name varchar(100) not null,
 	position varchar(5) not null
 );
+create index position_idx on players(position);
 
 drop table stats;
 create table stats (
@@ -17,6 +18,7 @@ create table stats (
 );
 create index stat_key_idx on stats(stat_key);
 create index stat_season_idx on stats(season);
+create index stats_player_season_week_idx on stats(player_id, season, week);
 
 drop table fantasy_points;
 create table fantasy_points (
