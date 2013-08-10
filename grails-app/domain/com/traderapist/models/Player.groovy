@@ -112,7 +112,6 @@ class Player {
             statSet = Stat.findAllByPlayerAndSeasonAndWeek(this, season, week)
         }
 
-        long start = System.currentTimeMillis();
         for(s in statSet) {
             boolean exists = false;
             for(fp in fantasyPoints) {
@@ -123,7 +122,7 @@ class Player {
             }
 
             if(exists) {
-                print("Fantasy points for ${name} for ${s.season}/${s.week} already exists.  Skipping...")
+                println("Fantasy points for ${name} for ${s.season}/${s.week} already exists.  Skipping...")
                 continue
             }
 
@@ -136,8 +135,6 @@ class Player {
             }
             points[key] += fantasyTeam.scoringSystem.calculateScore([s])
         }
-        long end = System.currentTimeMillis();
-        println("Distributed stats to season and week for ${name} in ${(end-start)/1000.0}")
 
         def starters = [:]
         fantasyTeam.fantasyTeamStarters.each {      starter ->
@@ -155,8 +152,6 @@ class Player {
                     numStartable: starters[this.position],
                     points: p.value).save()
         }
-        end = System.currentTimeMillis();
-        println("Created FantasyPoint entries for ${name} in ${(end-start)/1000.0}")
     }
 
     /**
