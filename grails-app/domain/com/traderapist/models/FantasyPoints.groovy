@@ -27,7 +27,7 @@ class FantasyPoints {
     }
 
     static mapping = {
-        cache true
+        cache false
         table "fantasy_points"
         version false
     }
@@ -54,7 +54,7 @@ class FantasyPoints {
         // Grab all the players - either all or at a certain position
         def players
         if(position && season && week) {
-            players = Player.createCriteria().listDistinct {
+	        players = Player.createCriteria().listDistinct {
                 eq "position", position
                 stats {
                     eq "season", season
@@ -79,8 +79,6 @@ class FantasyPoints {
 
         for(player in players) {
             player.computeFantasyPoints(fantasyTeam, season, week)
-//            end = System.currentTimeMillis()
-//            println("Calculated fantasy points for ${player.name} in ${ (end-start)/1000.0 }")
         }
         long end = System.currentTimeMillis()
 
@@ -152,8 +150,6 @@ class FantasyPoints {
                     numOwners: fantasyTeam.numOwners,
                     numStartable: numStarters[p.position]
             ).save()
-
-//            print("saved ${ fantasyTeam.season } projection for ${ p.name }")
         }
         long end = System.currentTimeMillis()
 
