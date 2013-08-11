@@ -21,8 +21,10 @@ class FantasyPointProjectionScheduler implements Runnable {
                 def jobs = FantasyPointsJob.findAllByCompletedAndProjection(false, false)
 
                 jobs.each {     job ->
+                    long start = System.currentTimeMillis()
                     def resp = rest.get("http://localhost:8080/FantasyAnalysisGrails/fantasyPointsJob/process?fantasy_points_job_id=${ job.id }")
-                    print resp.toString()
+                    long end = System.currentTimeMillis()
+                    println "FPJ job ${ job.id }/${ job.season }/${ job.week }/${ (job.projection) ? "proj" : "not_proj" } completed in ${ (end-start)/1000.0 }"
                 }
             }
 

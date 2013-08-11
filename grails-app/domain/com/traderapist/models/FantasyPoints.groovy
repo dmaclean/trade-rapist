@@ -49,6 +49,8 @@ class FantasyPoints {
      * The scoring system is determined by the one registered to the FantasyTeam passed in as an id.
      */
     static def generatePoints(fantasyTeam, position, season, week) {
+        long start = System.currentTimeMillis()
+
         // Grab all the players - either all or at a certain position
         def players
         if(position && season && week) {
@@ -75,15 +77,19 @@ class FantasyPoints {
             players = Player.findAll()
         }
 
-        long start = System.currentTimeMillis()
-        long end
         for(player in players) {
             player.computeFantasyPoints(fantasyTeam, season, week)
-            end = System.currentTimeMillis()
-            println("Calculated fantasy points for ${player.name} in ${ (end-start)/1000.0 }")
+//            end = System.currentTimeMillis()
+//            println("Calculated fantasy points for ${player.name} in ${ (end-start)/1000.0 }")
         }
-        end = System.currentTimeMillis()
-        println("Generated fantasy points for all players in ${ (end-start)/1000.0 } seconds")
+        long end = System.currentTimeMillis()
+
+        if(position) {
+            println("\t\tGenerated fantasy points for all ${ position } in ${ (end-start)/1000.0 } seconds")
+        }
+        else {
+            println("\t\tGenerated fantasy points for all players in ${ (end-start)/1000.0 } seconds")
+        }
 
         return true
     }
@@ -97,6 +103,8 @@ class FantasyPoints {
      * @return    A success message if everything works, or a failure message explaining the problem.
      */
     static def projectPoints(fantasyTeam) {
+        long start = System.currentTimeMillis()
+
         def numStarters = [:]
         fantasyTeam.fantasyTeamStarters.each {  starter ->
             numStarters[starter.position] = starter.numStarters
@@ -145,9 +153,10 @@ class FantasyPoints {
                     numStartable: numStarters[p.position]
             ).save()
 
-            print("saved ${ fantasyTeam.season } projection for ${ p.name }")
+//            print("saved ${ fantasyTeam.season } projection for ${ p.name }")
         }
+        long end = System.currentTimeMillis()
 
-        print "Point projection for ${ fantasyTeam.season } completed"
+        println "Point projection for ${ fantasyTeam.season } completed in ${ (end-start)/1000.0 }"
     }
 }

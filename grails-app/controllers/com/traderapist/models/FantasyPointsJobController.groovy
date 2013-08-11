@@ -23,7 +23,7 @@ class FantasyPointsJobController {
         def job = FantasyPointsJob.get(params.fantasy_points_job_id)
 
         if(job.projection) {
-            log.info "Projecting fantasy points for ${ job.fantasyTeam.name }"
+            println "Projecting fantasy points for ${ job.fantasyTeam.name } for ${ job.fantasyTeam.name } - ${ job.season }"
             FantasyPoints.projectPoints(job.fantasyTeam)
         }
         else {
@@ -37,10 +37,13 @@ class FantasyPointsJobController {
              * Project Points
              *- Fantasy Team Id
              */
+            println "\tGenerating fantasy points for ${ job.fantasyTeam.name } - ${ job.season }/${ job.week }"
+            long start = System.currentTimeMillis()
             positions.each {    position ->
-                log.info "Generating fantasy points for ${ job.fantasyTeam.name } for ${ position }"
                 FantasyPoints.generatePoints(job.fantasyTeam, position, job.season, job.week)
             }
+            long end = System.currentTimeMillis()
+            println "\tGenerated fantasy points for ${ job.fantasyTeam.name } - ${ job.season }/${ job.week } in ${ (end-start)/1000.0 }"
         }
 
         job.completed = true
