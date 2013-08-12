@@ -1,6 +1,5 @@
 package com.traderapist.automation
 
-import com.traderapist.models.FantasyPoints
 import com.traderapist.models.FantasyPointsJob
 import com.traderapist.models.FantasyPointsJobController
 import grails.plugins.rest.client.RestBuilder
