@@ -97,4 +97,13 @@ grails.plugins.springsecurity.userLookup.userDomainClassName = 'com.traderapist.
 grails.plugins.springsecurity.userLookup.authorityJoinClassName = 'com.traderapist.security.UserRole'
 grails.plugins.springsecurity.authority.className = 'com.traderapist.security.Role'
 
+//Remember me configuration
+grails.plugins.springsecurity.rememberMe.cookieName='traderapist_remember_me'
+grails.plugins.springsecurity.rememberMe.alwaysRemember=true //if true uses remember me even if no chkbox is in the form
+grails.plugins.springsecurity.rememberMe.tokenValiditySeconds=31*24*60*60
+grails.plugins.springsecurity.rememberMe.parameter='_spring_security_remember_me'
+grails.plugins.springsecurity.rememberMe.key='HeSX@nP1' // should be unique per application
+grails.plugins.springsecurity.rememberMe.useSecureCookie=false
+grails.plugins.springsecurity.rememberMe.persistent=false //don't want to save to db instead of cookie
+
 grails.views.javascript.library="jquery"
