@@ -113,22 +113,7 @@ class Player {
         }
 
         for(s in statSet) {
-            boolean exists = false;
-            for(fp in fantasyPoints) {
-                if(fp.scoringSystem == fantasyTeam.scoringSystem && fp.season == s.season && fp.week == s.week) {
-                    exists = true
-                    break
-                }
-            }
-
-            if(exists) {
-                println("Fantasy points for ${name} for ${s.season}/${s.week} already exists.  Skipping...")
-                continue
-            }
-
-            def seasonStr = String.valueOf(s.season)
-            def weekStr = String.valueOf(s.week)
-            def key = "${seasonStr}__${weekStr}"
+            def key = "${s.season}__${s.week}"
 
             if(!points[key]) {
                 points[key] = 0.0

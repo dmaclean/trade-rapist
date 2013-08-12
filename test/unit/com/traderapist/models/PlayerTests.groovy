@@ -101,34 +101,6 @@ class PlayerTests {
         assert fantasyPoints[0].points == 16
     }
 
-	void testCalculatePoints_SeasonStats_ESPNStandardScoring_AlreadyExist() {
-		Player player = new Player(name: "Dan", position: Player.POSITION_QB, stats: []).save(flush: true)
-		Stat s1 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200).save(flush: true)
-		Stat s2 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
-
-		fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(position: Player.POSITION_QB, numStarters: 1))
-
-		// Create existing FantasyPoints entry for 2001 season
-		FantasyPoints fp2001 = new FantasyPoints(
-				player: player,
-				points: 16,
-				season: 2001,
-				week: -1,
-				scoringSystem: scoringSystem,
-				numOwners: fantasyTeam.numOwners,
-				numStartable: 1
-		).save(flush: true)
-
-		player.computeFantasyPoints(fantasyTeam)
-
-		def fantasyPoints = FantasyPoints.findAllBySeason(2001)
-		assertTrue "Expecting 1 entry for FantasyPoints", fantasyPoints.size() == 1
-
-		assert fantasyPoints[0].season == 2001
-		assert fantasyPoints[0].week == -1
-		assert fantasyPoints[0].points == 16
-	}
-
     void testCalculatePoints_WeekStats_ESPNStandardScoring() {
         Player player = new Player(name: "Dan", position: Player.POSITION_QB, stats: []).save(flush: true)
         Stat s1 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200).save(flush: true)
@@ -142,23 +114,6 @@ class PlayerTests {
         assert fantasyPoints[0].week == 1
         assert fantasyPoints[0].points == 16
     }
-
-	void testCalculatePoints_WeekStats_ESPNStandardScoring_AlreadyExists() {
-		Player player = new Player(name: "Dan", position: Player.POSITION_QB, stats: []).save(flush: true)
-		Stat s1 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 200).save(flush: true)
-		Stat s2 = new Stat(player: player, season: 2001, week: 1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 2).save(flush: true)
-
-		// Create existing FantasyPoints entry for 2001 season
-		FantasyPoints fp2001 = new FantasyPoints(player: player, points: 16, season: 2001, week: 1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1).save(flush: true)
-
-		player.computeFantasyPoints(fantasyTeam)
-		def fantasyPoints = FantasyPoints.findAllBySeason(2001)
-		assertTrue "Expecting 1 entry for FantasyPoints, got ${ fantasyPoints.size() }", fantasyPoints.size() == 1
-
-		assert fantasyPoints[0].season == 2001
-		assert fantasyPoints[0].week == 1
-		assert fantasyPoints[0].points == 16
-	}
 
 	void testGetCorrelation_Position_Stat() {
 		assert Player.getCorrelation(Player.POSITION_QB, FantasyConstants.STAT_PASSING_YARDS) == 0.5
