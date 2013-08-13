@@ -22,6 +22,52 @@ class AverageDraftPositionController {
         [averageDraftPositionInstance: new AverageDraftPosition(params)]
     }
 
+	/**
+	 * Endpoint that accepts the contents of a CSV as a parameter and parses it out.
+	 * Once parsed, if the player being referenced exists, their ADP will be saved for
+	 * that season, along with their team affiliation.  Since we're not using player ids,
+	 * if there are multiple players with the same name (i.e. Steve Smith, Adrian Peterson)
+	 * then they are not saved and the user will be alerted that those players need to
+	 * be manually resolved.
+	 *
+	 * @return
+	 */
+	def saveFromCSV() {
+		def dupes = []
+		def lines = params.input.split("\n")
+
+		lines.each {    line ->
+			def pieces = line.split(",")
+
+			def season = params.season.toInteger()
+			def player = Player.findAllByName(pieces[0])
+			if(player.size() > 1) {
+				println "Found duplicate entries for ${ pieces[0] }"
+				dupes << pieces[0]
+			}
+			else {
+				def teamAbbr = pieces[1]
+				def adpValue = pieces[3].toDouble()
+
+				def adp = new AverageDraftPosition(player: player[0], season: season, adp: adpValue).save()
+
+				def team = Team.findByAbbreviation(teamAbbr)
+				def teamMembership = new TeamMembership(player: player, season: season, team: team).save()
+			}
+		}
+
+		if(dupes.empty)         render "success"
+		else {
+			def responseStr = "The following players were duplicates:\n"
+
+			dupes.each {    dupe ->
+				responseStr += "${dupe}\n"
+			}
+
+			render responseStr
+		}
+	}
+
     def save() {
         def averageDraftPositionInstance = new AverageDraftPosition(params)
         if (!averageDraftPositionInstance.save(flush: true)) {
