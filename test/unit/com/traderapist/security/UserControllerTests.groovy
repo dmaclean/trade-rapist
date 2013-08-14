@@ -1,8 +1,6 @@
 package com.traderapist.security
 
 
-
-import org.junit.*
 import grails.test.mixin.*
 
 @TestFor(UserController)
@@ -11,7 +9,7 @@ class UserControllerTests {
 
     def populateValidParams(params) {
         assert params != null
-        params["username"] = "dmaclean"
+        params["username"] = "dan@traderapist.com"
 	    params["password"] = "password"
     }
 
@@ -47,10 +45,31 @@ class UserControllerTests {
         populateValidParams(params)
         controller.save()
 
-        assert response.redirectedUrl == '/user/show/1'
-        assert controller.flash.message != null
+        assert response.redirectedUrl == '/home/index'
+        assert controller.flash.info != null
         assert User.count() == 1
     }
+
+	void testSave_InvalidEmail() {
+		User.metaClass.encodePassword = { -> }
+
+		params.username = "bademail"
+		params.password = "password"
+
+		controller.save()
+
+		assert model.userInstance != null
+		assert view == '/user/create'
+
+		response.reset()
+
+		populateValidParams(params)
+		controller.save()
+
+		assert response.redirectedUrl == '/home/index'
+		assert controller.flash.info != null
+		assert User.count() == 1
+	}
 
     void testShow() {
         controller.show()
