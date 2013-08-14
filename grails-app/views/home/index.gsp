@@ -9,14 +9,24 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <head>
     <meta name="layout" content="main"/>
-    <title>Trade Rapist</title>
+    <title>Trade Rapist - Sign-up</title>
 </head>
 <body>
+    <g:set var="user" value="${sec.username()}" />
     <div class="container">
-        <div class="hero-unit">
-            <h1>Hello, world!</h1>
-            <p>This is a template for a simple marketing or informational website. It includes a large callout called the hero unit and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
-            <p><a href="#" class="btn btn-primary btn-large">Learn more »</a></p>
-        </div>
+        <g:if test="${ user }">
+            <div class="row">
+                <div class="span12">
+                    Welcome back, ${ user }
+                </div>
+            </div>
+        </g:if>
+        <g:else>
+            <div class="hero-unit">
+                <h1>Trade Rapist</h1>
+                <p>Kick-ass fantasy football analysis</p>
+                <p><a href="user/create" class="btn btn-primary btn-large">Sign up!</a></p>
+            </div>
+        </g:else>
     </div>
 </body>
