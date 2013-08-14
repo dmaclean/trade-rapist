@@ -1,6 +1,5 @@
 package com.traderapist.models
 
-import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.annotation.Secured
 
