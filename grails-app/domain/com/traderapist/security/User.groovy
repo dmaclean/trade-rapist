@@ -12,7 +12,7 @@ class User {
 	boolean passwordExpired
 
 	static constraints = {
-		username blank: false, unique: true
+		username blank: false, unique: true, matches: /\S+@\S+\.\S+/
 		password blank: false
 	}
 
