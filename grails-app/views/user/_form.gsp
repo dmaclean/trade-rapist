@@ -4,7 +4,7 @@
 
 <div class="fieldcontain ${hasErrors(bean: userInstance, field: 'username', 'error')} required">
 	<label for="username">
-		<g:message code="user.username.label" default="Username" />
+		<g:message code="user.username.label" default="Email" />
 		<span class="required-indicator">*</span>
 	</label>
 	<g:textField name="username" required="" value="${userInstance?.username}"/>
@@ -15,9 +15,10 @@
 		<g:message code="user.password.label" default="Password" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:textField name="password" required="" value="${userInstance?.password}"/>
+	<g:passwordField name="password" required="" value="${userInstance?.password}"/>
 </div>
 
+<!--
 <div class="fieldcontain ${hasErrors(bean: userInstance, field: 'accountExpired', 'error')} ">
 	<label for="accountExpired">
 		<g:message code="user.accountExpired.label" default="Account Expired" />
@@ -48,5 +49,5 @@
 		
 	</label>
 	<g:checkBox name="passwordExpired" value="${userInstance?.passwordExpired}" />
-</div>
+</div>          -->
 
