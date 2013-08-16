@@ -4,20 +4,22 @@ import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.annotation.Secured
 
-@Secured(['ROLE_ADMIN'])
 class AverageDraftPositionController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
+	@Secured(['ROLE_ADMIN'])
 	def index() {
         redirect(action: "list", params: params)
     }
 
+	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
         params.max = Math.min(max ?: 10, 100)
         [averageDraftPositionInstanceList: AverageDraftPosition.list(params), averageDraftPositionInstanceTotal: AverageDraftPosition.count()]
     }
 
+	@Secured(['ROLE_ADMIN'])
     def create() {
         [averageDraftPositionInstance: new AverageDraftPosition(params)]
     }
@@ -34,7 +36,7 @@ class AverageDraftPositionController {
 	 */
 	def saveFromCSV() {
 		def dupes = []
-		def lines = params.input.split("\n")
+		def lines = params.input.split("\\|")
 
 		lines.each {    line ->
 			def pieces = line.split(",")
@@ -68,6 +70,7 @@ class AverageDraftPositionController {
 		}
 	}
 
+	@Secured(['ROLE_ADMIN'])
     def save() {
         def averageDraftPositionInstance = new AverageDraftPosition(params)
         if (!averageDraftPositionInstance.save(flush: true)) {
@@ -79,6 +82,7 @@ class AverageDraftPositionController {
         redirect(action: "show", id: averageDraftPositionInstance.id)
     }
 
+	@Secured(['ROLE_ADMIN'])
     def show(Long id) {
         def averageDraftPositionInstance = AverageDraftPosition.get(id)
         if (!averageDraftPositionInstance) {
@@ -90,6 +94,7 @@ class AverageDraftPositionController {
         [averageDraftPositionInstance: averageDraftPositionInstance]
     }
 
+	@Secured(['ROLE_ADMIN'])
     def edit(Long id) {
         def averageDraftPositionInstance = AverageDraftPosition.get(id)
         if (!averageDraftPositionInstance) {
@@ -101,6 +106,7 @@ class AverageDraftPositionController {
         [averageDraftPositionInstance: averageDraftPositionInstance]
     }
 
+	@Secured(['ROLE_ADMIN'])
     def update(Long id, Long version) {
         def averageDraftPositionInstance = AverageDraftPosition.get(id)
         if (!averageDraftPositionInstance) {
@@ -130,6 +136,7 @@ class AverageDraftPositionController {
         redirect(action: "show", id: averageDraftPositionInstance.id)
     }
 
+	@Secured(['ROLE_ADMIN'])
     def delete(Long id) {
         def averageDraftPositionInstance = AverageDraftPosition.get(id)
         if (!averageDraftPositionInstance) {

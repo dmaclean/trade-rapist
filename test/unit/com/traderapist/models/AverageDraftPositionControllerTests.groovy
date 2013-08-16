@@ -50,8 +50,8 @@ class AverageDraftPositionControllerTests {
 		def brees = new Player(name: "Drew Brees", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
 		def manning = new Player(name: "Peyton Manning", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
 
-		params.input = "Aaron Rodgers,GB,QB,9.2\n" +
-				"Drew Brees,NO,QB,12.9\n" +
+		params.input = "Aaron Rodgers,GB,QB,9.2|" +
+				"Drew Brees,NO,QB,12.9|" +
 				"Peyton Manning,Den,QB,15.1"
 		params.season = "2013"
 
@@ -80,8 +80,8 @@ class AverageDraftPositionControllerTests {
 		def brees = new Player(name: "Drew Brees", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
 		def manning = new Player(name: "Peyton Manning", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
 
-		params.input = "Aaron Rodgers,GB,QB,9.2\n" +
-				"Drew Brees,NO,QB,12.9\n" +
+		params.input = "Aaron Rodgers,GB,QB,9.2|" +
+				"Drew Brees,NO,QB,12.9|" +
 				"Peyton Manning,Den,QB,15.1"
 		params.season = "2013"
 
