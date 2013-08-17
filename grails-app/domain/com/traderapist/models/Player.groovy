@@ -135,6 +135,7 @@ class Player {
                     scoringSystem: fantasyTeam.scoringSystem,
                     numOwners: fantasyTeam.numOwners,
                     numStartable: starters[this.position],
+		            projection: false,
                     points: p.value).save()
         }
     }
@@ -279,7 +280,9 @@ class Player {
 		def receptionsLastYear = 0
 
 		if(position == Player.POSITION_QB) {
-			for(s in stats) {
+			def statList = Stat.findAllByPlayerAndSeasonAndWeek(this, year-1, -1)
+
+			for(s in statList) {
 				// Set flag for valid year
 				if(!hasValidYear && s.season == year-1) {
 					hasValidYear = true
@@ -389,7 +392,9 @@ class Player {
 					])
 		}
 		else if(position == Player.POSITION_RB) {
-			for(s in stats) {
+			def statList = Stat.findAllByPlayerAndSeasonAndWeek(this, year-1, -1)
+
+			for(s in statList) {
 				// Set flag for valid year
 				if(!hasValidYear && s.season == year-1) {
 					hasValidYear = true
@@ -499,7 +504,9 @@ class Player {
 					])
 		}
 		else if(position == Player.POSITION_WR || position == Player.POSITION_TE) {
-			for(s in stats) {
+			def statList = Stat.findAllByPlayerAndSeasonAndWeek(this, year-1, -1)
+
+			for(s in statList) {
 				// Set flag for valid year
 				if(!hasValidYear && s.season == year-1) {
 					hasValidYear = true
