@@ -102,7 +102,11 @@ class FantasyTeamController {
 			return
 		}
 
-		[fantasyTeamInstance: fantasyTeamInstance]
+		withFormat {
+			html fantasyTeamInstance: fantasyTeamInstance
+			all fantasyTeamInstance: fantasyTeamInstance
+			json { render fantasyTeamInstance as JSON }
+		}
 	}
 
 	def edit(Long id) {

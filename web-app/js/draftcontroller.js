@@ -217,6 +217,12 @@ function DraftController($scope, $http) {
 
     $scope.fetchFantasyTeams();
 
+    $scope.fetchFantasyTeamInfo = function() {
+        $http.get("fantasyTeam/show/" + $scope.selectedLeague + ".json").success(function(data) {
+            $scope.numOwners = data.numOwners;
+        });
+    }
+
     $scope.fetchPlayers = function() {
         for(var i=0; i<$scope.numOwners; i++) {
             $scope.owners[i] = new Array();

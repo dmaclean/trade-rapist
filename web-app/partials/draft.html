@@ -9,7 +9,7 @@
                 <div class="control-group" ng-hide="!leagues">
                     <label class="control-label" for="selectedLeague">Fantasy League</label>
                     <div class="controls">
-                        <select id="selectedLeague" ng-model="selectedLeague">
+                        <select id="selectedLeague" ng-model="selectedLeague" ng-change="fetchFantasyTeamInfo(this)">
                             <option value="">Select one</option>
                             <option ng-repeat="league in leagues" value="{{ league.id }}">{{ league.name }}</option>
                         </select>
