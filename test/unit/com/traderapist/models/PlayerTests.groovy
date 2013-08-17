@@ -1,10 +1,11 @@
 package com.traderapist.models
 
-import com.traderapist.security.User
-import grails.test.mixin.*
-import org.junit.*
-
 import com.traderapist.constants.FantasyConstants
+import com.traderapist.security.User
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.After
+import org.junit.Before
 
 /**
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
@@ -227,6 +228,61 @@ class PlayerTests {
 		 * 2013 rushing touchdowns =    (0 * 0.5) + (1 * 0.5) = 0 + 0.5 = 0.5 --> 0 * 6 = 0
 		 */
 		assert q4.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 26
+	}
+
+	void testCalculateProjectedPointsQB_season_numStartable1_numOwners3_NoUsableStats() {
+		def numStartable = 1
+		def numOwners = 3
+
+		// Create three quarterbacks
+		def q1 = new Player(name: "Quarterback 1", position: Player.POSITION_QB, stats: []).save(flush: true)
+		def q2 = new Player(name: "Quarterback 2", position: Player.POSITION_QB, stats: []).save(flush: true)
+		def q3 = new Player(name: "Quarterback 3", position: Player.POSITION_QB, stats: []).save(flush: true)
+		def q4 = new Player(name: "Quarterback 4", position: Player.POSITION_QB, stats: []).save(flush: true)
+		def q_nostats = new Player(name: "Quarterback NoStats", position: Player.POSITION_QB, stats: []).save(flush: true)
+		def r1 = new Player(name: "Running back 1", position: Player.POSITION_RB, stats: []).save(flush: true)
+
+		// Create stats for passing yards, passing touchdowns, interceptions, rushing yards, and rushing touchdowns
+		// for each quarterback for the previous season.
+		def py1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 100).save(flush: true)
+		def py2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 90).save(flush: true)
+		def py3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 80).save(flush: true)         // our avg player
+		def py4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_YARDS, statValue: 70).save(flush: true)
+
+		def pt1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 8).save(flush: true)     // our avg player
+		def pt2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 9).save(flush: true)
+		def pt3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 10).save(flush: true)
+		def pt4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 7).save(flush: true)
+
+		def i1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 1).save(flush: true)
+		def i2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 2).save(flush: true)
+		def i3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 3).save(flush: true)     // our avg player
+		def i4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_INTERCEPTIONS, statValue: 4).save(flush: true)
+
+		def ry1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 8).save(flush: true)
+		def ry2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 9).save(flush: true)      // our avg player
+		def ry3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 10).save(flush: true)
+		def ry4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 11).save(flush: true)
+		def ry5 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 100).save(flush: true)
+
+		def rt1 = new Stat(player: q1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 3).save(flush: true)
+		def rt2 = new Stat(player: q2, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
+		def rt3 = new Stat(player: q3, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 1).save(flush: true)  // our avg player
+		def rt4 = new Stat(player: q4, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 0).save(flush: true)
+		def rt5 = new Stat(player: r1, season: 2012, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 10).save(flush: true)
+
+		def gp = new Stat(player: q_nostats, season: 2012, week: -1, statKey: FantasyConstants.STAT_GAMES_PLAYED, statValue: 10).save(flush: true)
+
+		/*
+		 * Quarterback NoStats
+		 *
+		 * 2013 passing yards =         (0 * 0.5 ) + (80 * 0.5) = 40 --> 40 / 25 = 1.6
+		 * 2013 passing touchdowns =    (0 * 0.37) + (8 * 0.63) = 0 + 5.04 = 5.04 --> 5 * 4 = 20
+		 * 2013 interceptions =         (0 * 0.08) + (3 * 0.92) = 0 + 2.76 = 2.76 --> 2 * -2 = -4
+		 * 2013 rushing yards =         (0 * 0.78) + (9 * 0.22) = 0 + 1.98 = 1.98 --> 1 /10 = 0.1
+		 * 2013 rushing touchdowns =    (0 * 0.5) + (1 * 0.5) = 0 + 0.5 = 0.5 --> 0 * 6 = 0
+		 */
+		assert q_nostats.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 17.7
 	}
 
 	void testCalculateProjectedPointsRB_season_numStartable1_numOwners3() {
