@@ -19,6 +19,7 @@ create table stats (
 create index stat_key_idx on stats(stat_key);
 create index stat_season_idx on stats(season);
 create index stats_season_week_idx on stats(season, week);
+create index stats_player_season_stat_key_idx on stats(player_id, season, stat_key);
 create index stats_player_season_week_idx on stats(player_id, season, week);
 
 drop table fantasy_points;
