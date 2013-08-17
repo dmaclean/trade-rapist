@@ -1,11 +1,10 @@
 package com.traderapist.models
 
-
-
-import grails.test.mixin.*
-import org.junit.*
-
 import com.traderapist.security.User
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.After
+import org.junit.Before
 
 /**
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
@@ -25,7 +24,7 @@ class FantasyTeamPlayerTests {
 
 		User.metaClass.encodePassword = { -> "password"}
 
-		user = new User(username: "dmaclean", password: "password").save(flush: true)
+		user = new User(username: "dmaclean@gmail.com", password: "password").save(flush: true)
 		player = new Player(name: "Dan MacLean", position: Player.POSITION_QB).save(flush: true)
 		fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		fantasyTeam = new FantasyTeam(user: user, name: "ESPN", fantasyLeagueType: fantasyLeagueType, season: 2013, numOwners: 10).save(flush: true)

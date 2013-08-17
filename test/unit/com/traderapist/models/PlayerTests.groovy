@@ -34,7 +34,7 @@ class PlayerTests {
 	@Before
 	void setUp() {
 		User.metaClass.encodePassword = { -> "password"}
-		user = new User(username: "dmaclean", password: "password").save(flush: true)
+		user = new User(username: "dmaclean@gmail.com", password: "password").save(flush: true)
 		flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		fantasyTeam = new FantasyTeam(name: "Test team", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: new HashSet<FantasyTeamStarter>()).save(flush: true)
 

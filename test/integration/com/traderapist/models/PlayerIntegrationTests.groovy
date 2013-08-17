@@ -2,9 +2,11 @@ package com.traderapist.models
 
 import com.traderapist.constants.FantasyConstants
 import com.traderapist.security.User
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 
-import static org.junit.Assert.*
-import org.junit.*
+import static org.junit.Assert.fail
 
 class PlayerIntegrationTests {
 
@@ -18,7 +20,7 @@ class PlayerIntegrationTests {
     @Before
     void setUp() {
 	    User.metaClass.encodePassword = { -> "password"}
-	    user = new User(username: "test user", password: "password").save(flush: true)
+	    user = new User(username: "testuser@gmail.com", password: "password").save(flush: true)
 	    flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 	    fantasyTeam = new FantasyTeam(name: "Test team", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: new HashSet<FantasyTeamStarter>()).save(flush: true)
 	    scoringSystem = new ScoringSystem(name: "Test SS", fantasyTeam: fantasyTeam, scoringRules: new HashSet<ScoringRule>()).save(flush: true)

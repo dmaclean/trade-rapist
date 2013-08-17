@@ -2,8 +2,10 @@ package com.traderapist.models
 
 import com.traderapist.constants.FantasyConstants
 import com.traderapist.security.User
-import org.junit.*
-import grails.test.mixin.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.After
+import org.junit.Before
 
 @TestFor(ScoringSystemController)
 @Mock([FantasyPointsJob, FantasyTeam, ScoringSystem, ScoringRule, User, FantasyLeagueType])
@@ -17,7 +19,7 @@ class ScoringSystemControllerTests {
 	void setUp() {
 		User.metaClass.encodePassword = { -> "password" }
 
-		user = new User(username: "Dan", password: "password").save(flush: true)
+		user = new User(username: "Dan@gmail.com", password: "password").save(flush: true)
 		fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		fantasyTeam = new FantasyTeam(name: "MyFantasyTeam", leagueId: "111", season: 2013, user: user, fantasyLeagueType: fantasyLeagueType, numOwners: 10, fantasyTeamStarters: [])
 		fantasyTeam.validate()

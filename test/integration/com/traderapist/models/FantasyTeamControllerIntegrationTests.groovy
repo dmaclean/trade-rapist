@@ -34,7 +34,7 @@ class FantasyTeamControllerIntegrationTests {
 	@Test
 	void testListWithJSON_LoggedIn() {
 
-		def user = new User(username: "newuser", password: "password").save(flush: true)
+		def user = new User(username: "newuser@gmail.com", password: "password").save(flush: true)
 		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac", numOwners: 10).save(flush: true)
 
@@ -53,7 +53,7 @@ class FantasyTeamControllerIntegrationTests {
 	@Test
 	void testListWithJSON_NotLoggedIn() {
 
-		def user = new User(username: "newuser", password: "password").save(flush: true)
+		def user = new User(username: "newuser@gmail.com", password: "password").save(flush: true)
 		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac").save(flush: true)
 
@@ -73,8 +73,8 @@ class FantasyTeamControllerIntegrationTests {
 	void testList_UserLoggedIn() {
 		def roleUser = new Role(authority: Role.ROLE_USER).save(flush: true)
 		def roleAdmin = new Role(authority: Role.ROLE_ADMIN).save(flush: true)
-		def user = new User(username: "newuser", password: "password").save(flush: true)
-		def admin = new User(username: "adminuser", password: "password").save(flush: true)
+		def user = new User(username: "newuser@gmail.com", password: "password").save(flush: true)
+		def admin = new User(username: "adminuser@gmail.com", password: "password").save(flush: true)
 		def userrole = new UserRole(user: user, role: roleUser).save(flush: true)
 		def adminrole = new UserRole(user: admin, role: roleAdmin).save(flush: true)
 		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
@@ -98,7 +98,7 @@ class FantasyTeamControllerIntegrationTests {
 	void testList_NotLoggedIn() {
 
 		def role = new Role(authority: Role.ROLE_USER).save(flush: true)
-		def user = new User(username: "newuser", password: "password").save(flush: true)
+		def user = new User(username: "newuser@gmail.com", password: "password").save(flush: true)
 		def userrole = new UserRole(user: user, role: role).save(flush: true)
 		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def fantasyTeam = new FantasyTeam(user: user, fantasyLeagueType: flt, season: 2013, leagueId: "1111", name: "Dan Mac").save(flush: true)
@@ -119,8 +119,8 @@ class FantasyTeamControllerIntegrationTests {
 	void testList_AdminLoggedIn() {
 		def roleUser = new Role(authority: Role.ROLE_USER).save(flush: true)
 		def roleAdmin = new Role(authority: Role.ROLE_ADMIN).save(flush: true)
-		def user = new User(username: "newuser", password: "password").save(flush: true)
-		def admin = new User(username: "adminuser", password: "password").save(flush: true)
+		def user = new User(username: "newuser@gmail.com", password: "password").save(flush: true)
+		def admin = new User(username: "adminuser@gmail.com", password: "password").save(flush: true)
 		def userrole = new UserRole(user: user, role: roleUser).save(flush: true)
 		def adminrole = new UserRole(user: admin, role: roleAdmin).save(flush: true)
 		def flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)

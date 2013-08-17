@@ -1,11 +1,10 @@
 package com.traderapist.models
 
+import com.traderapist.security.User
 import grails.converters.JSON
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-
-import com.traderapist.security.User
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,7 +31,7 @@ class FantasyTeamPlayerControllerIntegrationTests {
 
 	@Test
 	void testSaveAllFromDraft() {
-		def user = new User(username: "test", password: "password").save(flush: true)
+		def user = new User(username: "test@gmail.com", password: "password").save(flush: true)
 		def fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def player = new Player(name: "Dan MacLean", position: Player.POSITION_QB).save(flush: true)
 		def player2 = new Player(name: "Mike MacLean", position: Player.POSITION_RB).save(flush: true)
@@ -63,7 +62,7 @@ class FantasyTeamPlayerControllerIntegrationTests {
 
 	@Test
 	void testSaveAllFromDraft_DeletePrevious() {
-		def user = new User(username: "test", password: "password").save(flush: true)
+		def user = new User(username: "test@gmail.com", password: "password").save(flush: true)
 		def fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		def player = new Player(name: "Dan MacLean", position: Player.POSITION_QB).save(flush: true)
 		def player2 = new Player(name: "Mike MacLean", position: Player.POSITION_RB).save(flush: true)

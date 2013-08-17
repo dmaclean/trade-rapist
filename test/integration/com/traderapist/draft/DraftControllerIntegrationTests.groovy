@@ -1,13 +1,6 @@
 package com.traderapist.draft
 
-import com.traderapist.models.AverageDraftPosition
-import com.traderapist.models.FantasyLeagueType
-import com.traderapist.models.FantasyPoints
-import com.traderapist.models.FantasyTeam
-import com.traderapist.models.FantasyTeamStarter
-import com.traderapist.models.Player
-import com.traderapist.models.ScoringRule
-import com.traderapist.models.ScoringSystem
+import com.traderapist.models.*
 import com.traderapist.security.User
 import org.junit.After
 import org.junit.Before
@@ -35,7 +28,7 @@ class DraftControllerIntegrationTests {
 		controller = new DraftController()
 		new FantasyTeamStarter(position: Player.POSITION_QB, numStarters: 1)
 		User.metaClass.encodePassword = { -> "password"}
-		user = new User(username: "test user", password: "password").save(flush: true)
+		user = new User(username: "testuser@gmail.com", password: "password").save(flush: true)
 		flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 		fantasyTeam = new FantasyTeam(name: "Test team", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
 		scoringSystem = new ScoringSystem(name: "Test SS", fantasyTeam: fantasyTeam, scoringRules: []).save(flush: true)

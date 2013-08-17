@@ -1,10 +1,10 @@
 package com.traderapist.models
 
-import grails.converters.JSON
-import org.junit.*
-import grails.test.mixin.*
-
 import com.traderapist.security.User
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.After
+import org.junit.Before
 
 @TestFor(FantasyTeamController)
 @Mock([FantasyLeagueType, FantasyTeam, FantasyTeamStarter, User])
@@ -15,7 +15,7 @@ class FantasyTeamControllerTests {
 	@Before
 	void setUp() {
 		User.metaClass.encodePassword = { -> "password"}
-		user = new User(username: "dmaclean", password: "password").save(flush: true)
+		user = new User(username: "dmaclean@gmail.com", password: "password").save(flush: true)
 		flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
 	}
 
