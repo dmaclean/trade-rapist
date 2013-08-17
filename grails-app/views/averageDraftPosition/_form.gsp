@@ -23,6 +23,6 @@
 		<g:message code="averageDraftPosition.player.label" default="Player" />
 		<span class="required-indicator">*</span>
 	</label>
-	<g:select id="player" name="player.id" from="${com.traderapist.models.Player.list()}" optionKey="id" required="" value="${averageDraftPositionInstance?.player?.id}" class="many-to-one"/>
+	<g:select id="player" name="player.id" from="${com.traderapist.models.Player.findAll(['sort':'id'])}" optionKey="id" required="" value="${averageDraftPositionInstance?.player?.id}" class="many-to-one"/>
 </div>
 

@@ -25,7 +25,7 @@ class AverageDraftPosition {
     }
 
 	static mapping = {
-		cache true
+		cache false
 		table "average_draft_positions"
 	}
 }

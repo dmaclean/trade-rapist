@@ -217,6 +217,12 @@ function DraftController($scope, $http) {
 
     $scope.fetchFantasyTeams();
 
+    $scope.fetchFantasyTeamInfo = function() {
+        $http.get("fantasyTeam/show/" + $scope.selectedLeague + ".json").success(function(data) {
+            $scope.numOwners = data.numOwners;
+        });
+    }
+
     $scope.fetchPlayers = function() {
         for(var i=0; i<$scope.numOwners; i++) {
             $scope.owners[i] = new Array();
@@ -232,7 +238,12 @@ function DraftController($scope, $http) {
             $scope.ownerNeed[i][$scope.KICKER] = $scope.ownerMaxNeed[$scope.KICKER];
         }
 
-        $http.get("draft/players?year=" + $scope.draftYear).success(function(data) {
+        var playersUrl = "draft/players?year=" + $scope.draftYear;
+        if($scope.selectedLeague) {
+            playersUrl += "&fantasy_team_id=" + $scope.selectedLeague;
+        }
+
+        $http.get(playersUrl).success(function(data) {
             $scope.players = data;
 
             var index = [0,0,0,0,0,0];

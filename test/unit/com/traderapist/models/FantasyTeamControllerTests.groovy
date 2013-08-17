@@ -7,7 +7,7 @@ import grails.test.mixin.*
 import com.traderapist.security.User
 
 @TestFor(FantasyTeamController)
-@Mock([FantasyLeagueType, FantasyTeam, User])
+@Mock([FantasyLeagueType, FantasyTeam, FantasyTeamStarter, User])
 class FantasyTeamControllerTests {
 	User user
 	FantasyLeagueType flt
@@ -33,6 +33,14 @@ class FantasyTeamControllerTests {
 		params["season"] = 2013
 		params["user"] = user
 		params["fantasyLeagueType"] = flt
+		params["numOwners"] = 10
+
+		params[Player.POSITION_QB] = 1
+		params[Player.POSITION_RB] = 2
+		params[Player.POSITION_WR] = 3
+		params[Player.POSITION_TE] = 1
+		params[Player.POSITION_DEF] = 1
+		params[Player.POSITION_K] = 1
 	}
 
 	void testIndex() {
@@ -72,6 +80,24 @@ class FantasyTeamControllerTests {
 		assert FantasyTeam.count() == 1
 	}
 
+	void testSaveWithStarters() {
+		controller.save()
+
+		assert model.fantasyTeamInstance != null
+		assert view == '/fantasyTeam/create'
+
+		response.reset()
+
+		populateValidParams(params)
+		controller.save()
+
+		assert response.redirectedUrl == '/fantasyTeam/show/1'
+		assert controller.flash.message != null
+		assert FantasyTeam.count() == 1
+
+		assert FantasyTeamStarter.count() == 6
+	}
+
 	void testSaveAjax() {
 		controller.saveAjax()
 
@@ -84,6 +110,8 @@ class FantasyTeamControllerTests {
 
 		assert response.text =~ /\d+/
 		assert FantasyTeam.count() == 1
+
+		assert FantasyTeamStarter.count() == 6
 	}
 
 	void testShow() {
@@ -135,6 +163,9 @@ class FantasyTeamControllerTests {
 
 		assert fantasyTeam.save() != null
 
+		// Create FantasyTeamStarter object
+	    def fantasyTeamStarter = new FantasyTeamStarter(position: Player.POSITION_WR, numStarters: 3, fantasyTeam: fantasyTeam).save(flush: true)
+
 		// test invalid parameters in update
 		params.id = fantasyTeam.id
 		//TODO: add invalid values to params object
@@ -149,7 +180,14 @@ class FantasyTeamControllerTests {
 		fantasyTeam.clearErrors()
 
 		populateValidParams(params)
+
+		// Change WR from 3 to 2
+		params[Player.POSITION_WR] = 2
+
 		controller.update()
+
+		def starter = FantasyTeamStarter.findByFantasyTeamAndPosition(fantasyTeam, Player.POSITION_WR)
+		assert starter != null && starter.numStarters == 2
 
 		assert response.redirectedUrl == "/fantasyTeam/show/$fantasyTeam.id"
 		assert flash.message != null

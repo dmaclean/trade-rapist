@@ -22,7 +22,7 @@ class Stat {
     }
 
     static mapping = {
-        cache true
+        cache false
         table "stats"
         version false
     }

@@ -30,7 +30,8 @@ class ScoringSystemController {
 	 * @return
 	 */
 	def createSystemAndRules() {
-		def scoringSystem = new ScoringSystem(name: params["ss_name"], fantasyTeam: FantasyTeam.get(params.fantasy_team_id), scoringRules: new HashSet<ScoringRule>())
+		def fantasyTeam = FantasyTeam.get(params.fantasy_team_id)
+		def scoringSystem = new ScoringSystem(name: params["ss_name"], fantasyTeam: fantasyTeam, scoringRules: new HashSet<ScoringRule>())
 
 		if(!scoringSystem.save()) {
 			render "error: Unable to save scoring system."
@@ -52,6 +53,19 @@ class ScoringSystemController {
 		}
 
 		scoringSystem.save()
+
+		def cal = Calendar.getInstance()
+		def currentYear = cal.get(Calendar.YEAR)
+		def seasons = 2001..currentYear
+
+		def projection = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, season: currentYear, week: -1, projection: true).save()
+		print "Successfully created Fantasy projections job for ${ fantasyTeam.name }"
+
+		seasons.each {    season ->
+			[-1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each {   week ->
+				def actual = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, season: season, week: week, projection: false).save()
+			}
+		}
 
 		flash.info = "Scoring system ${ params.ss_name } successfully created!"
 

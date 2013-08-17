@@ -6,7 +6,7 @@ import org.junit.*
 import grails.test.mixin.*
 
 @TestFor(ScoringSystemController)
-@Mock([FantasyTeam, ScoringSystem, ScoringRule, User, FantasyLeagueType])
+@Mock([FantasyPointsJob, FantasyTeam, ScoringSystem, ScoringRule, User, FantasyLeagueType])
 class ScoringSystemControllerTests {
 
 	def fantasyTeam
@@ -19,7 +19,7 @@ class ScoringSystemControllerTests {
 
 		user = new User(username: "Dan", password: "password").save(flush: true)
 		fantasyLeagueType = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
-		fantasyTeam = new FantasyTeam(name: "MyFantasyTeam", leagueId: "111", season: 2013, user: user, fantasyLeagueType: fantasyLeagueType)
+		fantasyTeam = new FantasyTeam(name: "MyFantasyTeam", leagueId: "111", season: 2013, user: user, fantasyLeagueType: fantasyLeagueType, numOwners: 10, fantasyTeamStarters: [])
 		fantasyTeam.validate()
 		fantasyTeam.save(flush: true)
 	}
@@ -58,6 +58,7 @@ class ScoringSystemControllerTests {
 
 	void testCreateSystemAndRules_NewSystemAndRules() {
 		controller.params.ss_name = "Test System"
+		controller.params.fantasy_team_id = fantasyTeam.id.toString()
 		controller.params.stat_multiplier_1 = "1"
 		controller.params.stat_multiplier_2 = "2"
 		controller.params.stat_multiplier_3 = "3"
@@ -69,6 +70,28 @@ class ScoringSystemControllerTests {
 		assert ScoringSystem.list().size() == 1
 
 		assert flash.info == "Scoring system ${ controller.params.ss_name } successfully created!"
+
+		def jobs = FantasyPointsJob.list()
+		def cal = Calendar.getInstance()
+		def currentYear = cal.get(Calendar.YEAR)
+		def seasons = [2001..currentYear]
+		def results = [:]
+
+		seasons.each {    season ->
+			[-1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each {   week ->
+				results["${ season }_${ week }_false"] = false
+			}
+		}
+		results["${ currentYear }_-1_true"] = false
+
+		jobs.each {     job ->
+			results["${ job.season }_${ job.week }_${ job.projection }"] = true
+			assert "Expected job to be marked as incomplete", !job.completed
+		}
+
+		results.each {  key, value ->
+			assert "Found entry ${ key } to be ungenerated", value
+		}
 	}
 
 	void testCreateSystemAndRules_NewSystemExistingRules() {
@@ -76,6 +99,7 @@ class ScoringSystemControllerTests {
 		def rule2 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_YARDS, multiplier: 0.4).save(flush: true)
 
 		controller.params.ss_name = "Test System"
+        controller.params.fantasy_team_id = fantasyTeam.id.toString()
 		controller.params.stat_multiplier_5 = "6"     // passing touchdowns
 		controller.params.stat_multiplier_4 = "0.4"   // passing yards
 
@@ -93,6 +117,7 @@ class ScoringSystemControllerTests {
 		def rule2 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_YARDS, multiplier: 0.4).save(flush: true)
 
 		controller.params.ss_name = "Test System"
+        controller.params.fantasy_team_id = fantasyTeam.id.toString()
 		controller.params.stat_multiplier_1 = "1"
 		controller.params.stat_multiplier_4 = "0.4"   // passing yards
 

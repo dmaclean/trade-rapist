@@ -4,6 +4,7 @@ create table players (
 	name varchar(100) not null,
 	position varchar(5) not null
 );
+create index position_idx on players(position);
 
 drop table stats;
 create table stats (
@@ -17,19 +18,27 @@ create table stats (
 );
 create index stat_key_idx on stats(stat_key);
 create index stat_season_idx on stats(season);
+create index stats_season_week_idx on stats(season, week);
+create index stats_player_season_stat_key_idx on stats(player_id, season, stat_key);
+create index stats_player_season_week_idx on stats(player_id, season, week);
 
 drop table fantasy_points;
 create table fantasy_points (
 	id int auto_increment primary key,
 	player_id int not null,
-	system varchar(100) not null,
+	scoring_system_id int not null,
 	season int not null,
 	week int not null,
 	points int not null,
 	projection boolean default false,
   num_startable int,
-  num_owners int
+  num_owners int,
+  version int,
+  foreign key (player_id) references players(id),
+  foreign key (scoring_system_id) references scoring_systems(id)
 );
+create index fp_season_idx on fantasy_points(season);
+create index fp_week_idx on fantasy_points(week);
 
 drop table teams;
 create table teams(
@@ -157,6 +166,7 @@ create table fantasy_teams (
   fantasy_league_type_id int not null,
   season int not null,
   scoring_system_id int not null,
+  num_owners int not null,
   version int,
   foreign key (user_id) references users(id),
   foreign key (fantasy_league_type_id) references fantasy_league_types(id),
@@ -174,6 +184,16 @@ create table fantasy_team_players (
   fantasy_team_id int not null,
   version int,
   foreign key (player_id) references players(id),
+  foreign key (fantasy_team_id) references fantasy_teams(id)
+);
+
+drop table if exists fantasy_team_starters;
+create table fantasy_team_starters (
+  id int auto_increment primary key,
+  fantasy_team_id int not null,
+  position varchar(5) not null,
+  num_starters int not null,
+  version int,
   foreign key (fantasy_team_id) references fantasy_teams(id)
 );
 
@@ -208,4 +228,17 @@ create table scoring_system_rules (
   version int,
   foreign key (scoring_rule_id) references scoring_rules(id),
   foreign key (scoring_system_id) references scoring_systems(id)
+);
+
+
+drop table if exists fantasy_points_jobs;
+create table fantasy_points_jobs (
+  id int auto_increment primary key ,
+  fantasy_team_id int not null,
+  completed boolean not null default false,
+  year int not null,
+  week int not null,
+  projection boolean not null,
+  version int,
+  foreign key (fantasy_team_id) references fantasy_teams(id)
 );

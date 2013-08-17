@@ -45,14 +45,32 @@ class FantasyTeamController {
 	}
 
 	def create() {
-		[fantasyTeamInstance: new FantasyTeam(params)]
+		def startersMap = [:]
+		params.each {     key, value ->
+			if(key ==~ /(${Player.POSITION_QB}|${Player.POSITION_RB}|${Player.POSITION_WR}|${Player.POSITION_TE}|${Player.POSITION_DEF}|${Player.POSITION_K})/) {
+				startersMap[key] = value
+			}
+		}
+
+		[fantasyTeamInstance: new FantasyTeam(params), starters: startersMap]
 	}
 
 	def save() {
 		def fantasyTeamInstance = new FantasyTeam(params)
+
+		/*
+		 * Save off the fantasy team with starters
+		 */
 		if (!fantasyTeamInstance.save(flush: true)) {
 			render(view: "create", model: [fantasyTeamInstance: fantasyTeamInstance])
 			return
+		}
+
+		params.each {     key, value ->
+			if(key ==~ /(${Player.POSITION_QB}|${Player.POSITION_RB}|${Player.POSITION_WR}|${Player.POSITION_TE}|${Player.POSITION_DEF}|${Player.POSITION_K})/) {
+				def starter = new FantasyTeamStarter(position: key, numStarters: value, fantasyTeam: fantasyTeamInstance).save()
+				log.info("Created FantasyTeamStarter ${ starter.toString() }")
+			}
 		}
 
 		flash.message = message(code: 'default.created.message', args: [message(code: 'fantasyTeam.label', default: 'FantasyTeam'), fantasyTeamInstance.id])
@@ -66,6 +84,13 @@ class FantasyTeamController {
 			return
 		}
 
+		params.each {     key, value ->
+			if(key ==~ /(${Player.POSITION_QB}|${Player.POSITION_RB}|${Player.POSITION_WR}|${Player.POSITION_TE}|${Player.POSITION_DEF}|${Player.POSITION_K})/) {
+				def starter = new FantasyTeamStarter(position: key, numStarters: value, fantasyTeam: fantasyTeamInstance).save()
+				log.info("Created FantasyTeamStarter ${ starter.toString() }")
+			}
+		}
+
 		render fantasyTeamInstance.id
 	}
 
@@ -77,7 +102,11 @@ class FantasyTeamController {
 			return
 		}
 
-		[fantasyTeamInstance: fantasyTeamInstance]
+		withFormat {
+			html fantasyTeamInstance: fantasyTeamInstance
+			all fantasyTeamInstance: fantasyTeamInstance
+			json { render fantasyTeamInstance as JSON }
+		}
 	}
 
 	def edit(Long id) {
@@ -88,7 +117,12 @@ class FantasyTeamController {
 			return
 		}
 
-		[fantasyTeamInstance: fantasyTeamInstance]
+		def startersMap = [:]
+		fantasyTeamInstance.fantasyTeamStarters.each { s ->
+			startersMap[s.position] = s.numStarters
+		}
+
+		[fantasyTeamInstance: fantasyTeamInstance, starters: startersMap]
 	}
 
 	def update(Long id, Long version) {
@@ -110,6 +144,11 @@ class FantasyTeamController {
 		}
 
 		fantasyTeamInstance.properties = params
+
+		fantasyTeamInstance.fantasyTeamStarters.each {  starter ->
+			starter.numStarters = params[starter.position].toInteger()
+			starter.save()
+		}
 
 		if (!fantasyTeamInstance.save(flush: true)) {
 			render(view: "edit", model: [fantasyTeamInstance: fantasyTeamInstance])

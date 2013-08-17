@@ -53,6 +53,12 @@ angular.module('TradeRapistE2E', ['TradeRapist', 'ngMockE2E'])
         $httpBackend.whenGET('draft/players?year=2001').respond(players_2001);
         $httpBackend.whenGET('draft/players?year=2000').respond(players_need_test);
 
+        $httpBackend.whenGET('draft/players?year=2013&fantasy_team_id=').respond(players);
+        $httpBackend.whenGET('draft/players?year=2012').passThrough();
+        $httpBackend.whenGET('draft/players?year=2002').respond(players);
+        $httpBackend.whenGET('draft/players?year=2001').respond(players_2001);
+        $httpBackend.whenGET('draft/players?year=2000').respond(players_need_test);
+
         $httpBackend.whenGET('partials/draft.html').passThrough();
 
         $httpBackend.whenGET('login/whoami').respond("dmaclean");

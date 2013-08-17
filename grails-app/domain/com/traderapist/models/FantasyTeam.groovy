@@ -6,17 +6,22 @@ class FantasyTeam {
 
 	static hasOne = [scoringSystem : ScoringSystem]
 
+	static hasMany = [fantasyTeamStarters : FantasyTeamStarter, fantasyPointsJobs : FantasyPointsJob]
+
 	static belongsTo = [user:User, fantasyLeagueType:FantasyLeagueType]
 
 	String leagueId
 	String name
 	Integer season
+	Integer numOwners
 
 	static constraints = {
 		leagueId nullable: true
 		name nullable: false, blank: false
 		season nullable: false
 		scoringSystem nullable: true
+		numOwners nullable: false, min: 1
+		fantasyPointsJobs nullable: true
 	}
 
 	static mapping = {

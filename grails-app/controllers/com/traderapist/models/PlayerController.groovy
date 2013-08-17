@@ -1,7 +1,5 @@
 package com.traderapist.models
 
-import com.traderapist.scoringsystem.ESPNStandardScoringSystem
-import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.annotation.Secured
 
