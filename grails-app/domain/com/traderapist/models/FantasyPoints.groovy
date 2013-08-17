@@ -1,7 +1,5 @@
 package com.traderapist.models
 
-import org.springframework.context.ApplicationContext
-
 class FantasyPoints {
 
     Integer season
@@ -122,17 +120,7 @@ class FantasyPoints {
 
 
         for(p in players) {
-            // Check for duplicates
-            if(FantasyPoints.findByNumOwnersAndNumStartableAndPlayerAndProjectionAndSeasonAndScoringSystem(
-                    fantasyTeam.numOwners,
-                    numStarters[p.position],
-                    p,
-                    true,
-                    fantasyTeam.season,
-                    fantasyTeam.scoringSystem
-            ) != null) {
-                continue
-            }
+	        long start2 = System.currentTimeMillis()
 
             def points = p.calculateProjectedPoints(
                     fantasyTeam.season,
@@ -150,6 +138,8 @@ class FantasyPoints {
                     numOwners: fantasyTeam.numOwners,
                     numStartable: numStarters[p.position]
             ).save()
+	        long end2 = System.currentTimeMillis()
+	        println "Generated ${ fantasyTeam.season } projection for ${ p.name } in ${ (end2-start2)/1000.0 }"
         }
         long end = System.currentTimeMillis()
 
