@@ -61,6 +61,7 @@ class ScoringSystemControllerTests {
 	void testCreateSystemAndRules_NewSystemAndRules() {
 		controller.params.ss_name = "Test System"
 		controller.params.fantasy_team_id = fantasyTeam.id.toString()
+		controller.params.projection_type = FantasyPointsJob.TRADERAPIST_PROJECTION
 		controller.params.stat_multiplier_1 = "1"
 		controller.params.stat_multiplier_2 = "2"
 		controller.params.stat_multiplier_3 = "3"
@@ -81,10 +82,10 @@ class ScoringSystemControllerTests {
 
 		seasons.each {    season ->
 			[-1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each {   week ->
-				results["${ season }_${ week }_false"] = false
+				results["${ season }_${ week }_${ FantasyPointsJob.NO_PROJECTION }"] = false
 			}
 		}
-		results["${ currentYear }_-1_true"] = false
+		results["${ currentYear }_-1_${ FantasyPointsJob.TRADERAPIST_PROJECTION }"] = false
 
 		jobs.each {     job ->
 			results["${ job.season }_${ job.week }_${ job.projection }"] = true
@@ -102,6 +103,7 @@ class ScoringSystemControllerTests {
 
 		controller.params.ss_name = "Test System"
         controller.params.fantasy_team_id = fantasyTeam.id.toString()
+		controller.params.projection_type = FantasyPointsJob.TRADERAPIST_PROJECTION
 		controller.params.stat_multiplier_5 = "6"     // passing touchdowns
 		controller.params.stat_multiplier_4 = "0.4"   // passing yards
 
@@ -120,6 +122,7 @@ class ScoringSystemControllerTests {
 
 		controller.params.ss_name = "Test System"
         controller.params.fantasy_team_id = fantasyTeam.id.toString()
+		controller.params.projection_type = FantasyPointsJob.TRADERAPIST_PROJECTION
 		controller.params.stat_multiplier_1 = "1"
 		controller.params.stat_multiplier_4 = "0.4"   // passing yards
 
