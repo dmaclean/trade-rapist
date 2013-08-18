@@ -60,8 +60,8 @@ class FantasyPointsJobControllerTests {
 	}
 
     void testProcess_OneGenerationOneProjection() {
-	    def gen = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2012, week: -1, projection: false, completed: false).save(flush: true)
-	    def proj = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2013, week: -1, projection: true, completed: false).save(flush: true)
+	    def gen = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2012, week: -1, projection: FantasyPointsJob.NO_PROJECTION, completed: false).save(flush: true)
+	    def proj = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2013, week: -1, projection: FantasyPointsJob.TRADERAPIST_PROJECTION, completed: false).save(flush: true)
 
 	    controller.params.fantasy_points_job_id = gen.id
 	    controller.process()
@@ -80,7 +80,7 @@ class FantasyPointsJobControllerTests {
     }
 
 	void testProcess_OneGeneration() {
-		def gen = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2012, week: -1, projection: false, completed: false).save(flush: true)
+		def gen = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2012, week: -1, projection: FantasyPointsJob.NO_PROJECTION, completed: false).save(flush: true)
 
 		controller.params.fantasy_points_job_id = gen.id
 		controller.process()
@@ -94,7 +94,7 @@ class FantasyPointsJobControllerTests {
 	}
 
 	void testProcess_OneProjection() {
-		def proj = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2013, week: -1, projection: true, completed: false).save(flush: true)
+		def proj = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2013, week: -1, projection: FantasyPointsJob.TRADERAPIST_PROJECTION, completed: false).save(flush: true)
 
 		controller.params.fantasy_points_job_id = proj.id
 		controller.process()
@@ -105,5 +105,40 @@ class FantasyPointsJobControllerTests {
 		assert "Expected 1 FantasyPoint projection, got ${ projResults.size() }", projResults.size() == 1
 
 		assert proj.completed
+	}
+
+	void testProcess_YahooPPR() {
+		def proj = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2013, week: -1, projection: FantasyPointsJob.YAHOO_PPR_PROJECTION, completed: false).save(flush: true)
+
+		def rodgers = new Player(id: 7200, name: "Aaron Rodgers", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		rodgers.id = 7200
+		rodgers.save(flush: true)
+
+		def brees = new Player(id: 5479, name: "Drew Brees", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		brees.id = 5479
+		brees.save(flush: true)
+
+		controller.params.fantasy_points_job_id = proj.id
+		controller.process()
+
+		def genResults = FantasyPoints.findAllByProjection(false)
+		def projResults = FantasyPoints.findAllByProjection(true)
+		assert "Expected 0 FantasyPoint non-projection, got ${ genResults.size() }", genResults.size() == 0
+		assert "Expected 2 FantasyPoint projection, got ${ projResults.size() }", projResults.size() == 2
+
+		def fps = FantasyPoints.list()
+		assert fps.size() == 2
+
+		assert fps[0].player == rodgers
+		assert fps[0].points == 345.74
+
+		assert fps[1].player == brees
+		assert fps[1].points == 339.32
+
+		assert proj.completed
+	}
+
+	void testProcess_YahooStandard() {
+		fail("TBD")
 	}
 }
