@@ -10,7 +10,7 @@ import org.junit.Before
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(FantasyPoints)
-@Mock([FantasyLeagueType, FantasyTeam, FantasyTeamStarter, Player, ScoringRule, ScoringSystem, Stat, User])
+@Mock([FantasyLeagueType, FantasyPointsJob, FantasyTeam, FantasyTeamStarter, Player, ScoringRule, ScoringSystem, Stat, User])
 class FantasyPointsTests {
 
     Player player
@@ -34,7 +34,13 @@ class FantasyPointsTests {
 	    User.metaClass.encodePassword = { -> "password"}
 	    user = new User(username: "dmaclean@gmail.com", password: "password").save(flush: true)
 	    flt = new FantasyLeagueType(code: "ESPN", description: "ESPN").save(flush: true)
-	    fantasyTeam = new FantasyTeam(name: "Test team", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: new HashSet<FantasyTeamStarter>()).save(flush: true)
+	    fantasyTeam = new FantasyTeam(name: "Test team", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
+	    fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(fantasyTeam: fantasyTeam, position: Player.POSITION_QB, numStarters: 1).save(flush: true))
+	    fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(fantasyTeam: fantasyTeam, position: Player.POSITION_RB, numStarters: 2).save(flush: true))
+	    fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(fantasyTeam: fantasyTeam, position: Player.POSITION_WR, numStarters: 3).save(flush: true))
+	    fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(fantasyTeam: fantasyTeam, position: Player.POSITION_TE, numStarters: 1).save(flush: true))
+	    fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(fantasyTeam: fantasyTeam, position: Player.POSITION_DEF, numStarters: 1).save(flush: true))
+	    fantasyTeam.fantasyTeamStarters.add(new FantasyTeamStarter(fantasyTeam: fantasyTeam, position: Player.POSITION_K, numStarters: 1).save(flush: true))
 
 	    scoringSystem = new ScoringSystem(name: "My Scoring System", fantasyTeam: fantasyTeam, scoringRules: []).save(flush: true)
 
@@ -263,5 +269,65 @@ class FantasyPointsTests {
 		assertTrue "Week is not -1", fp.week == -1
 		assertTrue "Points is not 20.2, instead got ${ fp.points }", fp.points == 20.2
 		assertTrue "Projection is not true", fp.projection
+	}
+
+	void testProjectPoints_YahooPPR2013() {
+		def rodgers = new Player(id: 7200, name: "Aaron Rodgers", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		rodgers.id = 7200
+		rodgers.save(flush: true)
+
+		def brees = new Player(id: 5479, name: "Drew Brees", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		brees.id = 5479
+		brees.save(flush: true)
+
+		def peterson = new Player(id: 8261, name: "Adrian Peterson", position: Player.POSITION_RB, stats: [], averageDraftPositions: []).save(flush: true)
+		peterson.id = 8261
+		peterson.save(flush: true)
+
+		def job = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, season: 2013, week: -1, projection: FantasyPointsJob.YAHOO_PPR_PROJECTION).save(flush: true)
+
+		FantasyPoints.projectPoints(job)
+
+		def fps = FantasyPoints.list()
+		assert fps.size() == 3
+
+		assert fps[0].player == rodgers
+		assert fps[0].points == 345.74
+
+		assert fps[1].player == brees
+		assert fps[1].points == 339.32
+
+		assert fps[2].player == peterson
+		assert fps[2].points == 307.83
+	}
+
+	void testProjectPoints_YahooStandard2013() {
+		def rodgers = new Player(id: 7200, name: "Aaron Rodgers", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		rodgers.id = 7200
+		rodgers.save(flush: true)
+
+		def brees = new Player(id: 5479, name: "Drew Brees", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		brees.id = 5479
+		brees.save(flush: true)
+
+		def peterson = new Player(id: 8261, name: "Adrian Peterson", position: Player.POSITION_RB, stats: [], averageDraftPositions: []).save(flush: true)
+		peterson.id = 8261
+		peterson.save(flush: true)
+
+		def job = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, season: 2013, week: -1, projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION).save(flush: true)
+
+		FantasyPoints.projectPoints(job)
+
+		def fps = FantasyPoints.list()
+		assert fps.size() == 3
+
+		assert fps[0].player == rodgers
+		assert fps[0].points == 345.74
+
+		assert fps[1].player == brees
+		assert fps[1].points == 339.32
+
+		assert fps[2].player == peterson
+		assert fps[2].points == 269.89
 	}
 }

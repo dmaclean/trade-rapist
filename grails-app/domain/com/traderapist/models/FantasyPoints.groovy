@@ -1,5 +1,8 @@
 package com.traderapist.models
 
+import com.traderapist.projections.YahooPPRProjections2013
+import com.traderapist.projections.YahooStandardProjections2013
+
 class FantasyPoints {
 
     Integer season
@@ -89,6 +92,64 @@ class FantasyPoints {
 
         return true
     }
+
+	static def projectPoints(FantasyPointsJob job) {
+		if(job.projection == FantasyPointsJob.TRADERAPIST_PROJECTION) {
+			projectPoints(job.fantasyTeam)
+		}
+		else if (job.projection == FantasyPointsJob.YAHOO_STANDARD_PROJECTION) {
+			YahooStandardProjections2013.yahooStandardProjections2013.each {  projection ->
+				def starters = [:]
+				job.fantasyTeam.fantasyTeamStarters.each {  starter ->
+					starters[starter.position] = starter.numStarters
+				}
+
+				def player = Player.get(projection[0])
+
+				if(player) {
+					def fp = new FantasyPoints(
+							season: job.season,
+							week: job.week,
+							points: projection[2],
+							projection: true,
+							numOwners: job.fantasyTeam.numOwners,
+							numStartable: starters[player.position],
+							player: player,
+							scoringSystem: job.fantasyTeam.scoringSystem
+					).save()
+				}
+				else {
+					log.error "Could not find player with id ${ projection[0] }"
+				}
+			}
+		}
+		else if (job.projection == FantasyPointsJob.YAHOO_PPR_PROJECTION) {
+			YahooPPRProjections2013.yahooPPRProjections2013.each {  projection ->
+				def starters = [:]
+				job.fantasyTeam.fantasyTeamStarters.each {  starter ->
+					starters[starter.position] = starter.numStarters
+				}
+
+				def player = Player.get(projection[0])
+
+				if(player) {
+					def fp = new FantasyPoints(
+							season: job.season,
+							week: job.week,
+							points: projection[2],
+							projection: true,
+							numOwners: job.fantasyTeam.numOwners,
+							numStartable: starters[player.position],
+							player: player,
+							scoringSystem: job.fantasyTeam.scoringSystem
+					).save()
+				}
+				else {
+					log.error "Could not find player with id ${ projection[0] }"
+				}
+			}
+		}
+	}
 
     /**
      * Creates projections for players of a particular position for the upcoming (or specified) season.  This expects URL parameters as
