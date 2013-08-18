@@ -9,7 +9,11 @@ if (typeof jQuery !== 'undefined') {
         context_root = $('#context_root').text();
 
         function createScoringSystem() {
-            var pairs = { 'ss_name' : $('#ss_name').val(), 'fantasy_team_id' : $('#fantasy_team_id').val() };
+            var pairs = {
+                'ss_name' : $('#ss_name').val(),
+                'fantasy_team_id' : $('#fantasy_team_id').val(),
+                'projection_type' : $('#projection_type').val()
+            };
 
             $(':input[name^="stat_multiplier"]').each(function(index) {
                 var statKey = $(this).attr('name'); //$(this).attr('name').split("_")[2];
