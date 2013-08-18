@@ -5,6 +5,8 @@ import com.traderapist.security.UserRole
 
 class BootStrap {
 
+	def grailsLinkGenerator
+
     def init = { servletContext ->
 
 	    def adminRole = Role.findByAuthority(Role.ROLE_ADMIN)
@@ -21,7 +23,7 @@ class BootStrap {
 	    /*
 	     * Start up the thread that monitors FantasyPointsJobs
 	     */
-	    Thread t = new Thread(new FantasyPointProjectionScheduler())
+	    Thread t = new Thread(new FantasyPointProjectionScheduler(grailsLinkGenerator: grailsLinkGenerator))
 	    t.start()
 
     }
