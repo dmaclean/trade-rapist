@@ -1,4 +1,4 @@
-<%@ page import="com.traderapist.constants.FantasyConstants; com.traderapist.models.FantasyTeam" %>
+<%@ page import="com.traderapist.models.FantasyPointsJob; com.traderapist.constants.FantasyConstants; com.traderapist.models.FantasyTeam" %>
 <head>
     <meta name="layout" content="main">
     <g:set var="entityName" value="${message(code: 'fantasyTeam.label', default: 'Fantasy Team')}" />
@@ -60,6 +60,13 @@
         <fieldset>
             <label>Scoring System name</label>
             <input id="ss_name" name="ss_name" type="text" placeholder="MyLeague scoring system">
+
+            <label>Projection Type</label>
+            <select name="projection_type" id="projection_type">
+                <option value="${ FantasyPointsJob.TRADERAPIST_PROJECTION }">Trade Rapist</option>
+                <option value="${ FantasyPointsJob.YAHOO_STANDARD_PROJECTION }">Yahoo! Standard Scoring</option>
+                <option value="${ FantasyPointsJob.YAHOO_PPR_PROJECTION }">Yahoo! PPR Scoring</option>
+            </select>
 
             <!--
                Passing
