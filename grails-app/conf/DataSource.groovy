@@ -45,7 +45,7 @@ environments {
 //               testOnReturn=true
 //               validationQuery="SELECT 1"
 //            }
-	        url = "jdbc:mysql://traderapist.cz4klpvd9rfo.us-east-1.rds.amazonaws.com:3306"
+	        url = "jdbc:mysql://aa1cx34u4zps7mj.cz4klpvd9rfo.us-east-1.rds.amazonaws.com:3306/ebdb"
 	        driverClassName = "com.mysql.jdbc.Driver"
 	        username = "traderapist"
 	        password = "santoro821"
