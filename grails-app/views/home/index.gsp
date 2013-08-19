@@ -9,7 +9,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <head>
     <meta name="layout" content="main"/>
-    <title>Trade Rapist - Sign-up</title>
+    <title>Trade Rapist</title>
 </head>
 <body>
     <g:set var="user" value="${sec.username()}" />
