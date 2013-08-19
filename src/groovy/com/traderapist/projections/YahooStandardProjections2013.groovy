@@ -159,7 +159,7 @@ class YahooStandardProjections2013 {
 		yahooStandardProjections2013 << [25880,"Vick Ballard",91.88]
 		yahooStandardProjections2013 << [26664,"Robert Woods",91.08]
 		yahooStandardProjections2013 << [8825,"Fred Davis",90.59]
-		yahooStandardProjections2013 << [8807,"Dustin Keller",90.39]
+		yahooStandardProjections2013 << [8807,"Dustin Keller",0.0]
 		yahooStandardProjections2013 << [24889,"Jordan Cameron",89.49]
 		yahooStandardProjections2013 << [24830,"Kyle Rudolph",87.71]
 		yahooStandardProjections2013 << [8838,"Martellus Bennett",86.68]
