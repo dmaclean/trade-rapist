@@ -24,10 +24,14 @@ class UserController {
 
     def save() {
         def userInstance = new User(params)
+	    userInstance.enabled = true
         if (!userInstance.save(flush: true)) {
             render(view: "create", model: [userInstance: userInstance])
             return
         }
+
+	    // Create appropriate role(s) for user.
+	    def userRole = new UserRole(user: userInstance, role: Role.findByAuthority(Role.ROLE_USER)).save()
 
         flash.info = "Your account ${ userInstance.username } was created successfully."
         redirect(controller: "home", action: "index")

@@ -1,11 +1,28 @@
 package com.traderapist.security
 
-
-import grails.test.mixin.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.After
+import org.junit.Before
 
 @TestFor(UserController)
-@Mock(User)
+@Mock([Role,User,UserRole])
 class UserControllerTests {
+
+	Role roleUser
+	Role roleAdmin
+
+	@Before
+	void setUp() {
+		roleUser = new Role(authority: Role.ROLE_USER).save(flush: true)
+		roleAdmin = new Role(authority: Role.ROLE_ADMIN).save(flush: true)
+	}
+
+	@After
+	void tearDown() {
+		roleUser = null
+		roleAdmin = null
+	}
 
     def populateValidParams(params) {
         assert params != null
@@ -35,6 +52,8 @@ class UserControllerTests {
     void testSave() {
 	    User.metaClass.encodePassword = { -> }
 
+	    assert UserRole.list().size() == 0
+
         controller.save()
 
         assert model.userInstance != null
@@ -44,6 +63,12 @@ class UserControllerTests {
 
         populateValidParams(params)
         controller.save()
+
+	    def userRoles = UserRole.list()
+	    assert userRoles.size() == 1
+	    assert userRoles[0].role == roleUser
+	    assert userRoles[0].user.username == "dan@traderapist.com"
+		assert userRoles[0].user.enabled
 
         assert response.redirectedUrl == '/home/index'
         assert controller.flash.info != null
