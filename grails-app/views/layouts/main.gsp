@@ -70,7 +70,7 @@
                         </g:if>
                         <g:else>
                             <ul class="nav pull-right">
-                                <li><a href="logout">Log out</a></li>
+                                <li><g:link controller="logout">Logout</g:link></li>
                             </ul>
                         </g:else>
                     </div><!--/.nav-collapse -->
