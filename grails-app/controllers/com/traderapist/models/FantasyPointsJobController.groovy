@@ -21,13 +21,8 @@ class FantasyPointsJobController {
 
         def job = FantasyPointsJob.get(params.fantasy_points_job_id)
 
-        if(job.projection == FantasyPointsJob.TRADERAPIST_PROJECTION) {
-            println "Projecting fantasy points for ${ job.fantasyTeam.name } for ${ job.fantasyTeam.name } - ${ job.season }"
-            FantasyPoints.projectPoints(job.fantasyTeam)
-        }
-	    else if(job.projection == FantasyPointsJob.YAHOO_PPR_PROJECTION ||
-		        job.projection == FantasyPointsJob.YAHOO_STANDARD_PROJECTION) {
-	        println "Projecting fantasy points for ${ job.fantasyTeam.name } for ${ job.fantasyTeam.name } - ${ job.season } with Yahoo YahooPPRProjections2013"
+        if(job.projection != FantasyPointsJob.NO_PROJECTION) {
+            println "Projecting fantasy points for ${ job.fantasyTeam.name } for ${ job.fantasyTeam.name } - ${ job.season } with type ${ job.projection }"
 	        FantasyPoints.projectPoints(job)
         }
         else {

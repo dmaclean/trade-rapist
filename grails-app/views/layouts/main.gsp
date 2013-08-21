@@ -29,6 +29,7 @@
 	</head>
 	<body>
         <g:set var="user" value="${sec.username()}" />
+        <g:set var="isAdmin" value="${sec.username() == 'admin'}" />
         <span id="context_root" style="display: none">${ applicationContext.servletContext.contextPath }</span>
 
 		<!--<div id="grailsLogo" role="banner"><a href="http://grails.org"><img src="${resource(dir: 'images', file: 'grails_logo.png')}" alt="Grails"/></a></div>-->
@@ -40,13 +41,15 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="brand" href="${ application.contextPath }/home">trade rapist</a>
+                    <g:link controller="home" class="brand">trade rapist</g:link>
                     <div class="nav-collapse collapse">
                         <ul class="nav">
-                            <li class="active"><a href="${ application.contextPath }/home">Home</a></li>
                             <li><a href="${ application.contextPath }/index.html">Draft Central</a></li>
-                            <g:if test="${ user }">
-                                <li><a href="${ application.contextPath }/fantasyTeam">My Fantasy Teams</a></li>
+                            <g:if test="${ user && !isAdmin }">
+                                <li><g:link controller="fantasyTeam" action="list">My Fantasy Teams</g:link></li>
+                            </g:if>
+                            <g:if test="${ isAdmin }">
+                                <li><g:link controller="fantasyPoints" action="editProjections">Edit Projections</g:link></li>
                             </g:if>
                             <!--<li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>

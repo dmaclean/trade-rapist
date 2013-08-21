@@ -8,7 +8,7 @@ class FantasyPoints {
     Integer season
     Integer week
     Double points
-	Boolean projection
+	Integer projection
 	Integer numStartable
 	Integer numOwners
 
@@ -94,16 +94,51 @@ class FantasyPoints {
     }
 
 	static def projectPoints(FantasyPointsJob job) {
+		def starters = [:]
+		job.fantasyTeam.fantasyTeamStarters.each {  starter ->
+			starters[starter.position] = starter.numStarters
+		}
+
 		if(job.projection == FantasyPointsJob.TRADERAPIST_PROJECTION) {
-			projectPoints(job.fantasyTeam)
+			def fantasyTeam = job.fantasyTeam
+
+			/*
+	         * Grab all players who had stats in the previous season.
+			 */
+			def previousSeason = fantasyTeam.season-1
+			def players = Player.createCriteria().listDistinct {
+				'in'("position", [Player.POSITION_QB, Player.POSITION_RB, Player.POSITION_WR, Player.POSITION_TE, Player.POSITION_DEF, Player.POSITION_K])
+				stats {
+					eq("season", previousSeason)
+					eq("week", -1)
+				}
+			}
+
+			for(p in players) {
+				long start2 = System.currentTimeMillis()
+
+				def points = p.calculateProjectedPoints(
+						fantasyTeam.season,
+						starters[p.position],
+						fantasyTeam.numOwners,
+						fantasyTeam.scoringSystem)
+
+				def playerFantasyProjection = new FantasyPoints(
+						player: p,
+						season: fantasyTeam.season,
+						week: -1,
+						points: points,
+						scoringSystem: fantasyTeam.scoringSystem,
+						projection: FantasyPointsJob.TRADERAPIST_PROJECTION,
+						numOwners: fantasyTeam.numOwners,
+						numStartable: starters[p.position]
+				).save()
+				long end2 = System.currentTimeMillis()
+				println "Generated ${ fantasyTeam.season } projection for ${ p.name } in ${ (end2-start2)/1000.0 }"
+			}
 		}
 		else if (job.projection == FantasyPointsJob.YAHOO_STANDARD_PROJECTION) {
 			YahooStandardProjections2013.yahooStandardProjections2013.each {  projection ->
-				def starters = [:]
-				job.fantasyTeam.fantasyTeamStarters.each {  starter ->
-					starters[starter.position] = starter.numStarters
-				}
-
 				def player = Player.get(projection[0])
 
 				if(player) {
@@ -111,7 +146,7 @@ class FantasyPoints {
 							season: job.season,
 							week: job.week,
 							points: projection[2],
-							projection: true,
+							projection: job.projection,
 							numOwners: job.fantasyTeam.numOwners,
 							numStartable: starters[player.position],
 							player: player,
@@ -125,11 +160,6 @@ class FantasyPoints {
 		}
 		else if (job.projection == FantasyPointsJob.YAHOO_PPR_PROJECTION) {
 			YahooPPRProjections2013.yahooPPRProjections2013.each {  projection ->
-				def starters = [:]
-				job.fantasyTeam.fantasyTeamStarters.each {  starter ->
-					starters[starter.position] = starter.numStarters
-				}
-
 				def player = Player.get(projection[0])
 
 				if(player) {
@@ -137,7 +167,7 @@ class FantasyPoints {
 							season: job.season,
 							week: job.week,
 							points: projection[2],
-							projection: true,
+							projection: job.projection,
 							numOwners: job.fantasyTeam.numOwners,
 							numStartable: starters[player.position],
 							player: player,
@@ -152,58 +182,40 @@ class FantasyPoints {
 	}
 
     /**
-     * Creates projections for players of a particular position for the upcoming (or specified) season.  This expects URL parameters as
-     * inputs:
-     *
-     * fantasy_team_id - The id of the fantasy team we want to do projections for.
-     *
-     * @return    A success message if everything works, or a failure message explaining the problem.
-     */
-    static def projectPoints(fantasyTeam) {
-        long start = System.currentTimeMillis()
+	 * Does a sweeping update of projected fantasy points for Yahoo! Standard and PPR types
+	 * for all teams across the app.
+	 *
+	 * @param type
+	 * @param season
+	 * @param data
+	 */
+	static def updateProjections(type, season, data) {
+		// Process the data first
+		def players = data.split("\r?\n")
+		def projections = [:]
+		players.each {  player ->
+			// id, name, points
+			def pieces = player.split(",")
+			projections[pieces[0]] = pieces[2].toDouble()
+		}
 
-        def numStarters = [:]
-        fantasyTeam.fantasyTeamStarters.each {  starter ->
-            numStarters[starter.position] = starter.numStarters
-        }
+		// Update the Fantasy Points.
+		def fantasyPoints = FantasyPoints.findAllBySeasonAndWeekAndProjection(season, -1, type)
 
-        /*
-         * Grab all players who had stats in the previous season.
-         */
-        def previousSeason = fantasyTeam.season-1
-        def players = Player.createCriteria().listDistinct {
-            'in'("position", [Player.POSITION_QB, Player.POSITION_RB, Player.POSITION_WR, Player.POSITION_TE, Player.POSITION_DEF, Player.POSITION_K])
-            stats {
-                eq("season", previousSeason)
-                eq("week", -1)
-            }
-        }
+		fantasyPoints.each {        fp ->
+			if(fp.points != projections[fp.player.id.toString()]) {
+				def newPoints = projections[fp.player.id.toString()]
+				if(newPoints) {
+					fp.points = newPoints.toDouble()
 
-
-        for(p in players) {
-	        long start2 = System.currentTimeMillis()
-
-            def points = p.calculateProjectedPoints(
-                    fantasyTeam.season,
-                    numStarters[p.position],
-                    fantasyTeam.numOwners,
-                    fantasyTeam.scoringSystem)
-
-            def playerFantasyProjection = new FantasyPoints(
-                    player: p,
-                    season: fantasyTeam.season,
-                    week: -1,
-                    points: points,
-                    scoringSystem: fantasyTeam.scoringSystem,
-                    projection: true,
-                    numOwners: fantasyTeam.numOwners,
-                    numStartable: numStarters[p.position]
-            ).save()
-	        long end2 = System.currentTimeMillis()
-	        println "Generated ${ fantasyTeam.season } projection for ${ p.name } in ${ (end2-start2)/1000.0 }"
-        }
-        long end = System.currentTimeMillis()
-
-        println "Point projection for ${ fantasyTeam.season } completed in ${ (end-start)/1000.0 }"
-    }
+					if(!fp.save()) {
+						println "Not valid for ${ fp.player.name }"
+					}
+				}
+				else {
+					println "Found null entry for ${ fp.player.name }"
+				}
+			}
+		}
+	}
 }

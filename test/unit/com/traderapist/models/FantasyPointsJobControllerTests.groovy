@@ -66,7 +66,7 @@ class FantasyPointsJobControllerTests {
 	    controller.params.fantasy_points_job_id = gen.id
 	    controller.process()
 
-	    def genResults = FantasyPoints.findAllByProjection(false)
+	    def genResults = FantasyPoints.findAllByProjection(FantasyPointsJob.NO_PROJECTION)
 	    assert "Expected 1 FantasyPoint non-projection, got ${ genResults.size() }", genResults.size() == 1
 	    assert gen.completed
 	    assert !proj.completed
@@ -74,7 +74,7 @@ class FantasyPointsJobControllerTests {
 	    controller.params.fantasy_points_job_id = proj.id
 	    controller.process()
 
-	    def projResults = FantasyPoints.findAllByProjection(true)
+	    def projResults = FantasyPoints.findAllByProjection(FantasyPointsJob.TRADERAPIST_PROJECTION)
         assert "Expected 1 FantasyPoint projection, got ${ projResults.size() }", projResults.size() == 1
 	    assert proj.completed
     }
@@ -85,8 +85,8 @@ class FantasyPointsJobControllerTests {
 		controller.params.fantasy_points_job_id = gen.id
 		controller.process()
 
-		def genResults = FantasyPoints.findAllByProjection(false)
-		def projResults = FantasyPoints.findAllByProjection(true)
+		def genResults = FantasyPoints.findAllByProjection(FantasyPointsJob.NO_PROJECTION)
+		def projResults = FantasyPoints.findAllByProjection(FantasyPointsJob.TRADERAPIST_PROJECTION)
 		assert "Expected 1 FantasyPoint non-projection, got ${ genResults.size() }", genResults.size() == 1
 		assert "Expected 0 FantasyPoint projection, got ${ projResults.size() }", projResults.size() == 0
 
@@ -99,8 +99,8 @@ class FantasyPointsJobControllerTests {
 		controller.params.fantasy_points_job_id = proj.id
 		controller.process()
 
-		def genResults = FantasyPoints.findAllByProjection(false)
-		def projResults = FantasyPoints.findAllByProjection(true)
+		def genResults = FantasyPoints.findAllByProjection(FantasyPointsJob.NO_PROJECTION)
+		def projResults = FantasyPoints.findAllByProjection(FantasyPointsJob.TRADERAPIST_PROJECTION)
 		assert "Expected 0 FantasyPoint non-projection, got ${ genResults.size() }", genResults.size() == 0
 		assert "Expected 1 FantasyPoint projection, got ${ projResults.size() }", projResults.size() == 1
 
@@ -121,8 +121,8 @@ class FantasyPointsJobControllerTests {
 		controller.params.fantasy_points_job_id = proj.id
 		controller.process()
 
-		def genResults = FantasyPoints.findAllByProjection(false)
-		def projResults = FantasyPoints.findAllByProjection(true)
+		def genResults = FantasyPoints.findAllByProjection(FantasyPointsJob.NO_PROJECTION)
+		def projResults = FantasyPoints.findAllByProjection(FantasyPointsJob.YAHOO_PPR_PROJECTION)
 		assert "Expected 0 FantasyPoint non-projection, got ${ genResults.size() }", genResults.size() == 0
 		assert "Expected 2 FantasyPoint projection, got ${ projResults.size() }", projResults.size() == 2
 
@@ -139,6 +139,33 @@ class FantasyPointsJobControllerTests {
 	}
 
 	void testProcess_YahooStandard() {
-		fail("TBD")
+		def proj = new FantasyPointsJob(fantasyTeam: fantasyTeam, season: 2013, week: -1, projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION, completed: false).save(flush: true)
+
+		def peterson = new Player(id: 8261, name: "Adrian Peterson", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		peterson.id = 8261
+		peterson.save(flush: true)
+
+		def foster = new Player(id: 9527, name: "Arian Foster", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		foster.id = 9527
+		foster.save(flush: true)
+
+		controller.params.fantasy_points_job_id = proj.id
+		controller.process()
+
+		def genResults = FantasyPoints.findAllByProjection(FantasyPointsJob.NO_PROJECTION)
+		def projResults = FantasyPoints.findAllByProjection(FantasyPointsJob.YAHOO_PPR_PROJECTION)
+		assert "Expected 0 FantasyPoint non-projection, got ${ genResults.size() }", genResults.size() == 0
+		assert "Expected 2 FantasyPoint projection, got ${ projResults.size() }", projResults.size() == 2
+
+		def fps = FantasyPoints.list()
+		assert fps.size() == 2
+
+		assert fps[0].player == peterson
+		assert fps[0].points == 269.89
+
+		assert fps[1].player == foster
+		assert fps[1].points == 255.82
+
+		assert proj.completed
 	}
 }

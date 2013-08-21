@@ -1,10 +1,11 @@
 package com.traderapist.models
 
-import com.traderapist.security.User
-import org.junit.*
-import grails.test.mixin.*
-
 import com.traderapist.constants.FantasyConstants
+import com.traderapist.security.User
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.After
+import org.junit.Before
 
 @TestFor(FantasyPointsController)
 @Mock([
@@ -72,7 +73,7 @@ class FantasyPointsControllerTests {
         params["points"] = 100
         params["scoring_system_id"] = scoringSystem.id.toString()
         params["player"] = player
-	    params["projection"] = false
+	    params["projection"] = FantasyPointsJob.NO_PROJECTION
     }
 
     void testIndex() {
@@ -324,6 +325,13 @@ class FantasyPointsControllerTests {
         assert model.fantasyPointsInstance == fantasyPoints
     }
 
+	void testEditProjections() {
+		def model = controller.editProjections()
+
+		assert flash.error == null
+		assert model == []
+	}
+
     void testUpdate() {
         controller.update()
 
@@ -370,6 +378,49 @@ class FantasyPointsControllerTests {
         //assert model.fantasyPointsInstance.errors.getFieldError('version')
         assert flash.message != null
     }
+
+	void testUpdateProjections() {
+		controller.updateProjections()
+
+		assert flash.error != null
+		assert response.redirectedUrl == '/fantasyPoints/editProjections'
+
+		response.reset()
+
+		// Projection type only
+		params.projection_type = FantasyPointsJob.YAHOO_STANDARD_PROJECTION.toString()
+		controller.updateProjections()
+
+		assert flash.error != null
+		assert response.redirectedUrl == '/fantasyPoints/editProjections'
+
+		response.reset()
+
+		// Projection type and seeason
+		params.projection_type = FantasyPointsJob.YAHOO_STANDARD_PROJECTION.toString()
+		params.season = "2013"
+		controller.updateProjections()
+
+		assert flash.error != null
+		assert response.redirectedUrl == '/fantasyPoints/editProjections'
+
+		flash.clear()
+		response.reset()
+
+		// Projection type, season, and data
+		params.projection_type = FantasyPointsJob.YAHOO_STANDARD_PROJECTION.toString()
+		params.season = "2013"
+		params.data = "7200,Aaron Rodgers,345.22\n" +
+				"5479,Drew Brees,339.32\n" +
+				"24823,Colin Kaepernick,326.66\n" +
+				"4256,Peyton Manning,318.66\n" +
+				"8256,Calvin Johnson,317.57"
+		controller.updateProjections()
+
+		assert flash.error == null
+		assert flash.info != null
+		assert response.redirectedUrl == '/'
+	}
 
     void testDelete() {
         controller.delete()

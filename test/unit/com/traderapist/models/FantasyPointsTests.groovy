@@ -257,7 +257,8 @@ class FantasyPointsTests {
 		Stat s4 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_TOUCHDOWNS, statValue: 2).save(flush: true)
 		Stat s5 = new Stat(player: player, season: 2001, week: -1, statKey: FantasyConstants.STAT_RUSHING_YARDS, statValue: 2).save(flush: true)
 
-		FantasyPoints.projectPoints(fantasyTeam)
+		def job = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, season: 2002, week: -1, projection: FantasyPointsJob.TRADERAPIST_PROJECTION).save(flush: true)
+		FantasyPoints.projectPoints(job)
 
 		def fps = FantasyPoints.findAllBySeason(2002)
 
@@ -268,7 +269,7 @@ class FantasyPointsTests {
 		assertTrue "Season is not 2002", fp.season == 2002
 		assertTrue "Week is not -1", fp.week == -1
 		assertTrue "Points is not 20.2, instead got ${ fp.points }", fp.points == 20.2
-		assertTrue "Projection is not true", fp.projection
+		assertTrue "Projection is not set to ${ FantasyPointsJob.TRADERAPIST_PROJECTION }", fp.projection == FantasyPointsJob.TRADERAPIST_PROJECTION
 	}
 
 	void testProjectPoints_YahooPPR2013() {
@@ -329,5 +330,291 @@ class FantasyPointsTests {
 
 		assert fps[2].player == peterson
 		assert fps[2].points == 269.89
+	}
+
+	void testUpdateProjections_YahooStandard() {
+		def team1 = new FantasyTeam(name: "Team 1", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
+		def team2 = new FantasyTeam(name: "Team 2", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
+		def team3 = new FantasyTeam(name: "Team 3", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
+
+		def scoringSystem1 = new ScoringSystem(name: "My Scoring System", fantasyTeam: team1, scoringRules: []).save(flush: true)
+		def scoringSystem2 = new ScoringSystem(name: "My Scoring System", fantasyTeam: team2, scoringRules: []).save(flush: true)
+		def scoringSystem3 = new ScoringSystem(name: "My Scoring System", fantasyTeam: team3, scoringRules: []).save(flush: true)
+
+
+		def rodgers = new Player(name: "Aaron Rodgers", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		rodgers.id = 7200
+		rodgers.save()
+
+		def brees = new Player(name: "Drew Brees", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		brees.id = 5479
+		brees.save()
+
+		def kaepernick = new Player(name: "Colin Kaepernick", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		kaepernick.id = 24823
+		kaepernick.save()
+
+		// Team1 is yahoo std
+		def fp1 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: rodgers,
+				scoringSystem: scoringSystem1
+		).save(flush: true)
+
+		def fp2 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: brees,
+				scoringSystem: scoringSystem1
+		).save(flush: true)
+
+		def fp3 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: kaepernick,
+				scoringSystem: scoringSystem1
+		).save(flush: true)
+
+		// Team2 is yahoo std
+		def fp4 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: rodgers,
+				scoringSystem: scoringSystem2
+		).save(flush: true)
+
+		def fp5 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: brees,
+				scoringSystem: scoringSystem2
+		).save(flush: true)
+
+		def fp6 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: kaepernick,
+				scoringSystem: scoringSystem2
+		).save(flush: true)
+
+		// Team2 is yahoo ppr
+		def fp7 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_PPR_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: rodgers,
+				scoringSystem: scoringSystem3
+		).save(flush: true)
+
+		def fp8 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_PPR_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: brees,
+				scoringSystem: scoringSystem3
+		).save(flush: true)
+
+		def fp9 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_PPR_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: kaepernick,
+				scoringSystem: scoringSystem3
+		).save(flush: true)
+
+		def data = "7200,Aaron Rodgers,345.22\n" +
+				"5479,Drew Brees,339.32\n" +
+				"24823,Colin Kaepernick,326.66"
+
+		FantasyPoints.updateProjections(FantasyPointsJob.YAHOO_STANDARD_PROJECTION, 2013, data)
+
+		assert fp1.points == 345.22
+		assert fp2.points == 339.32
+		assert fp3.points == 326.66
+
+		assert fp4.points == 345.22
+		assert fp5.points == 339.32
+		assert fp6.points == 326.66
+
+		assert fp7.points == 10
+		assert fp8.points == 10
+		assert fp9.points == 10
+	}
+
+	void testUpdateProjections_YahooPPR() {
+		def team1 = new FantasyTeam(name: "Team 1", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
+		def team2 = new FantasyTeam(name: "Team 2", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
+		def team3 = new FantasyTeam(name: "Team 3", user: user, fantasyLeagueType: flt, season: 2013, leagueId: "111", numOwners: 10, fantasyTeamStarters: []).save(flush: true)
+
+		def scoringSystem1 = new ScoringSystem(name: "My Scoring System", fantasyTeam: team1, scoringRules: []).save(flush: true)
+		def scoringSystem2 = new ScoringSystem(name: "My Scoring System", fantasyTeam: team2, scoringRules: []).save(flush: true)
+		def scoringSystem3 = new ScoringSystem(name: "My Scoring System", fantasyTeam: team3, scoringRules: []).save(flush: true)
+
+
+		def rodgers = new Player(name: "Aaron Rodgers", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		rodgers.id = 7200
+		rodgers.save()
+
+		def brees = new Player(name: "Drew Brees", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		brees.id = 5479
+		brees.save()
+
+		def kaepernick = new Player(name: "Colin Kaepernick", position: Player.POSITION_QB, stats: [], averageDraftPositions: []).save(flush: true)
+		kaepernick.id = 24823
+		kaepernick.save()
+
+		// Team1 is yahoo std
+		def fp1 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: rodgers,
+				scoringSystem: scoringSystem1
+		).save(flush: true)
+
+		def fp2 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: brees,
+				scoringSystem: scoringSystem1
+		).save(flush: true)
+
+		def fp3 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: kaepernick,
+				scoringSystem: scoringSystem1
+		).save(flush: true)
+
+		// Team2 is yahoo std
+		def fp4 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: rodgers,
+				scoringSystem: scoringSystem2
+		).save(flush: true)
+
+		def fp5 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: brees,
+				scoringSystem: scoringSystem2
+		).save(flush: true)
+
+		def fp6 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_STANDARD_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: kaepernick,
+				scoringSystem: scoringSystem2
+		).save(flush: true)
+
+		// Team2 is yahoo ppr
+		def fp7 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_PPR_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: rodgers,
+				scoringSystem: scoringSystem3
+		).save(flush: true)
+
+		def fp8 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_PPR_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: brees,
+				scoringSystem: scoringSystem3
+		).save(flush: true)
+
+		def fp9 = new FantasyPoints(
+				season: 2013,
+				week: -1,
+				points: 10,
+				projection: FantasyPointsJob.YAHOO_PPR_PROJECTION,
+				numStartable: 1,
+				numOwners: 10,
+				player: kaepernick,
+				scoringSystem: scoringSystem3
+		).save(flush: true)
+
+		def data = "7200,Aaron Rodgers,345.22\n" +
+				"5479,Drew Brees,339.32\n" +
+				"24823,Colin Kaepernick,326.66"
+
+		FantasyPoints.updateProjections(FantasyPointsJob.YAHOO_PPR_PROJECTION, 2013, data)
+
+		assert fp1.points == 10
+		assert fp2.points == 10
+		assert fp3.points == 10
+
+		assert fp4.points == 10
+		assert fp5.points == 10
+		assert fp6.points == 10
+
+		assert fp7.points == 345.22
+		assert fp8.points == 339.32
+		assert fp9.points == 326.66
 	}
 }

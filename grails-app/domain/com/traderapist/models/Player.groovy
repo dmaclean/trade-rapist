@@ -77,8 +77,8 @@ class Player {
 	 */
 	static def getPlayersInPointsOrder(position, season, system) {
 		def results = Player.executeQuery("from Player p inner join p.fantasyPoints f inner join p.averageDraftPositions adp " +
-				"where p.position = ? and f.season = ? and f.week = -1 and f.projection = ? and f.scoringSystem = ? and adp.season = ? " +
-				"order by f.points desc", [position, season, true, system, season])
+				"where p.position = ? and f.season = ? and f.week = -1 and f.projection != ${ FantasyPointsJob.NO_PROJECTION } and f.scoringSystem = ? and adp.season = ? " +
+				"order by f.points desc", [position, season, system, season])
 
 		def players = []
 		for(int i=0; i<results.size(); i++) {
@@ -135,7 +135,7 @@ class Player {
                     scoringSystem: fantasyTeam.scoringSystem,
                     numOwners: fantasyTeam.numOwners,
                     numStartable: starters[this.position],
-		            projection: false,
+		            projection: FantasyPointsJob.NO_PROJECTION,
                     points: p.value).save()
         }
     }
@@ -583,7 +583,7 @@ class Player {
 		else if(position == Player.POSITION_DEF || position == Player.POSITION_K) {
 			// Figure out what this particular player had for fantasy points last season.
 			def query = FantasyPoints.where {
-				player == this && (projection == null || projection == false) && season == year-1 && week == -1
+				player == this && projection == FantasyPointsJob.NO_PROJECTION && season == year-1 && week == -1
 			}
 			def fp = query.find()
 
@@ -592,7 +592,7 @@ class Player {
 			def avgPlayerResult = FantasyPoints.createCriteria().listDistinct {
 				eq("season", year-1)
 				eq("week", -1)
-				ne("projection", true)
+				eq("projection", FantasyPointsJob.NO_PROJECTION)
 				eq("scoringSystem", system)
 
 				player {

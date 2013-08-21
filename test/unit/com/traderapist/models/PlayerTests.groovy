@@ -282,7 +282,8 @@ class PlayerTests {
 		 * 2013 rushing yards =         (0 * 0.78) + (9 * 0.22) = 0 + 1.98 = 1.98 --> 1 /10 = 0.1
 		 * 2013 rushing touchdowns =    (0 * 0.5) + (1 * 0.5) = 0 + 0.5 = 0.5 --> 0 * 6 = 0
 		 */
-		assert q_nostats.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem) == 17.7
+		def result = q_nostats.calculateProjectedPoints(2013, numStartable, numOwners, scoringSystem)
+		assert result >= 17.7 && result <= 17.8
 	}
 
 	void testCalculateProjectedPointsRB_season_numStartable1_numOwners3() {
@@ -518,10 +519,10 @@ class PlayerTests {
 		def d3 = new Player(name: "Defense 3", position: Player.POSITION_DEF, stats: [], averageDraftPositions: []).save(flush: true)
 		def d4 = new Player(name: "Defense 4", position: Player.POSITION_DEF, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def fp2012_1 = new FantasyPoints(player: d1, season: 2012, week: -1, points: 100, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1).save(flush: true)
-		def fp2012_2 = new FantasyPoints(player: d2, season: 2012, week: -1, points: 90, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1).save(flush: true)
-		def fp2012_3 = new FantasyPoints(player: d3, season: 2012, week: -1, points: 80, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1).save(flush: true)  // Average player
-		def fp2012_4 = new FantasyPoints(player: d4, season: 2012, week: -1, points: 70, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1).save(flush: true)
+		def fp2012_1 = new FantasyPoints(player: d1, season: 2012, week: -1, points: 100, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
+		def fp2012_2 = new FantasyPoints(player: d2, season: 2012, week: -1, points: 90, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
+		def fp2012_3 = new FantasyPoints(player: d3, season: 2012, week: -1, points: 80, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)  // Average player
+		def fp2012_4 = new FantasyPoints(player: d4, season: 2012, week: -1, points: 70, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
 
 		/*
 		 * Do projections
@@ -564,10 +565,10 @@ class PlayerTests {
 		def k3 = new Player(name: "Kicker 3", position: Player.POSITION_K, stats: [], averageDraftPositions: []).save(flush: true)
 		def k4 = new Player(name: "Kicker 4", position: Player.POSITION_K, stats: [], averageDraftPositions: []).save(flush: true)
 
-		def fp2012_1 = new FantasyPoints(player: k1, season: 2012, week: -1, points: 100, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1).save(flush: true)
-		def fp2012_2 = new FantasyPoints(player: k2, season: 2012, week: -1, points: 90, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1).save(flush: true)
-		def fp2012_3 = new FantasyPoints(player: k3, season: 2012, week: -1, points: 80, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1).save(flush: true)  // Average player
-		def fp2012_4 = new FantasyPoints(player: k4, season: 2012, week: -1, points: 70, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1).save(flush: true)
+		def fp2012_1 = new FantasyPoints(player: k1, season: 2012, week: -1, points: 100, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
+		def fp2012_2 = new FantasyPoints(player: k2, season: 2012, week: -1, points: 90, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
+		def fp2012_3 = new FantasyPoints(player: k3, season: 2012, week: -1, points: 80, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)  // Average player
+		def fp2012_4 = new FantasyPoints(player: k4, season: 2012, week: -1, points: 70, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: 1, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
 
 		/*
 		 * Do projections
@@ -639,7 +640,7 @@ class PlayerTests {
 				season: 2001,
 				week: -1,
 				points: 100,
-				projection: false,
+				projection: FantasyPointsJob.NO_PROJECTION,
 				numOwners: 10,
 				numStartable: 1,
 				player: player,
@@ -664,7 +665,7 @@ class PlayerTests {
                 season: 2001,
                 week: 1,
                 points: 100,
-                projection: false,
+                projection: FantasyPointsJob.NO_PROJECTION,
                 numOwners: 10,
                 numStartable: 1,
                 player: player,
@@ -717,7 +718,7 @@ class PlayerTests {
                 season: 2001,
                 week: -1,
                 points: 100,
-                projection: false,
+                projection: FantasyPointsJob.NO_PROJECTION,
                 numOwners: 10,
                 numStartable: 1,
                 player: player,
@@ -742,7 +743,7 @@ class PlayerTests {
                 season: 2001,
                 week: 1,
                 points: 100,
-                projection: false,
+                projection: FantasyPointsJob.NO_PROJECTION,
                 numOwners: 10,
                 numStartable: 1,
                 player: player,

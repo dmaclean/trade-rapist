@@ -1,11 +1,12 @@
 package com.traderapist.models
 
-import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.annotation.Secured
 
 @Secured(['ROLE_ADMIN'])
 class FantasyPointsController {
+
+	def grailsLinkGenerator
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
@@ -56,6 +57,10 @@ class FantasyPointsController {
         [fantasyPointsInstance: fantasyPointsInstance]
     }
 
+	def editProjections() {
+		[]
+	}
+
     def update(Long id, Long version) {
         def fantasyPointsInstance = FantasyPoints.get(id)
         if (!fantasyPointsInstance) {
@@ -84,6 +89,24 @@ class FantasyPointsController {
         flash.message = message(code: 'default.updated.message', args: [message(code: 'fantasyPoints.label', default: 'FantasyPoints'), fantasyPointsInstance.id])
         redirect(action: "show", id: fantasyPointsInstance.id)
     }
+
+	/**
+	 * This will go through all the FantasyPoint projections for the specified season, week, and scheme
+	 * and update with the data provided in the text area.
+	 *
+	 * We'll also update the static lists.
+	 */
+	def updateProjections() {
+		if(!params.projection_type || !params.season || !params.data) {
+			flash.error = "Please make sure the Projection Type, Season, and Data are all filled out properly."
+			response.sendRedirect(grailsLinkGenerator.link(controller: "fantasyPoints", action: "editProjections"))
+			return
+		}
+
+		FantasyPoints.updateProjections(params.projection_type.toInteger(), params.season.toInteger(), params.data)
+		flash.info = "Fantasy points have been updated successfully"
+		response.sendRedirect(grailsLinkGenerator.link(controller: "home"))
+	}
 
     def delete(Long id) {
         def fantasyPointsInstance = FantasyPoints.get(id)

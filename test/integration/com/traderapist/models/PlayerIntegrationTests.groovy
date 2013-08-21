@@ -352,15 +352,15 @@ class PlayerIntegrationTests {
 		/*
 		 * Define fantasy points for players - non projections should be ignored.
 		 */
-		def q1_stats = new FantasyPoints(player: q1, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q1.position], points: 305).save(flush: true)
-		def q2_stats = new FantasyPoints(player: q2, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q2.position], points: 310).save(flush: true)
-		def q1p_stats = new FantasyPoints(player: q1, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q1.position], points: 300, projection: true).save(flush: true)
-		def q2p_stats = new FantasyPoints(player: q2, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q2.position], points: 295, projection: true).save(flush: true)
+		def q1_stats = new FantasyPoints(player: q1, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q1.position], points: 305, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
+		def q2_stats = new FantasyPoints(player: q2, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q2.position], points: 310, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
+		def q1p_stats = new FantasyPoints(player: q1, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q1.position], points: 300, projection: FantasyPointsJob.TRADERAPIST_PROJECTION).save(flush: true)
+		def q2p_stats = new FantasyPoints(player: q2, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[q2.position], points: 295, projection: FantasyPointsJob.TRADERAPIST_PROJECTION).save(flush: true)
 
-		def r1_stats = new FantasyPoints(player: r1, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r1.position], points: 245).save(flush: true)
-		def r2_stats = new FantasyPoints(player: r2, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r2.position], points: 250).save(flush: true)
-		def r1p_stats = new FantasyPoints(player: r1, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r1.position], points: 250, projection: true).save(flush: true)
-		def r2p_stats = new FantasyPoints(player: r2, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r2.position], points: 245, projection: true).save(flush: true)
+		def r1_stats = new FantasyPoints(player: r1, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r1.position], points: 245, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
+		def r2_stats = new FantasyPoints(player: r2, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r2.position], points: 250, projection: FantasyPointsJob.NO_PROJECTION).save(flush: true)
+		def r1p_stats = new FantasyPoints(player: r1, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r1.position], points: 250, projection: FantasyPointsJob.TRADERAPIST_PROJECTION).save(flush: true)
+		def r2p_stats = new FantasyPoints(player: r2, season: 2002, week: -1, scoringSystem: scoringSystem, numOwners: fantasyTeam.numOwners, numStartable: startable[r2.position], points: 245, projection: FantasyPointsJob.TRADERAPIST_PROJECTION).save(flush: true)
 
 		/*
 		 * Define ADP for players
