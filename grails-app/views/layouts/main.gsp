@@ -80,32 +80,32 @@
                 </div>
             </div>
         </div>
-        <!-- Space for flash messages -->
-        <g:if test="${ flash.error }">
-            <div class="span12">
-                <div class="alert alert-error">
-                    <button type="button" class="close" data-dismiss="alert">×</button>
-                    ${ flash.error }
-                </div>
-            </div>
-        </g:if>
-        <g:elseif test="${ flash.warning }">
-            <div class="span12">
-                <div class="alert">
-                    <button type="button" class="close" data-dismiss="alert">×</button>
-                    ${ flash.warning }
-                </div>
-            </div>
-        </g:elseif>
-        <g:elseif test="${ flash.info }">
-            <div class="span12">
-                <div class="alert alert-info">
-                    <button type="button" class="close" data-dismiss="alert">×</button>
-                    ${ flash.info }
-                </div>
-            </div>
-        </g:elseif>
         <div class="container">
+            <!-- Space for flash messages -->
+            <g:if test="${ flash.error }">
+                <div class="span12">
+                    <div class="alert alert-error">
+                        <button type="button" class="close" data-dismiss="alert">×</button>
+                        ${ flash.error }
+                    </div>
+                </div>
+            </g:if>
+            <g:elseif test="${ flash.warning }">
+                <div class="span12">
+                    <div class="alert">
+                        <button type="button" class="close" data-dismiss="alert">×</button>
+                        ${ flash.warning }
+                    </div>
+                </div>
+            </g:elseif>
+            <g:elseif test="${ flash.info }">
+                <div class="span12">
+                    <div class="alert alert-info">
+                        <button type="button" class="close" data-dismiss="alert">×</button>
+                        ${ flash.info }
+                    </div>
+                </div>
+            </g:elseif>
             <g:layoutBody/>
             <div class="footer" role="contentinfo"></div>
             <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
