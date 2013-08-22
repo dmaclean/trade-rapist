@@ -419,7 +419,7 @@ class FantasyPointsControllerTests {
 
 		assert flash.error == null
 		assert flash.info != null
-		assert response.redirectedUrl == '/'
+		assert response.redirectedUrl == '/home'
 	}
 
     void testDelete() {
