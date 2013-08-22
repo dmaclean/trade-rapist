@@ -39,14 +39,16 @@ class FantasyPointProjectionScheduler implements Runnable {
 
 					/*
 					 * Fetch all point generation jobs
+					 *
+					 * Holding off on this for now.
 					 */
-					jobs = FantasyPointsJob.findAllByCompletedAndProjection(false, FantasyPointsJob.NO_PROJECTION)
-					jobs.each {     job ->
-	                    long start = System.currentTimeMillis()
-	                    def resp = rest.get(grailsLinkGenerator.link(absolute: true, controller: "fantasyPointsJob", action: "process", params: [fantasy_points_job_id : job.id]))
-	                    long end = System.currentTimeMillis()
-	                    println "FPJ job ${ job.id }/${ job.season }/${ job.week }/${ (job.projection) ? "proj" : "not_proj" } completed in ${ (end-start)/1000.0 }"
-	                }
+//					jobs = FantasyPointsJob.findAllByCompletedAndProjection(false, FantasyPointsJob.NO_PROJECTION)
+//					jobs.each {     job ->
+//	                    long start = System.currentTimeMillis()
+//	                    def resp = rest.get(grailsLinkGenerator.link(absolute: true, controller: "fantasyPointsJob", action: "process", params: [fantasy_points_job_id : job.id]))
+//	                    long end = System.currentTimeMillis()
+//	                    println "FPJ job ${ job.id }/${ job.season }/${ job.week }/${ (job.projection) ? "proj" : "not_proj" } completed in ${ (end-start)/1000.0 }"
+//	                }
 				}
 				catch(Exception e) {
 					println "${ e.getMessage() }"
