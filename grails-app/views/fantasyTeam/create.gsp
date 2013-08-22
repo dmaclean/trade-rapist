@@ -123,6 +123,9 @@
                2pt receiving conversion = 2
             -->
             <h3>Receiving</h3>
+            <label>Receptions</label>
+            <g:textField id="stat_multiplier_${ FantasyConstants.STAT_RECEPTIONS }" name="stat_multiplier_${ FantasyConstants.STAT_RECEPTIONS }" value="0"/>
+
             <label>Receiving Yards</label>
             <g:textField id="stat_multiplier_${ FantasyConstants.STAT_RECEPTION_YARDS }" name="stat_multiplier_${ FantasyConstants.STAT_RECEPTION_YARDS }" value="0.1"/>
 

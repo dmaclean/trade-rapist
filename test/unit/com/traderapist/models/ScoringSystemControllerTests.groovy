@@ -97,6 +97,45 @@ class ScoringSystemControllerTests {
 		}
 	}
 
+	void testCreateSystemAndRules_NewSystemAndRulesPPR() {
+		controller.params.ss_name = "Test System"
+		controller.params.fantasy_team_id = fantasyTeam.id.toString()
+		controller.params.projection_type = FantasyPointsJob.TRADERAPIST_PROJECTION
+		controller.params.stat_multiplier_11 = "1"      // PPR
+		controller.params.stat_multiplier_2 = "2"
+		controller.params.stat_multiplier_3 = "3"
+
+		controller.createSystemAndRules()
+
+		assert response.text == "success"
+		assert ScoringRule.list().size() == 3
+		assert ScoringSystem.list().size() == 1
+
+		assert flash.info == "Scoring system ${ controller.params.ss_name } successfully created!"
+
+		def jobs = FantasyPointsJob.list()
+		def cal = Calendar.getInstance()
+		def currentYear = cal.get(Calendar.YEAR)
+		def seasons = [2001..currentYear]
+		def results = [:]
+
+		seasons.each {    season ->
+			[-1,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each {   week ->
+				results["${ season }_${ week }_${ FantasyPointsJob.NO_PROJECTION }"] = false
+			}
+		}
+		results["${ currentYear }_-1_${ FantasyPointsJob.TRADERAPIST_PROJECTION }"] = false
+
+		jobs.each {     job ->
+			results["${ job.season }_${ job.week }_${ job.projection }"] = true
+			assert "Expected job to be marked as incomplete", !job.completed
+		}
+
+		results.each {  key, value ->
+			assert "Found entry ${ key } to be ungenerated", value
+		}
+	}
+
 	void testCreateSystemAndRules_NewSystemExistingRules() {
 		def rule1 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, multiplier: 6).save(flush: true)
 		def rule2 = new ScoringRule(statKey: FantasyConstants.STAT_PASSING_YARDS, multiplier: 0.4).save(flush: true)
