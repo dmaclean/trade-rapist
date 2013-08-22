@@ -56,7 +56,7 @@ class ScoringSystemController {
 
 		def cal = Calendar.getInstance()
 		def currentYear = cal.get(Calendar.YEAR)
-		def seasons = 2001..currentYear
+		def seasons = 2007..currentYear
 
 		def projection = new FantasyPointsJob(fantasyTeam: fantasyTeam, completed: false, season: currentYear, week: -1, projection: params.projection_type.toInteger()).save()
 		print "Successfully created Fantasy projections job for ${ fantasyTeam.name }"
