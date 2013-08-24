@@ -11,6 +11,8 @@ files = [
   JASMINE,
   JASMINE_ADAPTER,
   'https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js',
+    'web-app/js/jquery.min.js',
+  'web-app/js/bootstrap.js',
   'web-app/js/test/lib/angular/*.js',
   'web-app/js/*.js',
   'web-app/js/test/**/*.js'
@@ -22,8 +24,7 @@ exclude = [
   'web-app/js/test/lib/angular/angular-scenario.js',
   'web-app/js/test/e2e/**/*.js',
   'web-app/js/test/web-server.js',
-  'web-app/js/bootstrap.min.js',
-  'web-app/js/jquery.min.js'
+  'web-app/js/bootstrap.min.js'
 ];
 
 

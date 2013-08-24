@@ -2441,4 +2441,257 @@ describe('DraftController spec', function() {
 
         });
     });
+
+    describe('undoPick', function() {
+        beforeEach(inject(function(_$httpBackend_, $rootScope, $controller) {
+            scope.draftYear = 2001;
+
+            $httpBackend = _$httpBackend_;
+            // Use this to test with 12 players at each position.
+            $httpBackend.expectGET('draft/players?year=' + new Date().getFullYear()).
+                respond([{id: 1, name: 'QB 1', position: 'QUARTERBACK', points: 300.0, adp: 2.5, vorp: 0},
+                    {id: 2, name: 'QB 2', position: 'QUARTERBACK', points: 280.0, adp: 5.0, vorp: 0},
+                    {id: 3, name: 'QB 3', position: 'QUARTERBACK', points: 270.0, adp: 5.0, vorp: 0},
+                    {id: 4, name: 'QB 4', position: 'QUARTERBACK', points: 260.0, adp: 5.0, vorp: 0},
+                    {id: 5, name: 'QB 5', position: 'QUARTERBACK', points: 250.0, adp: 5.0, vorp: 0},
+                    {id: 6, name: 'QB 6', position: 'QUARTERBACK', points: 240.0, adp: 5.0, vorp: 0},
+                    {id: 7, name: 'QB 7', position: 'QUARTERBACK', points: 230.0, adp: 5.0, vorp: 0},
+                    {id: 8, name: 'QB 8', position: 'QUARTERBACK', points: 220.0, adp: 5.0, vorp: 0},
+                    {id: 9, name: 'QB 9', position: 'QUARTERBACK', points: 210.0, adp: 5.0, vorp: 0},
+                    {id: 10, name: 'QB 10', position: 'QUARTERBACK', points: 200.0, adp: 5.0, vorp: 0},
+                    {id: 11, name: 'QB 11', position: 'QUARTERBACK', points: 190.0, adp: 5.0, vorp: 0},
+                    {id: 12, name: 'QB 12', position: 'QUARTERBACK', points: 180.0, adp: 5.0, vorp: 0},
+                    {id: 13, name: 'RB 1', position: 'RUNNING_BACK', points: 299.0, adp: 2.5, vorp: 30.0},
+                    {id: 14, name: 'RB 2', position: 'RUNNING_BACK', points: 220.0, adp: 5.0, vorp: 0},
+                    {id: 15, name: 'RB 3', position: 'RUNNING_BACK', points: 210.0, adp: 2.5, vorp: 30.0},
+                    {id: 16, name: 'RB 4', position: 'RUNNING_BACK', points: 200.0, adp: 2.5, vorp: 30.0},
+                    {id: 17, name: 'RB 5', position: 'RUNNING_BACK', points: 190.0, adp: 2.5, vorp: 30.0},
+                    {id: 18, name: 'RB 6', position: 'RUNNING_BACK', points: 180.0, adp: 2.5, vorp: 30.0},
+                    {id: 19, name: 'RB 7', position: 'RUNNING_BACK', points: 170.0, adp: 2.5, vorp: 30.0},
+                    {id: 20, name: 'RB 8', position: 'RUNNING_BACK', points: 160.0, adp: 2.5, vorp: 30.0},
+                    {id: 21, name: 'RB 9', position: 'RUNNING_BACK', points: 150.0, adp: 2.5, vorp: 30.0},
+                    {id: 22, name: 'RB 10', position: 'RUNNING_BACK', points: 140.0, adp: 2.5, vorp: 30.0},
+                    {id: 23, name: 'RB 11', position: 'RUNNING_BACK', points: 130.0, adp: 2.5, vorp: 30.0},
+                    {id: 24, name: 'RB 12', position: 'RUNNING_BACK', points: 120.0, adp: 2.5, vorp: 30.0},
+                    {id: 25, name: 'WR 1', position: 'WIDE_RECEIVER', points: 275.0, adp: 2.5, vorp: 20.0},
+                    {id: 26, name: 'WR 2', position: 'WIDE_RECEIVER', points: 190.0, adp: 5.0, vorp: 0},
+                    {id: 27, name: 'WR 3', position: 'WIDE_RECEIVER', points: 180.0, adp: 2.5, vorp: 20.0},
+                    {id: 28, name: 'WR 4', position: 'WIDE_RECEIVER', points: 170.0, adp: 2.5, vorp: 20.0},
+                    {id: 29, name: 'WR 5', position: 'WIDE_RECEIVER', points: 160.0, adp: 2.5, vorp: 20.0},
+                    {id: 30, name: 'WR 6', position: 'WIDE_RECEIVER', points: 150.0, adp: 2.5, vorp: 20.0},
+                    {id: 31, name: 'WR 7', position: 'WIDE_RECEIVER', points: 140.0, adp: 2.5, vorp: 20.0},
+                    {id: 32, name: 'WR 8', position: 'WIDE_RECEIVER', points: 130.0, adp: 2.5, vorp: 20.0},
+                    {id: 33, name: 'WR 9', position: 'WIDE_RECEIVER', points: 120.0, adp: 2.5, vorp: 20.0},
+                    {id: 34, name: 'WR 10', position: 'WIDE_RECEIVER', points: 110.0, adp: 2.5, vorp: 20.0},
+                    {id: 35, name: 'WR 11', position: 'WIDE_RECEIVER', points: 100.0, adp: 2.5, vorp: 20.0},
+                    {id: 36, name: 'WR 12', position: 'WIDE_RECEIVER', points: 90.0, adp: 2.5, vorp: 20.0},
+                    {id: 37, name: 'TE 1', position: 'TIGHT_END', points: 180.0, adp: 2.5, vorp: 5.0},
+                    {id: 38, name: 'TE 2', position: 'TIGHT_END', points: 170.0, adp: 5.0, vorp: 0},
+                    {id: 39, name: 'TE 3', position: 'TIGHT_END', points: 160.0, adp: 2.5, vorp: 5.0},
+                    {id: 40, name: 'TE 4', position: 'TIGHT_END', points: 150.0, adp: 2.5, vorp: 5.0},
+                    {id: 41, name: 'TE 5', position: 'TIGHT_END', points: 140.0, adp: 2.5, vorp: 5.0},
+                    {id: 42, name: 'TE 6', position: 'TIGHT_END', points: 130.0, adp: 2.5, vorp: 5.0},
+                    {id: 43, name: 'TE 7', position: 'TIGHT_END', points: 120.0, adp: 2.5, vorp: 5.0},
+                    {id: 44, name: 'TE 8', position: 'TIGHT_END', points: 110.0, adp: 2.5, vorp: 5.0},
+                    {id: 45, name: 'TE 9', position: 'TIGHT_END', points: 100.0, adp: 2.5, vorp: 5.0},
+                    {id: 46, name: 'TE 10', position: 'TIGHT_END', points: 90.0, adp: 2.5, vorp: 5.0},
+                    {id: 47, name: 'TE 11', position: 'TIGHT_END', points: 80.0, adp: 2.5, vorp: 5.0},
+                    {id: 48, name: 'TE 12', position: 'TIGHT_END', points: 70.0, adp: 2.5, vorp: 5.0},
+                    {id: 49, name: 'DEF 1', position: 'DEFENSE', points: 120.0, adp: 2.5, vorp: 20.0},
+                    {id: 50, name: 'DEF 2', position: 'DEFENSE', points: 100.0, adp: 5.0, vorp: 0},
+                    {id: 51, name: 'DEF 3', position: 'DEFENSE', points: 90.0, adp: 5.0, vorp: 0},
+                    {id: 52, name: 'DEF 4', position: 'DEFENSE', points: 80.0, adp: 5.0, vorp: 0},
+                    {id: 53, name: 'DEF 5', position: 'DEFENSE', points: 70.0, adp: 5.0, vorp: 0},
+                    {id: 54, name: 'DEF 6', position: 'DEFENSE', points: 60.0, adp: 5.0, vorp: 0},
+                    {id: 55, name: 'DEF 7', position: 'DEFENSE', points: 50.0, adp: 5.0, vorp: 0},
+                    {id: 56, name: 'DEF 8', position: 'DEFENSE', points: 40.0, adp: 5.0, vorp: 0},
+                    {id: 57, name: 'DEF 9', position: 'DEFENSE', points: 30.0, adp: 5.0, vorp: 0},
+                    {id: 58, name: 'DEF 10', position: 'DEFENSE', points: 20.0, adp: 5.0, vorp: 0},
+                    {id: 59, name: 'DEF 11', position: 'DEFENSE', points: 10.0, adp: 5.0, vorp: 0},
+                    {id: 60, name: 'DEF 12', position: 'DEFENSE', points: 5.0, adp: 5.0, vorp: 0},
+                    {id: 61, name: 'K 1', position: 'KICKER', points: 120.0, adp: 2.5, vorp: 30.0},
+                    {id: 62, name: 'K 2', position: 'KICKER', points: 110.0, adp: 5.0, vorp: 0},
+                    {id: 63, name: 'K 3', position: 'KICKER', points: 100.0, adp: 2.5, vorp: 30.0},
+                    {id: 64, name: 'K 4', position: 'KICKER', points: 90.0, adp: 2.5, vorp: 30.0},
+                    {id: 65, name: 'K 5', position: 'KICKER', points: 80.0, adp: 2.5, vorp: 30.0},
+                    {id: 66, name: 'K 6', position: 'KICKER', points: 70.0, adp: 2.5, vorp: 30.0},
+                    {id: 67, name: 'K 7', position: 'KICKER', points: 60.0, adp: 2.5, vorp: 30.0},
+                    {id: 68, name: 'K 8', position: 'KICKER', points: 50.0, adp: 2.5, vorp: 30.0},
+                    {id: 69, name: 'K 9', position: 'KICKER', points: 40.0, adp: 2.5, vorp: 30.0},
+                    {id: 70, name: 'K 10', position: 'KICKER', points: 30.0, adp: 2.5, vorp: 30.0},
+                    {id: 71, name: 'K 11', position: 'KICKER', points: 20.0, adp: 2.5, vorp: 30.0},
+                    {id: 72, name: 'K 12', position: 'KICKER', points: 10.0, adp: 2.5, vorp: 30.0}]);
+
+            scope = $rootScope.$new();
+            ctrl = $controller(DraftController, {$scope: scope});
+
+            scope.numOwners = 2;
+            scope.startablePositions[scope.QUARTERBACK] = 1;
+            scope.startablePositions[scope.RUNNING_BACK] = 1;
+            scope.startablePositions[scope.WIDE_RECEIVER] = 1;
+            scope.startablePositions[scope.TIGHT_END] = 1;
+            scope.startablePositions[scope.DEFENSE] = 1;
+            scope.startablePositions[scope.KICKER] = 1;
+        }));
+
+        it('should do nothing if no one has picked yet', function() {
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            var qbSize = scope.available_qbs.length;
+            var rbSize = scope.available_rbs.length;
+            var wrSize = scope.available_wrs.length;
+            var teSize = scope.available_tes.length;
+            var dSize = scope.available_ds.length;
+            var kSize = scope.available_ks.length;
+
+            var owner1 = scope.owners[0].length;
+            var owner2 = scope.owners[1].length;
+
+            scope.currentPick = 1;
+
+            scope.undoLastPick();
+
+            expect(scope.currentPick).toEqual(1);
+
+            expect(scope.available_qbs.length).toEqual(qbSize);
+            expect(scope.available_rbs.length).toEqual(rbSize);
+            expect(scope.available_wrs.length).toEqual(wrSize);
+            expect(scope.available_tes.length).toEqual(teSize);
+            expect(scope.available_ds.length).toEqual(dSize);
+            expect(scope.available_ks.length).toEqual(kSize);
+
+            expect(scope.owners[0].length).toEqual(owner1);
+            expect(scope.owners[1].length).toEqual(owner2);
+        });
+
+        it('undo first pick of first QB', function() {
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            scope.draftPlayer(scope.QUARTERBACK, 1);
+
+            expect(scope.available_qbs[0].id).toEqual(2);
+            expect(scope.owners[0].length).toEqual(1);
+
+            scope.undoLastPick();
+
+            expect(scope.available_qbs[0].id).toEqual(1);
+            expect(scope.owners[0].length).toEqual(0);
+        });
+
+        it('undo first pick of second QB', function() {
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            scope.draftPlayer(scope.QUARTERBACK, 2);
+
+            expect(scope.available_qbs.length).toEqual(11);
+            expect(scope.owners[0].length).toEqual(1);
+
+//            console.log(scope.available_qbs);
+
+            scope.undoLastPick();
+
+//            console.log(scope.available_qbs);
+
+            expect(scope.available_qbs[1].id).toEqual(2);
+            expect(scope.owners[0].length).toEqual(0);
+        });
+
+        it('undo first pick of last QB', function() {
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            scope.draftPlayer(scope.QUARTERBACK, 11);
+
+            expect(scope.available_qbs.length).toEqual(11);
+            expect(scope.owners[0].length).toEqual(1);
+
+//            console.log(scope.available_qbs);
+
+            scope.undoLastPick();
+
+//            console.log(scope.available_qbs);
+
+            expect(scope.available_qbs[11].id).toEqual(12);
+            expect(scope.owners[0].length).toEqual(0);
+        });
+
+        it('undo first pick of middle QB', function() {
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            scope.draftPlayer(scope.QUARTERBACK, 6);
+
+            expect(scope.available_qbs.length).toEqual(11);
+            expect(scope.owners[0].length).toEqual(1);
+
+//            console.log(scope.available_qbs);
+
+            scope.undoLastPick();
+
+//            console.log(scope.available_qbs);
+
+            expect(scope.available_qbs[5].id).toEqual(6);
+            expect(scope.owners[0].length).toEqual(0);
+        });
+
+        it('undo first pick of last QB - reset replacement QB', function() {
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            expect(scope.replacements[scope.QUARTERBACK] == scope.available_qbs[1]);
+
+            scope.draftPlayer(scope.QUARTERBACK, 12);
+
+            expect(scope.replacements[scope.QUARTERBACK] == scope.available_qbs[0]);
+            expect(scope.available_qbs.length).toEqual(11);
+            expect(scope.owners[0].length).toEqual(1);
+
+//            console.log(scope.available_qbs);
+
+            scope.undoLastPick();
+
+//            console.log(scope.available_qbs);
+
+            expect(scope.replacements[scope.QUARTERBACK] == scope.available_qbs[1]);
+            expect(scope.available_qbs[5].id).toEqual(6);
+            expect(scope.owners[0].length).toEqual(0);
+        });
+
+        it('undo first two picks of QB', function() {
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            scope.draftPlayer(scope.QUARTERBACK, 1);
+
+            expect(scope.available_qbs[0].id).toEqual(2);
+            expect(scope.owners[0].length).toEqual(1);
+
+            scope.draftPlayer(scope.QUARTERBACK, 2);
+
+            expect(scope.available_qbs[0].id).toEqual(3);
+            expect(scope.owners[1].length).toEqual(1);
+
+            // Undo 2nd owner's pick
+            scope.undoLastPick();
+
+            expect(scope.available_qbs[0].id).toEqual(2);
+            expect(scope.owners[1].length).toEqual(0);
+
+            // Undo 1st owner's pick
+            scope.undoLastPick();
+
+            expect(scope.available_qbs[0].id).toEqual(1);
+            expect(scope.owners[0].length).toEqual(0);
+        });
+    });
 });
