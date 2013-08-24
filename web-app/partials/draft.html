@@ -171,6 +171,9 @@
     <div id="save_roster" class="row-fluid" ng-hide="!initialized || !selectedLeague">
         <button class="btn btn-primary" id="save_roster_button" ng-click="saveRoster()">Save roster</button>
     </div>
+    <div id="undo" class="row-fluid" ng-hide="!initialized">
+        <button class="btn btn-primary" id="undo_button" ng-click="undoLastPick()">Undo last pick</button>
+    </div>
     <div id="owners" owners class="row-fluid" ng-hide="!initialized"></div>
     <div id="available_players" class="row-fluid" ng-hide="!initialized">
         <div class="span12">

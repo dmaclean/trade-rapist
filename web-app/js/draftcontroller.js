@@ -1041,4 +1041,71 @@ function DraftController($scope, $http) {
 
         });
     }
+
+    /**
+     * To undo a pick, we need to perform the following actions:
+     *
+     * - Rewind the pick number.
+     * - Remove the most recent pick from the last owner's player list.
+     * - Re-insert the player back where they were in the Available Position list.
+     * - Possibly re-adjust the replacement player at that position.
+     */
+    $scope.undoLastPick = function() {
+        if($scope.currentPick == 1) {
+            console.log("Cannot undo.  No one has made a pick yet.")
+            return;
+        }
+
+        // Rewind the pick number
+        $scope.currentPick--;
+
+        // Remove the most recent pick from the last owner's player list.
+        var ownerIndex = $scope.getOwnerPick();
+        var player = $scope.owners[ownerIndex].pop();
+
+//        console.log(player);
+
+        // Re-insert the player back where they were in the Available Position list.
+        var list = undefined;
+        if(player.position == $scope.QUARTERBACK)           list = $scope.available_qbs;
+        else if(player.position == $scope.RUNNING_BACK)     list = $scope.available_rbs;
+        else if(player.position == $scope.WIDE_RECEIVER)    list = $scope.available_wrs;
+        else if(player.position == $scope.TIGHT_END)        list = $scope.available_tes;
+        else if(player.position == $scope.DEFENSE)          list = $scope.available_ds;
+        else if(player.position == $scope.KICKER)           list = $scope.available_ks;
+
+//        console.log(list);
+
+        var index = -1;
+        var replacement = -1;
+        for(var i=0; i<list.length; i++) {
+            // Check for replacement, if we find it then we need to bump back the replacement
+            // unless we find the replacement in the same loop iteration (this means that our
+            // "undo" player goes before the player being compared in the list, and therefore
+            // he wouldn't be the replacement).
+            if(list[i] == $scope.replacements[player.position]) {
+                replacement = i;
+            }
+
+            if(player.points >= list[i].points) {
+                index = i;
+                break;
+            }
+        }
+
+        if(index == -1)     list.push(player);
+        else                list.splice(index, 0, player);
+
+        /*
+         * Do we need to adjust the replacement player?
+         *
+         * 3 scenarios - Pick to undo:
+         * - Is BETTER than the replacement player --> Do nothing.
+         * - Is WORSE than the replacement player --> Adjust replacement index by increasing it.
+         * - Is EQUAL TO the replacement player --> Adjust replacement index by increasing it.
+         */
+        if(replacement < index) {
+            $scope.replacements[player.position] = player;
+        }
+    }
 }

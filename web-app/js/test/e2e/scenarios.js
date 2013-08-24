@@ -395,4 +395,40 @@ describe('Trade Rapist Draft Setup', function() {
             expect(element('#save_roster').css('display')).toBe('none');
         });
     });
+
+    describe('Undo pick', function() {
+        it('should not be visible until draft is ready', function() {
+            select('selectedLeague').option("1");
+            input('numOwners').enter("2");
+            input('myPick').enter("1");
+            element('#screen1button').click();
+
+            expect(element('#undo').css('display')).toBe('none');
+            element('#screen2button').click();
+
+            expect(element('#undo').css('display')).not().toBe('none');
+        });
+
+        it('should remove player from owner list and back to available players on Undo', function() {
+            select('selectedLeague').option("");
+            input('numOwners').enter("2");
+            input('myPick').enter("1");
+            element('#screen1button').click();
+
+            expect(element('#undo').css('display')).toBe('none');
+            element('#screen2button').click();
+
+            expect(element('#undo').css('display')).not().toBe('none');
+
+            // Owner 1 drafts QB 1
+            element('#qb_1').click();
+            expect(element('#qb_1').count()).toEqual(0);
+            expect(element('#owner0 ol li').text()).toBe("QB 1 (QB)");
+
+            // Undo pick
+            element('#undo').click();
+            expect(element('#qb_1').count()).toEqual(1);
+            expect(element('#owner0 ol li').text()).not().toBe("QB 1 (QB)");
+        });
+    });
 });
