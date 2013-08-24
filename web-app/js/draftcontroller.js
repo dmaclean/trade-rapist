@@ -1047,6 +1047,7 @@ function DraftController($scope, $http) {
      *
      * - Rewind the pick number.
      * - Remove the most recent pick from the last owner's player list.
+     * - Revert the owner's need at that position.
      * - Re-insert the player back where they were in the Available Position list.
      * - Possibly re-adjust the replacement player at that position.
      */
@@ -1063,8 +1064,6 @@ function DraftController($scope, $http) {
         var ownerIndex = $scope.getOwnerPick();
         var player = $scope.owners[ownerIndex].pop();
 
-//        console.log(player);
-
         // Re-insert the player back where they were in the Available Position list.
         var list = undefined;
         if(player.position == $scope.QUARTERBACK)           list = $scope.available_qbs;
@@ -1073,8 +1072,6 @@ function DraftController($scope, $http) {
         else if(player.position == $scope.TIGHT_END)        list = $scope.available_tes;
         else if(player.position == $scope.DEFENSE)          list = $scope.available_ds;
         else if(player.position == $scope.KICKER)           list = $scope.available_ks;
-
-//        console.log(list);
 
         var index = -1;
         var replacement = -1;
@@ -1087,6 +1084,8 @@ function DraftController($scope, $http) {
                 replacement = i;
             }
 
+            // As soon as we find an available player with fewer or equal projected points than our
+            // drafted player, record the index, because we're re-inserting him there.
             if(player.points >= list[i].points) {
                 index = i;
                 break;
@@ -1096,6 +1095,9 @@ function DraftController($scope, $http) {
         if(index == -1)     list.push(player);
         else                list.splice(index, 0, player);
 
+        // Reset the owner need at the drafted position
+        $scope.ownerNeed[ownerIndex][player.position]++;
+
         /*
          * Do we need to adjust the replacement player?
          *
@@ -1104,7 +1106,7 @@ function DraftController($scope, $http) {
          * - Is WORSE than the replacement player --> Adjust replacement index by increasing it.
          * - Is EQUAL TO the replacement player --> Adjust replacement index by increasing it.
          */
-        if(replacement < index) {
+        if(replacement != -1 && replacement < index) {
             $scope.replacements[player.position] = player;
         }
     }

@@ -2571,15 +2571,45 @@ describe('DraftController spec', function() {
             scope.fetchPlayers();
             $httpBackend.flush();
 
+            var replacement = scope.replacements[scope.QUARTERBACK];
+
             scope.draftPlayer(scope.QUARTERBACK, 1);
 
+            expect(scope.replacements[scope.QUARTERBACK]).toEqual(replacement);
             expect(scope.available_qbs[0].id).toEqual(2);
             expect(scope.owners[0].length).toEqual(1);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]-1);
 
             scope.undoLastPick();
 
+            expect(scope.replacements[scope.QUARTERBACK]).toEqual(replacement);
             expect(scope.available_qbs[0].id).toEqual(1);
             expect(scope.owners[0].length).toEqual(0);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]);
+        });
+
+        it('undo first pick of first QB - 10 owners', function() {
+            scope.numOwners = 10;
+
+            expect(scope.players).toBeUndefined();
+            scope.fetchPlayers();
+            $httpBackend.flush();
+
+            var replacement = scope.replacements[scope.QUARTERBACK];
+
+            scope.draftPlayer(scope.QUARTERBACK, 1);
+
+            expect(scope.replacements[scope.QUARTERBACK]).toEqual(replacement);
+            expect(scope.available_qbs[0].id).toEqual(2);
+            expect(scope.owners[0].length).toEqual(1);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]-1);
+
+            scope.undoLastPick();
+
+            expect(scope.replacements[scope.QUARTERBACK]).toEqual(replacement);
+            expect(scope.available_qbs[0].id).toEqual(1);
+            expect(scope.owners[0].length).toEqual(0);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]);
         });
 
         it('undo first pick of second QB', function() {
@@ -2591,15 +2621,13 @@ describe('DraftController spec', function() {
 
             expect(scope.available_qbs.length).toEqual(11);
             expect(scope.owners[0].length).toEqual(1);
-
-//            console.log(scope.available_qbs);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]-1);
 
             scope.undoLastPick();
 
-//            console.log(scope.available_qbs);
-
             expect(scope.available_qbs[1].id).toEqual(2);
             expect(scope.owners[0].length).toEqual(0);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]);
         });
 
         it('undo first pick of last QB', function() {
@@ -2611,15 +2639,13 @@ describe('DraftController spec', function() {
 
             expect(scope.available_qbs.length).toEqual(11);
             expect(scope.owners[0].length).toEqual(1);
-
-//            console.log(scope.available_qbs);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]-1);
 
             scope.undoLastPick();
 
-//            console.log(scope.available_qbs);
-
             expect(scope.available_qbs[11].id).toEqual(12);
             expect(scope.owners[0].length).toEqual(0);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]);
         });
 
         it('undo first pick of middle QB', function() {
@@ -2631,15 +2657,13 @@ describe('DraftController spec', function() {
 
             expect(scope.available_qbs.length).toEqual(11);
             expect(scope.owners[0].length).toEqual(1);
-
-//            console.log(scope.available_qbs);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]-1);
 
             scope.undoLastPick();
 
-//            console.log(scope.available_qbs);
-
             expect(scope.available_qbs[5].id).toEqual(6);
             expect(scope.owners[0].length).toEqual(0);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]);
         });
 
         it('undo first pick of last QB - reset replacement QB', function() {
@@ -2654,16 +2678,14 @@ describe('DraftController spec', function() {
             expect(scope.replacements[scope.QUARTERBACK] == scope.available_qbs[0]);
             expect(scope.available_qbs.length).toEqual(11);
             expect(scope.owners[0].length).toEqual(1);
-
-//            console.log(scope.available_qbs);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]-1);
 
             scope.undoLastPick();
-
-//            console.log(scope.available_qbs);
 
             expect(scope.replacements[scope.QUARTERBACK] == scope.available_qbs[1]);
             expect(scope.available_qbs[5].id).toEqual(6);
             expect(scope.owners[0].length).toEqual(0);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]);
         });
 
         it('undo first two picks of QB', function() {
@@ -2675,23 +2697,27 @@ describe('DraftController spec', function() {
 
             expect(scope.available_qbs[0].id).toEqual(2);
             expect(scope.owners[0].length).toEqual(1);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]-1);
 
             scope.draftPlayer(scope.QUARTERBACK, 2);
 
             expect(scope.available_qbs[0].id).toEqual(3);
             expect(scope.owners[1].length).toEqual(1);
+            expect(scope.ownerNeed[1][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]-1);
 
             // Undo 2nd owner's pick
             scope.undoLastPick();
 
             expect(scope.available_qbs[0].id).toEqual(2);
             expect(scope.owners[1].length).toEqual(0);
+            expect(scope.ownerNeed[1][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]);
 
             // Undo 1st owner's pick
             scope.undoLastPick();
 
             expect(scope.available_qbs[0].id).toEqual(1);
             expect(scope.owners[0].length).toEqual(0);
+            expect(scope.ownerNeed[0][scope.QUARTERBACK]).toEqual(scope.ownerMaxNeed[scope.QUARTERBACK]);
         });
     });
 });
