@@ -173,9 +173,4 @@ class StatControllerTests {
         assert Stat.get(stat.id) == null
         assert response.redirectedUrl == '/stat/list'
     }
-
-	void testDumpToCSV() {
-		controller.dumpToCSV()
-		assert response.text == "done"
-	}
 }
