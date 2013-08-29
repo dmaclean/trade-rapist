@@ -1,11 +1,13 @@
 package com.traderapist.models
 
-import grails.plugins.springsecurity.Secured
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.annotation.Secured
 
 @Secured(['ROLE_ADMIN'])
 class StatController {
+
+	def sessionFactory
+	def propertyInstanceMap = org.codehaus.groovy.grails.plugins.DomainClassGrailsPlugin.PROPERTY_INSTANCE_MAP
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
@@ -102,4 +104,26 @@ class StatController {
             redirect(action: "show", id: id)
         }
     }
+
+	def dumpToCSV() {
+		def players = Player.list()
+		def csv = ""
+
+		players.eachWithIndex { player, i ->
+			csv += Stat.dumpToCSV(player)
+
+			if(i%100 == 0) {
+				sessionFactory.currentSession.flush()
+				sessionFactory.currentSession.clear()
+				propertyInstanceMap.get().clear()
+			}
+
+			println "Finished writing stats for ${player.name} (${i}/${players.size()})."
+		}
+
+		File f = new File("./dump.csv")
+		f.write(csv)
+
+		render "done"
+	}
 }

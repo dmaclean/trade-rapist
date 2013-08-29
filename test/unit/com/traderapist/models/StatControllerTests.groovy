@@ -1,10 +1,10 @@
 package com.traderapist.models
 
-
-
-import org.junit.*
-import grails.test.mixin.*
 import com.traderapist.constants.FantasyConstants
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.After
+import org.junit.Before
 
 @TestFor(StatController)
 @Mock([Player,Stat])
@@ -20,7 +20,7 @@ class StatControllerTests {
 
     @After
     void tearDown() {
-
+	    player = null
     }
 
     def populateValidParams(params) {
@@ -173,4 +173,9 @@ class StatControllerTests {
         assert Stat.get(stat.id) == null
         assert response.redirectedUrl == '/stat/list'
     }
+
+	void testDumpToCSV() {
+		controller.dumpToCSV()
+		assert response.text == "done"
+	}
 }

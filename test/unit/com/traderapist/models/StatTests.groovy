@@ -1,16 +1,14 @@
 package com.traderapist.models
 
-
-
-import grails.test.mixin.*
-import org.junit.*
-
 import com.traderapist.constants.FantasyConstants
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 
 /**
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(Stat)
+@Mock([Player,Stat])
 class StatTests {
 
     void testSeasonNotNull() {
@@ -78,4 +76,13 @@ class StatTests {
         assertEquals "Incomplete Passes", statIncompletions.translateStatKey()
         assertEquals "Passing Yards", statPassingYards.translateStatKey()
     }
+
+	void testDumpToCSV() {
+		def player = new Player(name: "Test QB", position: Player.POSITION_QB, averageDraftPositions: [], stats: []).save(flush: true)
+		def stat = new Stat(player: player, season: 2012, week: -1, statKey: FantasyConstants.STAT_PASSING_TOUCHDOWNS, statValue: 10).save(flush: true)
+
+		def csv = Stat.dumpToCSV(player)
+
+		assert csv == "1,Test QB,QB,2012,-1,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n"
+	}
 }
