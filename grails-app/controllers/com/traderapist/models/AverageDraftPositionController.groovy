@@ -14,8 +14,9 @@ class AverageDraftPositionController {
 
 	@Secured(['ROLE_ADMIN'])
     def list(Integer max) {
-        params.max = Math.min(max ?: 10, 100)
-        [averageDraftPositionInstanceList: AverageDraftPosition.list(params), averageDraftPositionInstanceTotal: AverageDraftPosition.count()]
+//        params.max = Math.min(max ?: 10, 100)
+		def adpList = (params.season) ? AverageDraftPosition.findAllBySeason(params.season) : AverageDraftPosition.list(sort: "season", order: "desc")
+        [averageDraftPositionInstanceList: adpList, averageDraftPositionInstanceTotal: AverageDraftPosition.count()]
     }
 
 	@Secured(['ROLE_ADMIN'])
