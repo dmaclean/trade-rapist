@@ -3,7 +3,7 @@
     <!--<p>BPA: {{ getBPA().name }}</p>
     <p>VORP: {{ getVORP().name }}</p>-->
     <div id="draft_init" class="row-fluid" ng-hide="initialized">
-        <div class="span4 offset4" id="screen1" ng-hide="initNumOwners">
+        <div class="span4 offset4" id="screen1" ng-hide="showRosterConfigScreen || showKeeperScreen || initialized">
             <form class="form-horizontal">
                 <!-- Hide the leagues field if nothing came over from the server -->
                 <div class="control-group" ng-hide="!leagues">
@@ -50,13 +50,13 @@
                             are configured.  Specifically, we need to know how many starters as well as the total number of
                             players you're allowed at each position.
                         </span>
-                        <button id="screen1button" class="btn btn-primary" ng-click="initNumOwners = true;">Go to roster settings...</button>
+                        <button id="screen1button" class="btn btn-primary" ng-click="showRosterConfigScreen = true;">Go to roster settings...</button>
                     </div>
                 </div>
             </form>
         </div>
 
-        <div class="row-fluid" id="screen2" ng-hide="!initNumOwners">
+        <div class="row-fluid" id="screen2" ng-hide="!showRosterConfigScreen">
             <div class="span8 offset3">
                 <div class="row-fluid">
                     <div class="span4">
@@ -161,11 +161,24 @@
                             <label class="checkbox" ng-hide="isNumOwnersValid(numOwners) == false">
                                 <input type="checkbox" id="simulation" ng-model="simulation"/>Simulation?
                             </label>
-                            <button id="screen2button" class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="initialized = true; fetchPlayers();">Start Draft!</button>
+                            <button id="screen2button" class="btn btn-primary" ng-hide="isNumOwnersValid(numOwners)== false" ng-click="showKeeperScreen = true; showRosterConfigScreen = false; fetchPlayers();">Configure Keepers</button>
                         </fieldset>
                     </div>
                 </div>
             </div>
+        </div>
+        <!--
+           Screen for setting franchise picks.
+        -->
+        <div id="keepers_choice" class="row-fluid" ng-hide="!showKeeperScreen">
+            <div class="span4 offset4" ng-hide="showKeeperScreen_Yes">
+                <h1>Do you have keepers?</h1>
+                <fieldset>
+                    <buton id="keeper_yes" class="btn btn-primary" ng-click="showKeeperScreen_Yes=true;">Yes</buton>
+                    <buton id="keeper_no" class="btn btn-danger" ng-click="showKeeperScreen=false; initialized=true;">No</buton>
+                </fieldset>
+            </div>
+            <div id="keepers" keepers class="row-fluid" ng-hide="!showKeeperScreen_Yes"></div>
         </div>
     </div>
     <div id="save_roster" class="row-fluid" ng-hide="!initialized || !selectedLeague">

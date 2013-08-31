@@ -26,21 +26,46 @@ angular.module('TradeRapist', []).
         return({
             link: link,
             restrict: "A",
-            template:   '<div class="row-fluid">' +
-                            '<div class="span12">' +
-                                '<h1>Owner Rosters</h1>' +
-                                '<div id="owners_row_{{ n }}" ng-repeat="n in [] | range:getOwnerRows()" class="row-fluid">' +
-                                    '<div id="owner{{ o }}" ng-repeat="o in ownersPerRow(n, numOwners)" class="span2">' +
-                                        '<h3>Owner {{ o+1 }}</h3>' +
-                                        '<span id="owner{{ o }}_points">Total Projected Points: {{ calculateTotalPoints(o) }}</span><br/>' +
-                                        '<span id="owner{{ o }}_starter_points">Starter Projected Points: {{ calculateStarterPoints(o) }}</span>' +
-                                        '<span class="label label-success" ng-hide="o != myPick-1">My pick</span>' +
-                                        '<span class="label label-important" ng-hide="!isOwnersPick(o+1)">Current pick</span>' +
-                                        '<ol><li ng-repeat="player in owners[o]">{{ player.name }} ({{ getPositionDisplayText(player.position) }})</li></ol>' +
+            template:       '<div class="row-fluid">' +
+                                '<div class="span12">' +
+                                    '<h1>Owner Rosters</h1>' +
+                                    '<div id="owners_row_{{ n }}" ng-repeat="n in [] | range:getOwnerRows()" class="row-fluid">' +
+                                        '<div id="owner{{ o }}" ng-repeat="o in ownersPerRow(n, numOwners)" class="span2">' +
+                                            '<h3>Owner {{ o+1 }}</h3>' +
+                                            '<span id="owner{{ o }}_points">Total Projected Points: {{ calculateTotalPoints(o) }}</span><br/>' +
+                                            '<span id="owner{{ o }}_starter_points">Starter Projected Points: {{ calculateStarterPoints(o) }}</span>' +
+                                            '<span class="label label-success" ng-hide="o != myPick-1">My pick</span>' +
+                                            '<span class="label label-important" ng-hide="!isOwnersPick(o+1)">Current pick</span>' +
+                                            '<ol><li ng-repeat="player in owners[o]">{{ player.name }} ({{ getPositionDisplayText(player.position) }})</li></ol>' +
+                                        '</div>' +
                                     '</div>' +
                                 '</div>' +
-                            '</div>' +
+                            '</div>'
+        });
+    })
+    .directive("keepers", function() {
+        function link($scope, element, attributes) {
+            console.log("Linked", attributes.id);
+        }
+
+        return({
+            link: link,
+            restrict: "A",
+            template:   '<div class="span4 offset4">' +
+                            '<h1>Keepers</h1>' +
+                            '<fieldset>' +
+                                '<div ng-repeat="n in [] | range:numOwners">' +
+                                    '<label>Owner {{ n+1 }}</label>' +
+                                    '<select id="keeper" ng-model="keepers[n]" ng-options="player.id as player.name for player in players">' +
+                                        '<option value="">Select Keeper</option>' +
+                                    '</select>' +
+                                '</div>' +
+                            '</fieldset>' +
+                            '<fieldset>' +
+                                '<button id="screen3button" class="btn btn-primary" ng-hide="!showKeeperScreen" ng-click="initialized = true;removeFranchisedPlayers();">Start Draft!</button>' +
+                            '</fieldset>' +
                         '</div>'
+
         });
     });
 
@@ -108,6 +133,24 @@ function DraftController($scope, $http) {
      */
     $scope.initNumOwners = false;
 
+    $scope.showRosterConfigScreen = false;
+
+    /**
+     * Flag to keep track of whether the user has entered the necessary information
+     * for roster settings
+     *
+     * @type {boolean}
+     */
+    $scope.showKeeperScreen = false;
+
+    /**
+     * Flag to show the actual dropdowns for keepers.  This will be set to true if the user
+     * selects "Yes" when asked if they have keepers.
+     *
+     * @type {boolean}
+     */
+    $scope.showKeeperScreen_Yes = false;
+
     /**
      * Flag to keep track of whether the draft has been initialized.
      *
@@ -123,11 +166,18 @@ function DraftController($scope, $http) {
     $scope.currentPick = 1;
 
     /**
-     *
+     * Contains the picks that each owner has made.
      *
      * @type {Array}
      */
     $scope.owners = new Array();
+
+    /**
+     * Keeps track of the keeper (if any) for each owner.
+     *
+     * @type {Array}
+     */
+    $scope.keepers = new Array();
 
     $scope.available_qbs = new Array();
     $scope.available_rbs = new Array();
@@ -245,6 +295,10 @@ function DraftController($scope, $http) {
 
         $http.get(playersUrl).success(function(data) {
             $scope.players = data;
+
+            for(var i=0; i<$scope.numOwners; i++) {
+                $scope.keepers[i] = $scope.players;
+            }
 
             var index = [0,0,0,0,0,0];
             for(p in $scope.players) {
@@ -1108,6 +1162,132 @@ function DraftController($scope, $http) {
          */
         if(replacement != -1 && replacement < index) {
             $scope.replacements[player.position] = player;
+        }
+    }
+
+    $scope.removeFranchisedPlayers = function() {
+        for(var i=0; i<$scope.keepers.length; i++) {
+            var replacementIndex = -1;
+
+            /*
+             * Check quarterbacks.
+             */
+            for(var j=0; j<$scope.available_qbs.length; j++) {
+                if($scope.available_qbs[j] == $scope.replacements[$scope.QUARTERBACK]) {
+                    replacementIndex = j;
+                }
+
+                if($scope.keepers[i] == $scope.available_qbs[j].id) {
+                    console.log("Found keeper match for " + $scope.keepers[i] + " in QB list.");
+                    $scope.owners[i].push( $scope.available_qbs.splice(j, 1)[0] );
+
+                    if(replacementIndex != -1) {
+                        $scope.replacements[$scope.QUARTERBACK] = $scope.available_qbs[replacementIndex-1];
+                    }
+
+                    break;
+                }
+            }
+
+            /*
+             * Check running backs.
+             */
+            for(var j=0; j<$scope.available_rbs.length; j++) {
+                if($scope.available_rbs[j] == $scope.replacements[$scope.RUNNING_BACK]) {
+                    replacementIndex = j;
+                }
+
+                if($scope.keepers[i] == $scope.available_rbs[j].id) {
+                    console.log("Found keeper match for " + $scope.keepers[i] + " in RB list.");
+                    $scope.owners[i].push( $scope.available_rbs.splice(j, 1)[0] );
+
+                    if(replacementIndex != -1) {
+                        $scope.replacements[$scope.RUNNING_BACK] = $scope.available_rbs[replacementIndex-1];
+                    }
+
+                    break;
+                }
+            }
+
+            /*
+             * Check wide receivers.
+             */
+            for(var j=0; j<$scope.available_wrs.length; j++) {
+                if($scope.available_wrs[j] == $scope.replacements[$scope.WIDE_RECEIVER]) {
+                    replacementIndex = j;
+                }
+
+                if($scope.keepers[i] == $scope.available_wrs[j].id) {
+                    console.log("Found keeper match for " + $scope.keepers[i] + " in WR list.");
+                    $scope.owners[i].push( $scope.available_wrs.splice(j, 1)[0] );
+
+                    if(replacementIndex != -1) {
+                        $scope.replacements[$scope.WIDE_RECEIVER] = $scope.available_wrs[replacementIndex-1];
+                    }
+
+                    break;
+                }
+            }
+
+            /*
+             * Check tight ends.
+             */
+            for(var j=0; j<$scope.available_tes.length; j++) {
+                if($scope.available_tes[j] == $scope.replacements[$scope.TIGHT_END]) {
+                    replacementIndex = j;
+                }
+
+                if($scope.keepers[i] == $scope.available_tes[j].id) {
+                    console.log("Found keeper match for " + $scope.keepers[i] + " in TE list.");
+                    $scope.owners[i].push( $scope.available_tes.splice(j, 1)[0] );
+
+                    if(replacementIndex != -1) {
+                        $scope.replacements[$scope.TIGHT_END] = $scope.available_tes[replacementIndex-1];
+                    }
+
+                    break;
+                }
+            }
+
+            /*
+             * Check defenses.  Not sure why, though.  No one is keeping a defense.
+             */
+            for(var j=0; j<$scope.available_ds.length; j++) {
+                if($scope.available_ds[j] == $scope.replacements[$scope.DEFENSE]) {
+                    replacementIndex = j;
+                }
+
+                if($scope.keepers[i] == $scope.available_ds[j].id) {
+                    console.log("Found keeper match for " + $scope.keepers[i] + " in DEF list.");
+                    $scope.owners[i].push( $scope.available_ds.splice(j, 1)[0] );
+
+                    if(replacementIndex != -1) {
+                        $scope.replacements[$scope.DEFENSE] = $scope.available_ds[replacementIndex-1];
+                    }
+
+                    break;
+                }
+            }
+
+            /*
+             * Check kickers.  See comment about defenses.
+             */
+            for(var j=0; j<$scope.available_ks.length; j++) {
+                if($scope.available_ks[j] == $scope.replacements[$scope.KICKER]) {
+                    replacementIndex = j;
+                }
+
+                if($scope.keepers[i] == $scope.available_ks[j].id) {
+                    console.log("Found keeper match for " + $scope.keepers[i] + " in K list.");
+                    $scope.owners[i].push( $scope.available_ks.splice(j, 1)[0] );
+
+                    if(replacementIndex != -1) {
+                        $scope.replacements[$scope.KICKER] = $scope.available_ks[replacementIndex-1];
+                    }
+
+                    break;
+                }
+            }
         }
     }
 }
