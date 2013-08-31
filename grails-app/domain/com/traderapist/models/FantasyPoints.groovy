@@ -185,11 +185,12 @@ class FantasyPoints {
 	 * Does a sweeping update of projected fantasy points for Yahoo! Standard and PPR types
 	 * for all teams across the app.
 	 *
-	 * @param type
-	 * @param season
-	 * @param data
+	 * @param type          Prediction type.
+	 * @param season        The season of predictions we want to modify.
+	 * @param data          CSV data taking the form of <yahoo player id>,<player name>,<projected points>
 	 */
 	static def updateProjections(type, season, data) {
+
 		// Process the data first
 		def players = data.split("\r?\n")
 		def projections = [:]
@@ -212,8 +213,13 @@ class FantasyPoints {
 						println "Not valid for ${ fp.player.name }"
 					}
 				}
+				else if(fp.player.position == Player.POSITION_DEF) {
+					println "Found a team defense (${fp.player.name}).  Leaving it alone."
+				}
 				else {
-					println "Found null entry for ${ fp.player.name }"
+					println "Found null entry for ${ fp.player.name }.  Setting to zero."
+					fp.points = 0
+					fp.save()
 				}
 			}
 		}
