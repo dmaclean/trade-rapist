@@ -141,6 +141,11 @@ public class FantasyConstants {
 	public static final int STAT_DEFENSIVE_YARDS_ALLOWED_500_PLUS = 76;
 	public static final int STAT_THREE_AND_OUTS_FORCED = 77;
 
+	// Additional stats added by me
+	public static final int STAT_FIRST_DOWNS_ALLOWED = 100;
+	public static final int STAT_RUSHING_YARDS_ALLOWED = 101;
+	public static final int STAT_PASSING_YARDS_ALLOWED = 102;
+
 	public static final HashMap<Integer, String> statTranslation = new HashMap<Integer, String>(100);
 	static {
 		statTranslation.put(STAT_GAMES_PLAYED, "Games Played");
@@ -221,5 +226,9 @@ public class FantasyConstants {
 		statTranslation.put(STAT_DEFENSIVE_YARDS_ALLOWED_400_499, "Defensive Yards Allowed 400-499");
 		statTranslation.put(STAT_DEFENSIVE_YARDS_ALLOWED_500_PLUS, "Defensive Yards Allowed 500+");
 		statTranslation.put(STAT_THREE_AND_OUTS_FORCED, "Three-and-Outs Forced");
+
+		statTranslation.put(STAT_FIRST_DOWNS_ALLOWED, "First Downs Allowed");
+		statTranslation.put(STAT_RUSHING_YARDS_ALLOWED, "Rushing Yards Allowed");
+		statTranslation.put(STAT_PASSING_YARDS_ALLOWED, "Passing Yards Allowed");
 	}
 }
