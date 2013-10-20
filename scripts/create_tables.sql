@@ -22,6 +22,15 @@ create index stats_season_week_idx on stats(season, week);
 create index stats_player_season_stat_key_idx on stats(player_id, season, stat_key);
 create index stats_player_season_week_idx on stats(player_id, season, week);
 
+drop table if exists fantasy_points_odfl;
+create table fantasy_points_odfl (
+  id int auto_increment primary key,
+  player_id int not null,
+  season int not null,
+  week int not null,
+  points int not null
+);
+
 drop table fantasy_points;
 create table fantasy_points (
 	id int auto_increment primary key,
@@ -80,6 +89,17 @@ insert into teams (city, name, abbreviation) values ('Jacksonville','Jaguars','J
 insert into teams (city, name, abbreviation) values ('Baltimore','Ravens','BAL');
 insert into teams (city, name, abbreviation) values ('Houston','Texans','HOU');
 
+drop table if exists team_rankings;
+create table team_rankings (
+  id int auto_increment primary key,
+  team_id int not null,
+  season int not null,
+  week int not null,
+  type varchar(50) not null,
+  rank int not null,
+  foreign key (team_id) references teams(id)
+);
+
 drop table team_memberships;
 create table team_memberships (
 	id int auto_increment primary key,
@@ -91,6 +111,19 @@ create table team_memberships (
 	foreign key (team_id) references teams(id)
 );
 create index player_season_team_idx on team_memberships(player_id, season, team_id);
+
+drop table if exists team_schedule;
+create table team_schedule (
+  id int auto_increment primary key ,
+  team_id int not null,
+  opponent_id int not null,
+  season int not null,
+  week int not null,
+  home boolean,
+  version int,
+  foreign key (team_id) references teams(id),
+  foreign key (opponent_id) references teams(id)
+);
 
 drop table average_draft_positions;
 create table average_draft_positions (
