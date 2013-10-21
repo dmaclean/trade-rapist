@@ -1,4 +1,4 @@
-package com.traderapist.utils
+package com.traderapist.utils.projection
 
 import junit.framework.TestCase
 import org.junit.After

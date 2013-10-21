@@ -1,4 +1,4 @@
-package com.traderapist.utils
+package com.traderapist.utils.projection
 
 import groovy.sql.Sql
 
