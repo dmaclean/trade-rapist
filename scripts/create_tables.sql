@@ -31,6 +31,18 @@ create table fantasy_points_odfl (
   points int not null
 );
 
+drop table if exists consistency;
+create table consistency(
+  id int auto_increment primary key,
+  player_id int not null,
+  type varchar(15) not null,
+  value float not null,
+  season int not null,
+  week int not null,
+  foreign key (player_id) references players(id)
+);
+create index consistency_type_season_week on consistency(type, season, week);
+
 drop table fantasy_points;
 create table fantasy_points (
 	id int auto_increment primary key,
