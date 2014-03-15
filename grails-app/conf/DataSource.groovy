@@ -22,6 +22,14 @@ environments {
             password = "fantasy"
             logSql=false
         }
+        dataSource_nba {
+            dbCreate=""
+            url = "jdbc:mysql://localhost/basketball_reference"
+            driverClassName = "com.mysql.jdbc.Driver"
+            username = "fantasy"
+            password = "fantasy"
+            logSql=false
+        }
     }
     test {
         dataSource {
