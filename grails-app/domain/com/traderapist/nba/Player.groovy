@@ -2,6 +2,7 @@ package com.traderapist.nba
 
 class Player {
 
+    String id
     String name
     String position
     String rgPosition
@@ -22,5 +23,9 @@ class Player {
 
     static mapping = {
         datasource 'nba'
+        table 'players'
+        version false
+
+        id column: 'id', generator: 'assigned', type: 'string'
     }
 }
