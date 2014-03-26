@@ -17,5 +17,7 @@ class Injury {
 
     static mapping = {
         datasource 'nba'
+        table 'injuries'
+        version false
     }
 }
